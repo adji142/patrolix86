@@ -9,9 +9,16 @@ class Mod_Patroli {
 
   Mod_Patroli(this.sess, {this.Parameter});
 
-  Future<Map> getPatroliList() async{
-    var url = Uri.parse(sess!.server+"APIReadPatroli");
-    final response = await http.post(url,body: this.Parameter);
+  Future<Map> getPatroliList() async {
+    var url = Uri.parse(sess!.server + "APIReadPatroli");
+    final response = await http.post(url, body: this.Parameter);
+    return json.decode(response.body);
+  }
+
+  Future<Map> save() async {
+    var url = Uri.parse(sess!.server + "APIAddPatroli");
+    final response = await http.post(url, body: this.Parameter);
+    // print(Parameter);
     return json.decode(response.body);
   }
 }

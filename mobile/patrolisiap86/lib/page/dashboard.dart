@@ -120,7 +120,13 @@ class _dashboardState extends State<Dashboard> {
                 };
               }
               var xData = await Mod_Patroli(this.widget.sess, Parameter: oParamx()).getPatroliList().then((valueData) {
-                Navigator.push(context, MaterialPageRoute(builder: (context)=>FormCheckIn(this.widget.sess!,value,valueData["data"][0]["NamaCheckPoint"])));
+                if(valueData["data"].length > 0){
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=>FormCheckIn(this.widget.sess!,value,valueData["data"][0]["NamaCheckPoint"]))).then((value) {
+                    setState(() {
+                      
+                    });
+                  });
+                }
               });
             });
           },

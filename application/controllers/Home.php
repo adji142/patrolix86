@@ -158,4 +158,14 @@ class home extends CI_Controller {
 	{
 		$this->load->view('V_Master/Security');
 	}
+	// Report
+	public function readReview()
+	{
+		$this->load->view('V_Report/reviewpatroli');
+	}
+	public function loadmap($value)
+	{
+		$data['latlang'] = $value;
+		$this->load->view('V_Report/map',$data);	
+	}
 }

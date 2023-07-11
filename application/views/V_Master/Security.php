@@ -18,6 +18,37 @@
             </div>
             <div class="x_content">
               <div class="row">
+                <div class="col-md-4 col-sm-12  ">
+                  Lokasi :
+                  <select id="KodeLokasi" name="KodeLokasi" class="form-control">
+                    <?php
+                      $oParam = array();
+
+                      if ($this->session->userdata('AreaUser') != "") {
+                        $oParam = array(
+                          'RecordOwnerID' => $this->session->userdata('RecordOwnerID'),
+                          'id' => $this->session->userdata('AreaUser'),
+                        );
+                      }
+                      else{
+                        echo "<option value=''>Pilih Lokasi</option>";
+                        $oParam = array(
+                          'RecordOwnerID' => $this->session->userdata('RecordOwnerID')
+                        );
+                      }
+                      // var_dump($oParam);
+                      $rs = $this->ModelsExecuteMaster->FindData($oParam,'tlokasipatroli')->result();
+
+                      foreach ($rs as $key) {
+                        echo "<option value = '".$key->id."'>".$key->NamaArea."</option>";
+                      }
+                    ?>
+                  </select>
+                </div>
+                <div class="col-md-6 col-sm-12  ">
+                  <br>
+                  <button class="btn btn-warning" id="btSearch">Cari</button>
+                </div>
                 <div class="col-md-12 col-sm-12  ">
                   <div class="dx-viewport demo-container">
                     <div id="data-grid-demo">
@@ -126,7 +157,7 @@
       $.ajax({
         type: "post",
         url: "<?=base_url()?>C_Security/Read",
-        data: {'NIK':'', 'RecordOwnerID': RecordOwnerID},
+        data: {'NIK':'', 'RecordOwnerID': RecordOwnerID,':LocationID':$('#KodeLokasi').val()},
         dataType: "json",
         success: function (response) {
           bindGrid(response.data);
@@ -176,6 +207,17 @@
     $('.close').click(function() {
       location.reload();
     });
+    $('#btSearch').click(function () {
+      $.ajax({
+        type: "post",
+        url: "<?=base_url()?>C_Security/Read",
+        data: {'KodeCheckPoint':'', 'RecordOwnerID': RecordOwnerID,'LocationID':$('#KodeLokasi').val()},
+        dataType: "json",
+        success: function (response) {
+          bindGrid(response.data);
+        }
+      });
+    })
     function GetData(id) {
       var where_field = 'id';
       var where_value = id;

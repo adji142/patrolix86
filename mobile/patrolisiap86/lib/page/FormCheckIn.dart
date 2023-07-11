@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:patrolisiap86/general/dialog.dart';
 import 'package:patrolisiap86/general/session.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:patrolisiap86/models/patroli.dart';
 
 class FormCheckIn extends StatefulWidget {
   final session sess;
@@ -21,12 +23,17 @@ class FormCheckIn extends StatefulWidget {
 class _FormCheckInState extends State<FormCheckIn> {
   final ImagePicker _picker = ImagePicker();
 
+  final GlobalKey<State> _keyLoader = new GlobalKey<State>();
+
   DateTime? _tanggal;
   File? imageFile;
   List? pathext;
   String? extentionPath;
   String image64 = "";
   Position? _currentPosition;
+
+  bool _isbuttondisable = true;
+  bool _issaving = false;
 
   // Position _posisi = new Position();
   TextEditingController _catatan = TextEditingController();
@@ -47,6 +54,7 @@ class _FormCheckInState extends State<FormCheckIn> {
           image64 = base64Encode(bites);
         }
       });
+      _setEnableCommand();
       // Navigator.of(context).pop();
     });
   }
@@ -83,9 +91,9 @@ class _FormCheckInState extends State<FormCheckIn> {
   Future<void> _getCurrentPosition() async {
     final hasPermission = await _handleLocationPermission();
     if (!hasPermission) return;
-    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
-        .then((Position position) {
+    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high).then((Position position) {
       setState(() => _currentPosition = position);
+      _setEnableCommand();
     }).catchError((e) {
       debugPrint(e);
     });
@@ -130,6 +138,22 @@ class _FormCheckInState extends State<FormCheckIn> {
       // _kodeShift = shift.toString();
       _tanggal = now;
     });
+  }
+
+
+  void _setEnableCommand(){
+    if(_currentPosition != null){
+      if("${_currentPosition!.latitude},${_currentPosition!.longitude}" == "," || image64 == ""){
+        _isbuttondisable =true;
+      }
+      else{
+        _isbuttondisable = false;
+      }
+    }
+    else{
+      _isbuttondisable = true;
+    }
+    setState(() {});
   }
 
   @override
@@ -254,6 +278,50 @@ class _FormCheckInState extends State<FormCheckIn> {
                       },
                     ),
                   ),
+
+                  ElevatedButton(
+                    child: _issaving == true ? CircularProgressIndicator() :Text("Proses Data",style: TextStyle(color: Colors.white),),
+                    style: ButtonStyle(
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18.0),
+                      // side: BorderSide(color: Colors.red)
+                    ))),
+                    onPressed: _isbuttondisable ? null : () async{
+                      showLoadingDialog(context, _keyLoader, info: "Begin Login");
+                      Map oParam(){
+                        return{
+                          'RecordOwnerID' : this.widget.sess.RecordOwnerID,
+                          'KodeCheckPoint' : this.widget.KodeCheckPoint,
+                          'LocationID' : this.widget.sess.LocationID.toString(),
+                          'TanggalPatroli' : _tanggal.toString(),
+                          'KodeKaryawan' : this.widget.sess.KodeUser,
+                          'Koordinat' : "${_currentPosition!.latitude},${_currentPosition!.longitude}",
+                          'Image' : image64.toString(),
+                          'Catatan' : _catatan.text,
+                          'ImageName' : extentionPath
+                        };
+                      }
+
+                      print(image64);
+
+                      var temp = await Mod_Patroli(this.widget.sess, Parameter: oParam()).save().then((value) async{
+                        if(value["success"]){
+                          Navigator.of(context, rootNavigator: true).pop();
+                          Navigator.of(context).pop();
+                        }
+                        else{
+                          Navigator.of(context, rootNavigator: true).pop();
+                          await messageBox(
+                            context: context, 
+                            title: "Infomasi", 
+                            message: value["message"]
+                          );
+                        }
+                      });
+                    },
+                  )
                 ],
               ),
       ),

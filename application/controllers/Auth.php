@@ -92,6 +92,7 @@ class Auth extends CI_Controller {
 		$mail = $this->input->post('mail');
 		$pass = $this->input->post('pass');
 		$role = $this->input->post('roles');
+		$LocationID = $this->input->post('LocationID');
 
 		$id = $this->input->post('id');
 		$formtype = $this->input->post('formtype');
@@ -103,6 +104,8 @@ class Auth extends CI_Controller {
 			'nama'		=> $nama,
 			'email'		=> "",
 			'password'	=> $md_pass,
+			'AreaUser'=> $LocationID,
+			'RecordOwnerID' => $this->session->userdata('RecordOwnerID')
 		);
 		if ($formtype == 'add') {
 			$call = $this->ModelsExecuteMaster->ExecInsert($insert,'users');
@@ -428,6 +431,7 @@ class Auth extends CI_Controller {
 			$sess_data['NamaUser'] = $oUser->row()->nama;
 			$sess_data['UserName'] = $oUser->row()->username;
 			$sess_data['RecordOwnerID'] = $oUser->row()->RecordOwnerID;
+			$sess_data['AreaUser'] = $oUser->row()->AreaUser;
 			$this->session->set_userdata($sess_data);
 			$data['success'] = true;
 			$data['username'] = $oUser->row()->username;

@@ -109,6 +109,24 @@
                       </select>
                     </div>
                   </div>
+                  <div class="item form-group">
+                    <label class="col-form-label col-md-3 col-sm-3 label-align" for="first-name">Lokasi <span class="required">*</span>
+                    </label>
+                    <div class="col-md-12 col-sm-12 ">
+                      <select class="form-control col-md-6" id="LocationID" name="LocationID" >
+                        <?php
+                          $oParam = array(
+                            'RecordOwnerID' => $this->session->userdata('RecordOwnerID')
+                          );
+                          $rs = $this->ModelsExecuteMaster->FindData($oParam,'tlokasipatroli')->result();
+
+                          foreach ($rs as $key) {
+                            echo "<option value = '".$key->id."'>".$key->NamaArea."</option>";
+                          }
+                        ?>
+                      </select>
+                    </div>
+                  </div>
                   <div class="item" form-group>
                     <button class="btn btn-primary" id="btn_Save">Save</button>
                   </div>
@@ -224,6 +242,7 @@
                 $('#pass').val(response.decript);
                 $('#roles').val(v.roleid).trigger('change');
                 $('#id').val(v.id);
+                $('#LocationID').val(v.LocationID);
                 // $('#Nilai').val(v.Nilai);
 
                 $('#formtype').val("edit");

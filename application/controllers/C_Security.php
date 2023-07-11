@@ -16,6 +16,7 @@
 
 			$NIK = $this->input->post('NIK');
 			$RecordOwnerID = $this->input->post('RecordOwnerID');
+			$LocationID = $this->input->post('LocationID');
 			
 			$SQL = "
 				SELECT 
@@ -28,6 +29,10 @@
 
 			if ($NIK != "") {
 				$SQL .= " AND a.NIK = '".$NIK."' ";
+			}
+
+			if ($LocationID != "") {
+				$SQL .= " AND a.LocationID = '".$LocationID."' ";	
 			}
 
 			$rs = $this->db->query($SQL);

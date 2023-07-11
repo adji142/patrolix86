@@ -18,7 +18,36 @@
             </div>
             <div class="x_content">
               <div class="row">
-                <div class="col-md-3 col-sm-12  ">
+                <div class="col-md-4 col-sm-12  ">
+                  Lokasi :
+                  <select id="KodeLokasi" name="KodeLokasi" class="form-control">
+                    <?php
+                      $oParam = array();
+
+                      if ($this->session->userdata('AreaUser') != "") {
+                        $oParam = array(
+                          'RecordOwnerID' => $this->session->userdata('RecordOwnerID'),
+                          'id' => $this->session->userdata('AreaUser'),
+                        );
+                      }
+                      else{
+                        echo "<option value=''>Pilih Lokasi</option>";
+                        $oParam = array(
+                          'RecordOwnerID' => $this->session->userdata('RecordOwnerID')
+                        );
+                      }
+                      // var_dump($oParam);
+                      $rs = $this->ModelsExecuteMaster->FindData($oParam,'tlokasipatroli')->result();
+
+                      foreach ($rs as $key) {
+                        echo "<option value = '".$key->id."'>".$key->NamaArea."</option>";
+                      }
+                    ?>
+                  </select>
+                </div>
+                <div class="col-md-6 col-sm-12  ">
+                  <br>
+                  <button class="btn btn-warning" id="btSearch">Cari</button>
                   <button class="btn btn-primary" id="btExportQR">Export QRCODE</button>
                 </div>
                 <div class="col-md-12 col-sm-12  ">
@@ -118,7 +147,7 @@
       $.ajax({
         type: "post",
         url: "<?=base_url()?>C_CheckPoint/Read",
-        data: {'KodeCheckPoint':'', 'RecordOwnerID': RecordOwnerID},
+        data: {'KodeCheckPoint':'', 'RecordOwnerID': RecordOwnerID,'KodeLokasi':$('#KodeLokasi').val()},
         dataType: "json",
         success: function (response) {
           bindGrid(response.data);
@@ -182,6 +211,17 @@
           // console.log(response);
           window.open(response.DownloadLink, "_blank");
           location.reload();
+        }
+      });
+    })
+    $('#btSearch').click(function () {
+      $.ajax({
+        type: "post",
+        url: "<?=base_url()?>C_CheckPoint/Read",
+        data: {'KodeCheckPoint':'', 'RecordOwnerID': RecordOwnerID,'KodeLokasi':$('#KodeLokasi').val()},
+        dataType: "json",
+        success: function (response) {
+          bindGrid(response.data);
         }
       });
     })
