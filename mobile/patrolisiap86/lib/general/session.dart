@@ -11,4 +11,5 @@ class session {
   double hight = 0;
   double width = 0;
   String orientation = "";
+  int interval = 0;
 }

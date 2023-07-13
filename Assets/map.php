@@ -52,7 +52,7 @@
 
     <!-- Async script executes immediately and must be after any DOM elements used in callback. -->
     <script
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCG7FscIk67I9yY_fiyLc7-_1Aoyerf96E&callback=initMap&libraries=&v=weekly"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB9kWX3JZIeoK36X9N0vh17TUuv2EU2OlQ&callback=initMap&libraries=&v=weekly"
       async
     ></script>
   </body>

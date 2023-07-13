@@ -1,7 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import 'package:patrolisiap86/general/session.dart';
+import 'package:mobilepatrol/general/session.dart';
 
 class Mod_Auth {
   session? sess;

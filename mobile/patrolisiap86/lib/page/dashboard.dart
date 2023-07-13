@@ -3,18 +3,23 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:patrolisiap86/general/session.dart';
-import 'package:patrolisiap86/models/patroli.dart';
+import 'package:mobilepatrol/general/session.dart';
+import 'package:mobilepatrol/main.dart';
+import 'package:mobilepatrol/models/patroli.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
-import 'package:patrolisiap86/page/FormCheckIn.dart';
+import 'package:mobilepatrol/page/FormCheckIn.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:mobilepatrol/shared/sharedprefrence.dart';
 
 class Dashboard extends StatefulWidget {
   final session? sess;
-  Dashboard(this.sess);
+  final int ? interval;
+  Dashboard(this.sess, {this.interval});
 
   @override
   _dashboardState createState() => _dashboardState();
 }
+
 
 class _dashboardState extends State<Dashboard> {
   DateTime? _tanggal;
@@ -26,7 +31,7 @@ class _dashboardState extends State<Dashboard> {
   String _scanBarcode = 'Unknown';
 
   final f = NumberFormat("##0");
-
+  static ReceivedAction? initialAction;
   //Time Change
   //---------------------------------------------------------------------------
   void _timeChange() {
@@ -90,6 +95,34 @@ class _dashboardState extends State<Dashboard> {
     super.initState();
   }
 
+  @override
+  void dispose(){
+    super.dispose();
+  }
+  static Future<void> createNewNotification(int x, String StartPatroli) async {
+    // bool isAllowed = await AwesomeNotifications().isNotificationAllowed();
+    // if (!isAllowed) isAllowed = await displayNotificationRationale();
+    // if (!isAllowed) return;
+    String localTimeZone = await AwesomeNotifications().getLocalTimeZoneIdentifier();
+    // print(localTimeZone);
+    var listTime = StartPatroli.split(":");
+    await AwesomeNotifications().createNotification(
+        content: NotificationContent(
+            id: -1, // -1 is replaced by a random number
+            channelKey: 'alerts',
+            title: 'Informasi Patroli',
+            body: "Sudah Waktunya Patroli Lagi.!!!",
+            notificationLayout: NotificationLayout.Messaging,
+            payload: {'notificationId': '1234567890'}),
+            schedule: NotificationCalendar.fromDate(
+              // date: DateTime(DateTime.now().year,DateTime.now().month,DateTime.now().day,int.parse(listTime[0]),int.parse(listTime[1]), int.parse(listTime[2])).add(Duration(minutes: x == null ? 0 : x)),
+              date: DateTime.now().add(Duration(minutes: x == null ? 0 : x)),
+              repeats: true,
+              preciseAlarm: true,
+              allowWhileIdle: true
+            ),
+          );
+  }
   Widget build(BuildContext context) {
     Map oParam() {
       return {
@@ -104,12 +137,60 @@ class _dashboardState extends State<Dashboard> {
     return Scaffold(
         appBar: AppBar(
           title: Text("Patroli Siap x86"),
-          actions: [IconButton(icon: Icon(Icons.refresh), onPressed: () {})],
+          actions: [
+            Padding(
+              padding: EdgeInsets.only(right: this.widget.sess!.width * 5),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  GestureDetector(
+                    child: Text(
+                      "Logout",
+                      style: TextStyle(
+                        fontSize: this.widget.sess!.width * 4,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: "Arial"
+                      ),
+                    ),
+                    onTap: () async{
+                      // print("data tabed");
+                      // await awesomeNotification;
+                      SharedPreference().removeKey("accountInfo");
+                      Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => MyApp()));
+                    },
+                  )
+                ],
+              ),
+            )
+          ],
         ),
         floatingActionButton: FloatingActionButton(
           child: Icon(Icons.add),
           onPressed: () async {
-            var data = await barcodeScan().then((value) async{
+            // Handle Notification
+            Map oParamLokasi(){
+              return {
+                'id' : this.widget.sess!.LocationID.toString(),
+                'RecordOwnerID':this.widget.sess!.RecordOwnerID,
+              };
+            }
+
+            var x = Mod_Patroli(this.widget.sess, Parameter: oParamLokasi()).readLokasi().then((value) async {
+              int interval = 0;
+
+              // int.parse(value["data"][0]["IntervalPatroli"]) * 60;
+              if(value["data"][0]["IntervalType"] == "DAY"){
+                interval = value["data"][0]["IntervalPatroli"] * 1440;
+              }
+              else if(value["data"][0]["IntervalType"] == "HOUR"){
+                interval = value["data"][0]["IntervalPatroli"] * 60;
+              }
+              else if(value["data"][0]["IntervalType"] == "MINUTE"){
+                interval = value["data"][0]["IntervalPatroli"];
+              }
+              createNewNotification(interval,value["data"][0]["StartPatroli"]);
+            });
+            var data = await barcodeScan().then((value) async {
               Map oParamx() {
                 return {
                   "KodeCheckPoint": value,
@@ -119,12 +200,21 @@ class _dashboardState extends State<Dashboard> {
                   "KodeKaryawan": this.widget.sess!.KodeUser
                 };
               }
-              var xData = await Mod_Patroli(this.widget.sess, Parameter: oParamx()).getPatroliList().then((valueData) {
-                if(valueData["data"].length > 0){
-                  Navigator.push(context, MaterialPageRoute(builder: (context)=>FormCheckIn(this.widget.sess!,value,valueData["data"][0]["NamaCheckPoint"]))).then((value) {
-                    setState(() {
-                      
-                    });
+
+              var xData =
+                  await Mod_Patroli(this.widget.sess, Parameter: oParamx())
+                      .getPatroliList()
+                      .then((valueData) {
+                if (valueData["data"].length > 0) {
+                  Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => FormCheckIn(
+                                  this.widget.sess!,
+                                  value,
+                                  valueData["data"][0]["NamaCheckPoint"])))
+                      .then((value) {
+                    setState(() {});
                   });
                 }
               });

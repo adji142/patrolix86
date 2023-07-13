@@ -1,4 +1,4 @@
-package com.example.patrolisiap86
+package ais.patroli.mobilepatrol
 
 import io.flutter.embedding.android.FlutterActivity
 

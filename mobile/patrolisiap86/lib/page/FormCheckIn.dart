@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:patrolisiap86/general/dialog.dart';
-import 'package:patrolisiap86/general/session.dart';
+import 'package:mobilepatrol/general/dialog.dart';
+import 'package:mobilepatrol/general/session.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:patrolisiap86/models/patroli.dart';
+import 'package:mobilepatrol/models/patroli.dart';
 
 class FormCheckIn extends StatefulWidget {
   final session sess;

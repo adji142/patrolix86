@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:patrolisiap86/general/dialog.dart';
-import 'package:patrolisiap86/general/session.dart';
-import 'package:patrolisiap86/models/auth.dart';
-import 'package:patrolisiap86/page/dashboard.dart';
-import 'package:patrolisiap86/shared/sharedprefrence.dart';
+import 'package:mobilepatrol/general/dialog.dart';
+import 'package:mobilepatrol/general/session.dart';
+import 'package:mobilepatrol/models/auth.dart';
+import 'package:mobilepatrol/page/dashboard.dart';
+import 'package:mobilepatrol/shared/sharedprefrence.dart';
 
 class LoginMobilePotrait extends StatefulWidget {
   final session? sess;
@@ -32,10 +32,10 @@ class _LoginMobilePotraitState extends State<LoginMobilePotrait> {
             alignment: Alignment.topLeft,
             child: Padding(
               padding: EdgeInsets.only(left: this.widget.sess!.hight * 5),
-              child: Container(
-                // color: Colors.black,
-                width: this.widget.sess!.width * 25,
-                height: this.widget.sess!.hight * 25,
+              child: Image.asset(
+                "assets/logo.gif",
+                width: this.widget.sess!.width * 40,
+                height: this.widget.sess!.hight * 35,
               ),
             ),
           ),

@@ -1,14 +1,60 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
-import 'package:patrolisiap86/general/session.dart';
-import 'package:patrolisiap86/page/dashboard.dart';
-import 'package:patrolisiap86/page/login.dart';
-import 'package:patrolisiap86/shared/sharedprefrence.dart';
+import 'package:mobilepatrol/general/session.dart';
+import 'package:mobilepatrol/page/dashboard.dart';
+import 'package:mobilepatrol/page/login.dart';
+import 'package:mobilepatrol/shared/sharedprefrence.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-void main() {
+Future<void> main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await NotificationController.initializeLocalNotifications();
   runApp(MyApp());
 }
 
+class NotificationController {
+    static Future<void> initializeLocalNotifications() async {
+    await AwesomeNotifications().initialize(
+        null, //'resource://drawable/res_app_icon',//
+        [
+          NotificationChannel(
+              channelKey: 'alerts',
+              channelName: 'Alerts',
+              channelDescription: 'Notification tests as alerts',
+              playSound: true,
+              onlyAlertOnce: true,
+              groupAlertBehavior: GroupAlertBehavior.Children,
+              importance: NotificationImportance.High,
+              defaultPrivacy: NotificationPrivacy.Private,
+              defaultColor: Colors.deepPurple,
+              ledColor: Colors.deepPurple)
+        ],
+        debug: true);
+  }
+
+  static Future<void> createNewNotification(int x, String StartPatroli) async {
+    // bool isAllowed = await AwesomeNotifications().isNotificationAllowed();
+    // if (!isAllowed) isAllowed = await displayNotificationRationale();
+    // if (!isAllowed) return;
+    String localTimeZone = await AwesomeNotifications().getLocalTimeZoneIdentifier();
+    // print(localTimeZone);
+    var listTime = StartPatroli.split(":");
+    await AwesomeNotifications().createNotification(
+        content: NotificationContent(
+            id: -1, // -1 is replaced by a random number
+            channelKey: 'alerts',
+            title: 'Informasi Patroli',
+            body: "Sudah Waktunya Patroli Lagi.!!!",
+            notificationLayout: NotificationLayout.Messaging,
+            payload: {'notificationId': '1234567890'}),
+            schedule: NotificationCalendar.fromDate(
+              date: DateTime(DateTime.now().year,DateTime.now().month,DateTime.now().day,int.parse(listTime[0]),int.parse(listTime[1]), int.parse(listTime[2])).add(Duration(minutes: x == null ? 0 : x)),
+              repeats: true,
+              preciseAlarm: true,
+              allowWhileIdle: true
+            ),
+          );
+  }
+}
 class MyApp extends StatefulWidget {
   @override
   _MainState createState() => _MainState();
@@ -20,7 +66,6 @@ class _MainState extends State<MyApp> {
 
   @override
   void initState() {
-    
     super.initState();
   }
 
