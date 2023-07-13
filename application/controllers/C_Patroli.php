@@ -59,10 +59,15 @@
 
 			$xRS = $this->db->query($SQL2);
 			if ($rs) {
-				var_dump($SQL2);
+				// var_dump($SQL2);
 				$data['success'] = true;
 				$data['data'] = $rs->result();
-				$data['Penyelesaian'] = Round(($xRS->row()->JumlahPatroliAktual / $xRS->row()->JumlahRencanaPatroli) * 100, 2);
+				if ($xRS) {
+					$data['Penyelesaian'] = Round(($xRS->row()->JumlahPatroliAktual / $xRS->row()->JumlahRencanaPatroli) * 100, 2);
+				}
+				else{
+					$data['Penyelesaian'] = 0;
+				}
 			}
 			echo json_encode($data);
 		}
