@@ -59,6 +59,7 @@
 
 			$xRS = $this->db->query($SQL2);
 			if ($rs) {
+				var_dump($xRS->row());
 				$data['success'] = true;
 				$data['data'] = $rs->result();
 				$data['Penyelesaian'] = Round(($xRS->row()->JumlahPatroliAktual / $xRS->row()->JumlahRencanaPatroli) * 100, 2);
