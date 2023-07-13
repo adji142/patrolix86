@@ -1,5 +1,5 @@
 class session {
-  String server = "http://192.168.1.66:8080/patrolisiap86/"; // development
+  String server = "http://patroli.aissystem.org/"; // development
   int idUser = -1;
   String KodeUser = "";
   String NamaUser = "";
