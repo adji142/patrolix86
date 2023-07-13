@@ -87,7 +87,7 @@
                 <select class="form-control" id="IntervalType" name="IntervalType">
                   <option value="DAY">Hari</option>
                   <option value="HOUR">Jam</option>
-                  <option value="MINUTE">Menit</option>
+                  <!-- <option value="MINUTE">Menit</option> -->
                 </select>
               </div>
             </div>

@@ -1,6 +1,9 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
+import 'package:mobilepatrol/general/notification_service.dart';
+// import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:mobilepatrol/general/session.dart';
+import 'package:mobilepatrol/models/patroli.dart';
 import 'package:mobilepatrol/page/dashboard.dart';
 import 'package:mobilepatrol/page/login.dart';
 import 'package:mobilepatrol/shared/sharedprefrence.dart';
@@ -12,6 +15,7 @@ Future<void> main() async{
 }
 
 class NotificationController {
+  static ReceivedAction? initialAction;
     static Future<void> initializeLocalNotifications() async {
     await AwesomeNotifications().initialize(
         null, //'resource://drawable/res_app_icon',//
@@ -31,13 +35,73 @@ class NotificationController {
         debug: true);
   }
 
-  static Future<void> createNewNotification(int x, String StartPatroli) async {
-    // bool isAllowed = await AwesomeNotifications().isNotificationAllowed();
-    // if (!isAllowed) isAllowed = await displayNotificationRationale();
-    // if (!isAllowed) return;
+  static Future<bool> displayNotificationRationale(BuildContext context) async {
+    bool userAuthorized = false;
+    // BuildContext context = MyApp.navigatorKey.currentContext!;
+    await showDialog(
+        context: context,
+        builder: (BuildContext ctx) {
+          return AlertDialog(
+            title: Text('Get Notified!',
+                style: Theme.of(context).textTheme.titleLarge),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Image.asset(
+                        'assets/animated-bell.gif',
+                        height: MediaQuery.of(context).size.height * 0.3,
+                        fit: BoxFit.fitWidth,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                    'Izinkan aplikasi untuk memberi notifikasi!'),
+              ],
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                  },
+                  child: Text(
+                    'Deny',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge
+                        ?.copyWith(color: Colors.red),
+                  )),
+              TextButton(
+                  onPressed: () async {
+                    userAuthorized = true;
+                    Navigator.of(ctx).pop();
+                  },
+                  child: Text(
+                    'Allow',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge
+                        ?.copyWith(color: Colors.deepPurple),
+                  )),
+            ],
+          );
+        });
+    return userAuthorized &&
+        await AwesomeNotifications().requestPermissionToSendNotifications();
+  }
+
+  static Future<void> createNewNotification(int x, String StartPatroli, BuildContext context) async {
+    bool isAllowed = await AwesomeNotifications().isNotificationAllowed();
+    if (!isAllowed) isAllowed = await displayNotificationRationale(context);
+    if (!isAllowed) return;
     String localTimeZone = await AwesomeNotifications().getLocalTimeZoneIdentifier();
     // print(localTimeZone);
     var listTime = StartPatroli.split(":");
+    print("Hit the planet : "+ x.toString());
     await AwesomeNotifications().createNotification(
         content: NotificationContent(
             id: -1, // -1 is replaced by a random number
@@ -46,16 +110,27 @@ class NotificationController {
             body: "Sudah Waktunya Patroli Lagi.!!!",
             notificationLayout: NotificationLayout.Messaging,
             payload: {'notificationId': '1234567890'}),
-            schedule: NotificationCalendar.fromDate(
-              date: DateTime(DateTime.now().year,DateTime.now().month,DateTime.now().day,int.parse(listTime[0]),int.parse(listTime[1]), int.parse(listTime[2])).add(Duration(minutes: x == null ? 0 : x)),
-              repeats: true,
+            // schedule: NotificationCalendar.fromDate(
+            //   // date: DateTime(DateTime.now().year,DateTime.now().month,DateTime.now().day,int.parse(listTime[0]),int.parse(listTime[1]), 0).add(Duration(minutes: x == null ? 0 : x)),
+            //   // minutes: x == null ? 0 : x
+            //   date: DateTime.now().add(Duration(seconds: 10)),
+            //   repeats: true,
+            //   preciseAlarm: true,
+            //   allowWhileIdle: true
+            // ),
+            schedule: NotificationCalendar(
+              second: 10,
+              timeZone: localTimeZone,
               preciseAlarm: true,
-              allowWhileIdle: true
-            ),
+              repeats: true
+            )
           );
   }
+  
 }
+
 class MyApp extends StatefulWidget {
+  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   @override
   _MainState createState() => _MainState();
 }
@@ -112,6 +187,28 @@ class _MainState extends State<MyApp> {
             sess.KodeUser = xData[2];
             sess.RecordOwnerID = xData[3];
             sess.LocationID = int.parse(xData[4]);
+
+            Map oParamLokasi(){
+              return {
+                'id' : sess.LocationID.toString(),
+                'RecordOwnerID':sess.RecordOwnerID,
+              };
+            }
+            var x = Mod_Patroli(sess, Parameter: oParamLokasi()).readLokasi().then((value) async {
+              int interval = 0;
+
+              // int.parse(value["data"][0]["IntervalPatroli"]) * 60;
+              if(value["data"][0]["IntervalType"] == "DAY"){
+                interval = int.parse(value["data"][0]["IntervalPatroli"]) * 1440;
+              }
+              else if(value["data"][0]["IntervalType"] == "HOUR"){
+                interval = int.parse(value["data"][0]["IntervalPatroli"]) * 60;
+              }
+              else if(value["data"][0]["IntervalType"] == "MINUTE"){
+                interval = int.parse(value["data"][0]["IntervalPatroli"]);
+              }
+              NotificationController.createNewNotification(interval,value["data"][0]["StartPatroli"], context);
+            });
             return Dashboard(sess);
           }
           else{

@@ -88,10 +88,36 @@ class _dashboardState extends State<Dashboard> {
     return barcodeScanRes;
   }
 
+  void generateNotif(){
+    Map oParamLokasi(){
+      return {
+        'id' : this.widget.sess!.LocationID.toString(),
+        'RecordOwnerID':this.widget.sess!.RecordOwnerID,
+      };
+    }
+
+    var x = Mod_Patroli(this.widget.sess, Parameter: oParamLokasi()).readLokasi().then((value) async {
+      int interval = 0;
+
+      // int.parse(value["data"][0]["IntervalPatroli"]) * 60;
+      if(value["data"][0]["IntervalType"] == "DAY"){
+        interval = int.parse(value["data"][0]["IntervalPatroli"]) * 1440;
+      }
+      else if(value["data"][0]["IntervalType"] == "HOUR"){
+        interval = int.parse(value["data"][0]["IntervalPatroli"]) * 60;
+      }
+      else if(value["data"][0]["IntervalType"] == "MINUTE"){
+        interval = int.parse(value["data"][0]["IntervalPatroli"]);
+      }
+      createNewNotification(interval,value["data"][0]["StartPatroli"], context);
+    });
+  }
+
   @override
   void initState() {
     Timer.periodic(Duration(seconds: 1), (Timer t) => _timeChange());
     // _fetchData();
+    generateNotif();
     super.initState();
   }
 
@@ -99,16 +125,74 @@ class _dashboardState extends State<Dashboard> {
   void dispose(){
     super.dispose();
   }
-  static Future<void> createNewNotification(int x, String StartPatroli) async {
-    // bool isAllowed = await AwesomeNotifications().isNotificationAllowed();
-    // if (!isAllowed) isAllowed = await displayNotificationRationale();
-    // if (!isAllowed) return;
+  static Future<bool> displayNotificationRationale(BuildContext context) async {
+    bool userAuthorized = false;
+    // BuildContext context = MyApp.navigatorKey.currentContext!;
+    await showDialog(
+        context: context,
+        builder: (BuildContext ctx) {
+          return AlertDialog(
+            title: Text('Get Notified!',
+                style: Theme.of(context).textTheme.titleLarge),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Image.asset(
+                        'assets/animated-bell.gif',
+                        height: MediaQuery.of(context).size.height * 0.3,
+                        fit: BoxFit.fitWidth,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                    'Izinkan aplikasi untuk memberi notifikasi!'),
+              ],
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                  },
+                  child: Text(
+                    'Deny',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge
+                        ?.copyWith(color: Colors.red),
+                  )),
+              TextButton(
+                  onPressed: () async {
+                    userAuthorized = true;
+                    Navigator.of(ctx).pop();
+                  },
+                  child: Text(
+                    'Allow',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge
+                        ?.copyWith(color: Colors.deepPurple),
+                  )),
+            ],
+          );
+        });
+    return userAuthorized &&
+        await AwesomeNotifications().requestPermissionToSendNotifications();
+  }
+  static Future<void> createNewNotification(int x, String StartPatroli, BuildContext context) async {
+    bool isAllowed = await AwesomeNotifications().isNotificationAllowed();
+    if (!isAllowed) isAllowed = await displayNotificationRationale(context);
+    if (!isAllowed) return;
     String localTimeZone = await AwesomeNotifications().getLocalTimeZoneIdentifier();
     // print(localTimeZone);
     var listTime = StartPatroli.split(":");
     await AwesomeNotifications().createNotification(
         content: NotificationContent(
-            id: -1, // -1 is replaced by a random number
+            id: 123123123, // -1 is replaced by a random number
             channelKey: 'alerts',
             title: 'Informasi Patroli',
             body: "Sudah Waktunya Patroli Lagi.!!!",
@@ -168,28 +252,6 @@ class _dashboardState extends State<Dashboard> {
           child: Icon(Icons.add),
           onPressed: () async {
             // Handle Notification
-            Map oParamLokasi(){
-              return {
-                'id' : this.widget.sess!.LocationID.toString(),
-                'RecordOwnerID':this.widget.sess!.RecordOwnerID,
-              };
-            }
-
-            var x = Mod_Patroli(this.widget.sess, Parameter: oParamLokasi()).readLokasi().then((value) async {
-              int interval = 0;
-
-              // int.parse(value["data"][0]["IntervalPatroli"]) * 60;
-              if(value["data"][0]["IntervalType"] == "DAY"){
-                interval = value["data"][0]["IntervalPatroli"] * 1440;
-              }
-              else if(value["data"][0]["IntervalType"] == "HOUR"){
-                interval = value["data"][0]["IntervalPatroli"] * 60;
-              }
-              else if(value["data"][0]["IntervalType"] == "MINUTE"){
-                interval = value["data"][0]["IntervalPatroli"];
-              }
-              createNewNotification(interval,value["data"][0]["StartPatroli"]);
-            });
             var data = await barcodeScan().then((value) async {
               Map oParamx() {
                 return {
@@ -232,7 +294,10 @@ class _dashboardState extends State<Dashboard> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Padding(
-              padding: EdgeInsets.all(this.widget.sess!.width * 2),
+              padding: EdgeInsets.only(
+                bottom: this.widget.sess!.width * 2,
+                top:this.widget.sess!.width * 2
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

@@ -274,7 +274,7 @@
                     caption: "Action",
                     allowEditing:false,
                     cellTemplate: function(cellElement, cellInfo) {
-                      LinkAccess = "<a style href = '<?=base_url()?>Assets/images/patroli/"+cellInfo.data.Image+"' class='btn btn-info' target='_blank'>Hak Akses</a>";
+                      LinkAccess = "<a style href = '<?=base_url()?>Assets/images/patroli/"+cellInfo.data.Image+"' class='btn btn-info' target='_blank'>Lihat Gambar</a>";
                       LinkAccess += "<button class='btn btn-success' onClick=loadMap('"+cellInfo.data.Koordinat+"')>Lihat Lokasi</button>";
                       cellElement.append(LinkAccess);
                   }

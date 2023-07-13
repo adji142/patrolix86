@@ -167,9 +167,9 @@
             },
             editing: {
                 mode: "row",
-                allowAdding:true,
+                allowAdding:false,
                 allowUpdating: false,
-                allowDeleting: true,
+                allowDeleting: false,
                 texts: {
                     confirmDeleteMessage: ''  
                 }

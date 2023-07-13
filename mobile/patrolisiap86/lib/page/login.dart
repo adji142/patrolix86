@@ -1,7 +1,9 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:mobilepatrol/general/dialog.dart';
 import 'package:mobilepatrol/general/session.dart';
 import 'package:mobilepatrol/models/auth.dart';
+import 'package:mobilepatrol/models/patroli.dart';
 import 'package:mobilepatrol/page/dashboard.dart';
 import 'package:mobilepatrol/shared/sharedprefrence.dart';
 
@@ -22,6 +24,7 @@ class _LoginMobilePotraitState extends State<LoginMobilePotrait> {
 
   bool _obscured = false;
   bool _isReadonly = false;
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
