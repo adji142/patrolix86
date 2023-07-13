@@ -41,8 +41,7 @@
 			}
 
 			$SQL.= " GROUP BY a.KodeCheckPoint, a.NamaCheckPoint,a.Keterangan, c.NamaArea ";
-
-			var_dump($SQL);
+			
 			$rs = $this->db->query($SQL);
 
 			$SQL2 = "
