@@ -55,6 +55,7 @@ $route['translate_uri_dashes'] = FALSE;
 
 // Auth
 $route['register'] = 'Home/register';
+$route['generate'] = 'Home/generatePascode';
 // Auth
 
 // API TEST

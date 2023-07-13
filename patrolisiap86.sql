@@ -11,7 +11,7 @@
  Target Server Version : 100240
  File Encoding         : 65001
 
- Date: 11/07/2023 22:57:32
+ Date: 13/07/2023 16:01:36
 */
 
 SET NAMES utf8mb4;
@@ -27,13 +27,11 @@ CREATE TABLE `pascode`  (
   `ValidTo` datetime(6) NOT NULL,
   `Status` int(1) NOT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of pascode
 -- ----------------------------
-INSERT INTO `pascode` VALUES (1, 'ec0cf337a81bafbd8b4895fa3ade3b9f196725d208d84fcb1e2dedb09b54b99b481604f194b41eac479c385d5e0c6581c95301841f71f61237a66c24131bb9femcTrY3xtK7aa/G0K9A6l7ul0gWdPQtXSHhZhlGG2amo=', '2023-07-07 10:00:13.000000', 0);
-INSERT INTO `pascode` VALUES (2, '02603afb79f95580985acf6bf944215b3f724880b15bd9d721f03c262876a460d725b4612a436e554a2621b56f12e9e777abcbeef34d3e06a4a965095cd9273ax2wBQQtT23VokJuPPNArpF4PSdotov+NUAZznADByb0=', '2023-07-07 11:06:07.000000', 0);
 
 -- ----------------------------
 -- Table structure for patroli
@@ -51,18 +49,11 @@ CREATE TABLE `patroli`  (
   `Catatan` varchar(255) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL,
   `Rank` int(6) NOT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of patroli
 -- ----------------------------
-INSERT INTO `patroli` VALUES (1, 'CL0001', '1001', 2, '2023-07-10 20:44:38.000000', '40001', '40001', '40001', '40001', 0);
-INSERT INTO `patroli` VALUES (2, 'CL0001', '1002', 2, '2023-07-10 21:52:26.000000', '40001', '40001', '40001', '40001', 0);
-INSERT INTO `patroli` VALUES (3, 'CL0001', '1003', 2, '2023-07-11 21:36:56.886703', '40001', '-7.4949801,110.8311486', 'scaled_0cc4cbe1-5a9f-4d61-99a2-5453e2c5c8823016398997681695412.jpg', 'test', 0);
-INSERT INTO `patroli` VALUES (4, 'CL0001', '1003', 2, '2023-07-11 21:31:56.563771', '40001', '-7.4951212,110.8310752', 'scaled_b736d3d6-5b7e-47f0-840e-e869ac678ee26593544744343249446.jpg', 'nsnsn', 0);
-INSERT INTO `patroli` VALUES (5, 'CL0001', '1002', 2, '2023-07-11 21:40:32.439036', '40001', '-7.4949988,110.831079', 'scaled_fe5a0615-59f1-4bee-8cbb-5d9cdd0f9b72489385808773887168.jpg', 'sone', 0);
-INSERT INTO `patroli` VALUES (6, 'CL0001', '1002', 2, '2023-07-11 21:40:32.439036', '40001', '-7.4949988,110.831079', 'scaled_fe5a0615-59f1-4bee-8cbb-5d9cdd0f9b72489385808773887168.jpg', 'sone dong', 1);
-INSERT INTO `patroli` VALUES (7, 'CL0001', '1001', 2, '2023-07-11 21:41:55.238955', '40001', '-7.4949875,110.8311385', 'scaled_05e47a60-4a0a-49da-8a80-32fb68f027d06809552727925159375.jpg', 'done lokasi1', 0);
 
 -- ----------------------------
 -- Table structure for permission
@@ -157,9 +148,6 @@ CREATE TABLE `tcheckpoint`  (
 -- ----------------------------
 -- Records of tcheckpoint
 -- ----------------------------
-INSERT INTO `tcheckpoint` VALUES ('1001', 'Entrance', 'test 2', 2, 'CL0001');
-INSERT INTO `tcheckpoint` VALUES ('1002', 'Loby', 'asd', 2, 'CL0001');
-INSERT INTO `tcheckpoint` VALUES ('1003', 'Gudang', 'Test Pembayaran', 2, 'CL0001');
 
 -- ----------------------------
 -- Table structure for tcompany
@@ -185,7 +173,6 @@ CREATE TABLE `tcompany`  (
 -- ----------------------------
 -- Records of tcompany
 -- ----------------------------
-INSERT INTO `tcompany` VALUES ('CL0001', 'AIS SYSTEM', 'SOLO', '2132', '081325058258', '123123', 'Prasetyo Aji Wibowo', '2023-07-06 11:07:15.000000', 'AIS SYSTEM', NULL, NULL, '43ccdfe93ef6be87f4f41801a97a921a5af93260ac23433f9c3b4213dccc271ccd86efbe98bacf700f2cbb3e0a6b75c3d6c0eab486eb4d710abc7a10047fea41O4vHOjZA/dcmPfp2N8O+mO1v+ric5AIA86kuXkHWqCE=');
 
 -- ----------------------------
 -- Table structure for tlokasipatroli
@@ -204,13 +191,11 @@ CREATE TABLE `tlokasipatroli`  (
   `Toleransi` varchar(15) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idxArea`(`RecordOwnerID`, `id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of tlokasipatroli
 -- ----------------------------
-INSERT INTO `tlokasipatroli` VALUES (2, 'PT ANGKASA PURA', 'MERAK BANTEN', 'test', 'CL0001', '13:00:00.000000', 2, 'HOUR', '21:00:00.000000', '15');
-INSERT INTO `tlokasipatroli` VALUES (4, 'PT XYZ', 'SOLO', '-', 'CL0001', '07:00:00.000000', 2, 'HOUR', '15:00:00.000000', '15');
 
 -- ----------------------------
 -- Table structure for tsecurity
@@ -230,7 +215,6 @@ CREATE TABLE `tsecurity`  (
 -- ----------------------------
 -- Records of tsecurity
 -- ----------------------------
-INSERT INTO `tsecurity` VALUES ('40001', 'Prasetyo Aji Wibowo', '2023-12-31', 2, 1, 'CL0001', '08c2abdf5f355dd99e0bd5a522aaf33f34c218fc66a6081c87eac2d15a488b2397623d4864740432323e712eebdf05dc94996d5ac6f9790aadd0290b2b1121a6rluW9NwHpb6h0B7flaWJ7EzdPzQm31CWO++leUz4lro=');
 
 -- ----------------------------
 -- Table structure for userrole
