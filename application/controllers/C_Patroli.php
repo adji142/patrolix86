@@ -59,7 +59,7 @@
 
 			$xRS = $this->db->query($SQL2);
 			if ($rs) {
-				// var_dump($SQL2);
+				var_dump($xRS);
 				$data['success'] = true;
 				$data['data'] = $rs->result();
 				if ($xRS) {
