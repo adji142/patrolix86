@@ -1,7 +1,7 @@
 <!--sidebar-menu-->
 <?php
   $active = '';
-  var_dump($user_id);
+  // var_dump($user_id);
   $temp_lv1 = $this->GlobalVar->GetSideBar($user_id,0,0)->result();
 ?>
 <style type="text/css">

@@ -432,7 +432,20 @@ class Auth extends CI_Controller {
 
 			$oSecurity = $this->ModelsExecuteMaster->FindData(array('NIK'=>$Username,'RecordOwnerID'=> $RecordOwnerID), 'tsecurity');
 
+			// var_dump($oSecurity->row());
+
 			$oLokasi = $this->ModelsExecuteMaster->FindData(array('LocationID'=>$oUser->row()->AreaUser,'RecordOwnerID'=> $RecordOwnerID), 'tshift');
+
+			$data['success'] = true;
+			$data['username'] = $oUser->row()->username;
+			$data['unique_id'] = $oUser->row()->id;
+			$data['RecordOwnerID'] = $oUser->row()->RecordOwnerID;
+			$data['LocationID'] = $oUser->row()->AreaUser;
+			$data['NamaUser'] = $oUser->row()->nama;
+			if ($oSecurity->num_rows() > 0) {
+				$data['Shift'] = $oSecurity->row()->Shift;
+			}
+			$data['JadwalShift'] = $oLokasi->result();
 
 			$sess_data['userid']=$oUser->row()->id;
 			$sess_data['NamaUser'] = $oUser->row()->nama;
@@ -440,14 +453,6 @@ class Auth extends CI_Controller {
 			$sess_data['RecordOwnerID'] = $oUser->row()->RecordOwnerID;
 			$sess_data['AreaUser'] = $oUser->row()->AreaUser;
 			$this->session->set_userdata($sess_data);
-			$data['success'] = true;
-			$data['username'] = $oUser->row()->username;
-			$data['unique_id'] = $oUser->row()->id;
-			$data['RecordOwnerID'] = $oUser->row()->RecordOwnerID;
-			$data['LocationID'] = $oUser->row()->AreaUser;
-			$data['NamaUser'] = $oUser->row()->nama;
-			$data['Shift'] = $oSecurity->row()->Shift;
-			$data['JadwalShift'] = $oLokasi->result();
 		}
 
 
