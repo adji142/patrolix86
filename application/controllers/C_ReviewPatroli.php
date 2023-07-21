@@ -21,33 +21,36 @@
 			$KodeKaryawan = $this->input->post('KodeKaryawan');
 			$LocationID = $this->input->post('LocationID');
 			
-			$SQL = "
-				SELECT 
-					a.id,
-					c.NamaArea				AS NamaLokasi,
-					d.NamaSecurity,
-					b.NamaCheckPoint,
-					a.Koordinat,
-					a.Image,
-					a.Catatan,
-					DATE_FORMAT(a.TanggalPatroli,'%d/%m/%Y %H:%i:%S') Tanggal
-				FROM patroli a
-				LEFT JOIN tcheckpoint b on a.KodeCheckPoint = b.KodeCheckPoint and a.RecordOwnerID = b.RecordOwnerID AND a.LocationID = b.LocationID
-				LEFT JOIN tlokasipatroli c on a.LocationID = c.id AND a.RecordOwnerID = c.RecordOwnerID
-				LEFT JOIN tsecurity d on a.KodeKaryawan = d.NIK = a.RecordOwnerID = d.RecordOwnerID
-				WHERE DATE(a.TanggalPatroli) BETWEEN '".$TglAwal."' AND '".$TglAkhir."'
-				AND a.RecordOwnerID = '".$RecordOwnerID."'
-			";
+			// $SQL = "
+			// 	SELECT 
+			// 		a.id,
+			// 		c.NamaArea				AS NamaLokasi,
+			// 		d.NamaSecurity,
+			// 		b.NamaCheckPoint,
+			// 		a.Koordinat,
+			// 		a.Image,
+			// 		a.Catatan,
+			// 		DATE_FORMAT(a.TanggalPatroli,'%d/%m/%Y %H:%i:%S') Tanggal
+			// 	FROM patroli a
+			// 	LEFT JOIN tcheckpoint b on a.KodeCheckPoint = b.KodeCheckPoint and a.RecordOwnerID = b.RecordOwnerID AND a.LocationID = b.LocationID
+			// 	LEFT JOIN tlokasipatroli c on a.LocationID = c.id AND a.RecordOwnerID = c.RecordOwnerID
+			// 	LEFT JOIN tsecurity d on a.KodeKaryawan = d.NIK = a.RecordOwnerID = d.RecordOwnerID
+			// 	WHERE DATE(a.TanggalPatroli) BETWEEN '".$TglAwal."' AND '".$TglAkhir."'
+			// 	AND a.RecordOwnerID = '".$RecordOwnerID."'
+			// ";
 
-			if ($KodeKaryawan != "") {
-				$SQL .= " AND a.KodeKaryawan = '".$KodeKaryawan."' ";
-			}
+			// if ($KodeKaryawan != "") {
+			// 	$SQL .= " AND a.KodeKaryawan = '".$KodeKaryawan."' ";
+			// }
 
-			if ($LocationID != "") {
-				$SQL .= " AND a.LocationID = '".$LocationID."' ";
-			}
+			// if ($LocationID != "") {
+			// 	$SQL .= " AND a.LocationID = '".$LocationID."' ";
+			// }
 
-			$SQL.= " ORDER BY a.TanggalPatroli";
+			// $SQL.= " ORDER BY a.TanggalPatroli";
+
+
+			$SQL = "CALL fn_ReadReview('".$TglAwal."','".$TglAkhir."','".$RecordOwnerID."','".$KodeKaryawan."','".$LocationID."');";
 
 			$rs = $this->db->query($SQL);
 			if ($rs) {

@@ -1,5 +1,5 @@
 class session {
-  String server = "http://patroli.aissystem.org/"; // development
+  String server = ""; // development
   int idUser = -1;
   String KodeUser = "";
   String NamaUser = "";
@@ -12,4 +12,6 @@ class session {
   double width = 0;
   String orientation = "";
   int interval = 0;
+  String shift = "";
+  List jadwalShift = [];
 }

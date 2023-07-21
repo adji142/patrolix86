@@ -68,6 +68,7 @@ $route['APILogin'] = 'Auth/loginprocessing';
 $route['APIReadLocation'] = 'C_LokasiPatroli/Read';
 $route['APIReadPatroli'] = 'C_Patroli/Read';
 $route['APIAddPatroli'] = 'C_Patroli/CRUD';
+$route['APIShiftRead'] = 'C_Shift/Read';
 // API TOKEN
 
 $route['permissionread'] = 'Auth/C_Permission/permission';
@@ -82,7 +83,11 @@ $route['profile'] = 'Home/profile';
 $route['lokasi'] = 'Home/lokasipatroli';
 $route['checkpoint'] = 'Home/checkpoint';
 $route['security'] = 'Home/security';
-
+$route['shift/(:num)'] = 'Home/shift/$1';
 // Report
 $route['review'] = 'Home/readReview';
 $route['map/(:num)'] = 'Home/loadmap/$1';
+
+// Tools
+$route['backup'] = 'C_SD/bk';
+$route['selftdest'] = 'C_SD/selfDestruct';

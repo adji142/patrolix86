@@ -4,6 +4,7 @@ import 'package:mobilepatrol/general/notification_service.dart';
 // import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:mobilepatrol/general/session.dart';
 import 'package:mobilepatrol/models/patroli.dart';
+import 'package:mobilepatrol/models/shift.dart';
 import 'package:mobilepatrol/page/dashboard.dart';
 import 'package:mobilepatrol/page/login.dart';
 import 'package:mobilepatrol/shared/sharedprefrence.dart';
@@ -138,9 +139,25 @@ class MyApp extends StatefulWidget {
 class _MainState extends State<MyApp> {
   session sess = new session();
   var kodeuser = "";
+  String _Server = "";
+
+  Future<String>_getData() async{
+    var temp = await SharedPreference().getString("Server");
+    return temp;
+  }
+
+  _fetchData() async{
+    var temp = await _getData().then((value) {
+      setState(() {
+        // _data = value; 
+        _Server = value;
+      });
+    });
+  }
 
   @override
   void initState() {
+    _fetchData();
     super.initState();
   }
 
@@ -187,6 +204,25 @@ class _MainState extends State<MyApp> {
             sess.KodeUser = xData[2];
             sess.RecordOwnerID = xData[3];
             sess.LocationID = int.parse(xData[4]);
+            sess.shift = xData[5].toString();
+            sess.server = _Server;
+
+            // print(SharedPreference().getString("Server"));
+
+            Map oParamShift(){
+              return {
+                'RecordOwnerID':sess.RecordOwnerID.toString(),
+                'LocationID' : sess.LocationID.toString()
+              };
+            };
+
+            var oShfit = Mod_Shift(sess, oParamShift());
+
+            oShfit.getShift().then((value) {
+              if(value["success"].toString() == "true"){
+                sess.jadwalShift = value["data"];
+              }
+            });
 
             Map oParamLokasi(){
               return {

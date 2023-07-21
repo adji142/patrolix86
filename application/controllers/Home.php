@@ -158,6 +158,13 @@ class home extends CI_Controller {
 	{
 		$this->load->view('V_Master/Security');
 	}
+	public function shift($value)
+	{
+		$data['LocationID'] = $value;
+		
+		$this->load->view('V_Master/shift',$data);	
+	}
+
 	// Report
 	public function readReview()
 	{

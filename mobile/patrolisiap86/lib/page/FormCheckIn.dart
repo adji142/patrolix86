@@ -35,6 +35,8 @@ class _FormCheckInState extends State<FormCheckIn> {
   bool _isbuttondisable = true;
   bool _issaving = false;
 
+  String _shift = "";
+  String _kodeShift = "";
   // Position _posisi = new Position();
   TextEditingController _catatan = TextEditingController();
 
@@ -108,34 +110,65 @@ class _FormCheckInState extends State<FormCheckIn> {
     final DateTime now = DateTime.now();
     final String temp = DateFormat('jm').format(now).trim();
     final ampm = temp.substring(temp.length - 2, temp.length);
+    String xShift = "";
+    int shift = 0;
 
-    int shift;
+    if(this.widget.sess!.jadwalShift.length > 0){
+      // print(this.widget.sess!.jadwalShift);
+      for (var i = 0; i < this.widget.sess.jadwalShift.length; i++) {
+        var mulai = this.widget.sess.jadwalShift[i]["MulaiBekerja"].toString().split(":");
+        var selesai = this.widget.sess.jadwalShift[i]["SelesaiBekerja"].toString().split(":");
 
-    if (ampm == "AM") {
-      // AM
-      //------------------------------------------------------------------------
-      if (now.hour < DateTime.utc(1900, 1, 1, 7, 0, 0).hour) {
-        shift = 3;
-      } else {
-        shift = 1;
+        if(mulai.isNotEmpty){
+
+          DateTime jamMulai = DateTime.utc(now.year, now.month, now.day, int.parse(mulai[0]), int.parse(mulai[1]), int.parse(mulai[0].split(".")[0]));
+          DateTime jamSelesai = DateTime.utc(now.year, now.month, now.day, int.parse(selesai[0]), int.parse(selesai[1]), int.parse(selesai[0].split(".")[0]));
+          
+          // print(jamMulai);
+
+          if(jamMulai.isAfter(now) && now.isBefore(jamSelesai)){
+            xShift = this.widget.sess.jadwalShift[i]["NamaShift"].toString();
+            shift = int.parse(this.widget.sess.jadwalShift[i]["id"]);
+          }
+
+          // if (DateTime.utc(1900, 1, 1, int.parse(mulai[0]), int.parse(mulai[1]), int.parse(mulai[0].split(".")[0])).hour <= now.hour && DateTime.utc(1900, 1, 1, int.parse(selesai[0]), int.parse(selesai[1]), int.parse(selesai[0].split(".")[0])).hour >= now.hour) {
+          //   xShift = this.widget.sess!.jadwalShift[i]["NamaShift"].toString();
+          //   shift = int.parse(this.widget.sess!.jadwalShift[i]["id"]);
+          //   // 22 < 07 && 22 > 15 -> false
+          //   // 22 < 15 && 22 > 23 ->
+          //   // 23 < 23 && 22 > 07
+          // }
+        }
       }
-      //------------------------------------------------------------------------
-    } else {
-      // PM
-      //------------------------------------------------------------------------
-      if (now.hour < DateTime.utc(1900, 1, 1, 15, 0, 0).hour) {
-        shift = 1;
-      } else if (now.hour >= DateTime.utc(1900, 1, 1, 15, 0, 0).hour &&
-          now.hour < DateTime.utc(1900, 1, 1, 23, 0, 0).hour) {
-        shift = 2;
-      } else {
-        shift = 3;
-      }
-      //------------------------------------------------------------------------
     }
 
+    // if (ampm == "AM") {
+    //   // AM
+    //   //------------------------------------------------------------------------
+    //   if (now.hour < DateTime.utc(1900, 1, 1, 7, 0, 0).hour) {
+    //     shift = 3;
+    //   } else {
+    //     shift = 1;
+    //   }
+    //   //------------------------------------------------------------------------
+    // } else {
+    //   // PM
+    //   //------------------------------------------------------------------------
+    //   if (now.hour < DateTime.utc(1900, 1, 1, 15, 0, 0).hour) {
+    //     shift = 1;
+    //   } else if (now.hour >= DateTime.utc(1900, 1, 1, 15, 0, 0).hour &&
+    //       now.hour < DateTime.utc(1900, 1, 1, 23, 0, 0).hour) {
+    //     shift = 2;
+    //   } else {
+    //     shift = 3;
+    //   }
+    //   //------------------------------------------------------------------------
+    // }
+
     setState(() {
-      // _kodeShift = shift.toString();
+      // _kodeShift = xshift.toString();
+      _shift = xShift.toString();
+      _kodeShift = shift.toString();
       _tanggal = now;
     });
   }
@@ -300,7 +333,8 @@ class _FormCheckInState extends State<FormCheckIn> {
                           'Koordinat' : "${_currentPosition!.latitude},${_currentPosition!.longitude}",
                           'Image' : image64.toString(),
                           'Catatan' : _catatan.text,
-                          'ImageName' : extentionPath
+                          'ImageName' : extentionPath,
+                          'Shift' : _kodeShift.toString()
                         };
                       }
 

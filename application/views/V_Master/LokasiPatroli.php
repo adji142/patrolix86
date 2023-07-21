@@ -284,6 +284,16 @@
                     caption: "Keterangan",
                     allowEditing:false
                 },
+                {
+                    dataField: "FileItem",
+                    caption: "Action",
+                    allowEditing:false,
+                    cellTemplate: function(cellElement, cellInfo) {
+                      LinkAccess = "<a href = '<?=base_url()?>shift/"+cellInfo.data.id+"' class='btn btn-warning'>Atur Shift</a>";
+                      // console.log();
+                      cellElement.append(LinkAccess);
+                  }
+                }
             ],
             onEditingStart: function(e) {
                 GetData(e.data.id);

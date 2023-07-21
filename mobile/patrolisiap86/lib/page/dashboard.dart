@@ -23,7 +23,9 @@ class Dashboard extends StatefulWidget {
 
 class _dashboardState extends State<Dashboard> {
   DateTime? _tanggal;
-  // String _kodeShift;
+  String _kodeShift = "";
+  int _idShift = -1;
+
   Map _data = {};
   String _penyelesaian = "0 %";
   String _jumlahCP = "0 Check Point";
@@ -34,39 +36,73 @@ class _dashboardState extends State<Dashboard> {
   static ReceivedAction? initialAction;
   //Time Change
   //---------------------------------------------------------------------------
-  void _timeChange() {
-    final DateTime now = DateTime.now();
+  DateTime? _timeChange(DateTime now) {
+    // final DateTime now = DateTime.now();
     final String temp = DateFormat('jm').format(now).trim();
     final ampm = temp.substring(temp.length - 2, temp.length);
 
-    int shift;
+    String xShift = "";
+    int shift = -1;
 
-    if (ampm == "AM") {
-      // AM
-      //------------------------------------------------------------------------
-      if (now.hour < DateTime.utc(1900, 1, 1, 7, 0, 0).hour) {
-        shift = 3;
-      } else {
-        shift = 1;
+    print(now.hour);
+    if(this.widget.sess!.jadwalShift.length > 0){
+      // print(this.widget.sess!.jadwalShift);
+      for (var i = 0; i < this.widget.sess!.jadwalShift.length; i++) {
+        var mulai = this.widget.sess!.jadwalShift[i]["MulaiBekerja"].toString().split(":");
+        var selesai = this.widget.sess!.jadwalShift[i]["SelesaiBekerja"].toString().split(":");
+
+        if(mulai.isNotEmpty){
+
+          DateTime jamMulai = DateTime.utc(now.year, now.month, now.day, int.parse(mulai[0]), int.parse(mulai[1]), int.parse(mulai[0].split(".")[0]));
+          DateTime jamSelesai = DateTime.utc(now.year, now.month, now.day, int.parse(selesai[0]), int.parse(selesai[1]), int.parse(selesai[0].split(".")[0]));
+          
+          // print(jamMulai);
+
+          if(jamMulai.isAfter(now) && now.isBefore(jamSelesai)){
+            xShift = this.widget.sess!.jadwalShift[i]["NamaShift"].toString();
+            shift = int.parse(this.widget.sess!.jadwalShift[i]["id"]);
+          }
+
+          // if (DateTime.utc(1900, 1, 1, int.parse(mulai[0]), int.parse(mulai[1]), int.parse(mulai[0].split(".")[0])).hour <= now.hour && DateTime.utc(1900, 1, 1, int.parse(selesai[0]), int.parse(selesai[1]), int.parse(selesai[0].split(".")[0])).hour >= now.hour) {
+          //   xShift = this.widget.sess!.jadwalShift[i]["NamaShift"].toString();
+          //   shift = int.parse(this.widget.sess!.jadwalShift[i]["id"]);
+          //   // 22 < 07 && 22 > 15 -> false
+          //   // 22 < 15 && 22 > 23 ->
+          //   // 23 < 23 && 22 > 07
+          // }
+        }
       }
-      //------------------------------------------------------------------------
-    } else {
-      // PM
-      //------------------------------------------------------------------------
-      if (now.hour < DateTime.utc(1900, 1, 1, 15, 0, 0).hour) {
-        shift = 1;
-      } else if (now.hour >= DateTime.utc(1900, 1, 1, 15, 0, 0).hour &&
-          now.hour < DateTime.utc(1900, 1, 1, 23, 0, 0).hour) {
-        shift = 2;
-      } else {
-        shift = 3;
-      }
-      //------------------------------------------------------------------------
     }
-    setState(() {
-      // _kodeShift = shift.toString();
-      _tanggal = now;
-    });
+
+    // if (ampm == "AM") {
+    //   // AM
+    //   //------------------------------------------------------------------------
+    //   if (now.hour < DateTime.utc(1900, 1, 1, 7, 0, 0).hour) {
+    //     shift = 3;
+    //   } else {
+    //     shift = 1;
+    //   }
+    //   //------------------------------------------------------------------------
+    // } else {
+    //   // PM
+    //   //------------------------------------------------------------------------
+    //   if (now.hour < DateTime.utc(1900, 1, 1, 15, 0, 0).hour) {
+    //     shift = 1;
+    //   } else if (now.hour >= DateTime.utc(1900, 1, 1, 15, 0, 0).hour &&
+    //       now.hour < DateTime.utc(1900, 1, 1, 23, 0, 0).hour) {
+    //     shift = 2;
+    //   } else {
+    //     shift = 3;
+    //   }
+    //   //------------------------------------------------------------------------
+    // }
+    // setState(() {
+    //   // print(xShift);
+    //   _kodeShift = xShift;
+    //   _idShift = shift;
+    //   _tanggal = now;
+    // });
+    return _tanggal;
   }
   //---------------------------------------------------------------------------
 
@@ -115,7 +151,7 @@ class _dashboardState extends State<Dashboard> {
 
   @override
   void initState() {
-    Timer.periodic(Duration(seconds: 1), (Timer t) => _timeChange());
+    // Timer.periodic(Duration(seconds: 1), (Timer t) => _timeChange());
     // _fetchData();
     generateNotif();
     super.initState();
@@ -318,32 +354,75 @@ class _dashboardState extends State<Dashboard> {
                       subtitle: Text(this.widget.sess!.NamaUser),
                     ),
                   ),
-                  _tanggal == null
-                      ? Container()
-                      : Container(
-                          width: this.widget.sess!.width * 40,
-                          height: this.widget.sess!.hight * 10,
-                          child: Container(
-                            width: this.widget.sess!.width * 30,
-                            height: this.widget.sess!.hight * 10,
-                            decoration: new BoxDecoration(
-                              borderRadius: new BorderRadius.circular(10.0),
-                              color: Colors.yellow.shade600,
-                            ),
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
+                  Container(
+                    width: this.widget.sess!.width * 40,
+                    height: this.widget.sess!.hight * 10,
+                    child: Container(
+                      width: this.widget.sess!.width * 30,
+                      height: this.widget.sess!.hight * 10,
+                      decoration: new BoxDecoration(
+                        borderRadius: new BorderRadius.circular(10.0),
+                        color: Colors.yellow.shade600,
+                      ),
+                      child: Center(
+                        child: StreamBuilder(
+                          stream: Stream.periodic(Duration(seconds: 1)),
+                          builder: (context, snapshot){
+                            final DateTime now = DateTime.now();
+                            final String temp = DateFormat('jm').format(now).trim();
+                            final ampm = temp.substring(temp.length - 2, temp.length);
+
+                            String xShift = "";
+                            int shift = -1;
+                            if(this.widget.sess!.jadwalShift.length > 0){
+                              // print(this.widget.sess!.jadwalShift);
+                              for (var i = 0; i < this.widget.sess!.jadwalShift.length; i++) {
+                                var mulai = this.widget.sess!.jadwalShift[i]["MulaiBekerja"].toString().split(":");
+                                var selesai = this.widget.sess!.jadwalShift[i]["SelesaiBekerja"].toString().split(":");
+
+                                if(mulai.isNotEmpty){
+
+                                  DateTime jamMulai = DateTime.utc(now.year, now.month, now.day, int.parse(mulai[0]), int.parse(mulai[1]), int.parse(mulai[0].split(".")[0]));
+                                  DateTime jamSelesai = DateTime.utc(now.year, now.month, now.day, int.parse(selesai[0]), int.parse(selesai[1]), int.parse(selesai[0].split(".")[0]));
+                                  
+                                  // print(jamMulai);
+
+                                  if(jamMulai.isAfter(now) && now.isBefore(jamSelesai)){
+                                    xShift = this.widget.sess!.jadwalShift[i]["NamaShift"].toString();
+                                    shift = int.parse(this.widget.sess!.jadwalShift[i]["id"]);
+                                  }
+                                }
+                              }
+                            }
+                            _kodeShift = xShift;
+                            _idShift = shift;
+                            _tanggal = now;
+                            // Widget
+
+                            return now == null ? Container() : Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
                                   SizedBox(height: 1),
-                                  Text(DateFormat("hh:mm:ss").format(_tanggal!),
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.red,
-                                          fontWeight: FontWeight.bold)),
+                                  Text(DateFormat("hh:mm:ss").format(now),
+                                    style: TextStyle(
+                                      fontSize: this.widget.sess!.width * 5.5,
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.bold)),
+                                  Text(
+                                    "Shift : " + _kodeShift,
+                                    style: TextStyle(
+                                      fontSize: this.widget.sess!.width * 4,
+                                      color: Theme.of(context).primaryColor,
+                                      fontWeight: FontWeight.bold
+                                    ),
+                                  )
                                 ],
-                              ),
-                            ),
-                          ))
+                              );
+                          }
+                        ),
+                      ),
+                    ),
+                  )
                 ],
               ),
             ),
@@ -421,6 +500,7 @@ class _dashboardState extends State<Dashboard> {
   }
 
   Widget _listData(List list) {
+    // print(this.widget.sess!.server);
     if (list.length == 0) {
       return Container();
     } else {
@@ -430,7 +510,7 @@ class _dashboardState extends State<Dashboard> {
             onRefresh: () => _refreshData(),
             child: ListView.builder(
               shrinkWrap: true,
-              physics: ClampingScrollPhysics(),
+              // physics: ClampingScrollPhysics(),
               itemCount: list == null ? 0 : list.length,
               itemBuilder: (context, index) {
                 return ListTile(
@@ -457,10 +537,10 @@ class _dashboardState extends State<Dashboard> {
   }
 
   Future _refreshData() async {
+    setState(() {});
     Completer<Null> completer = Completer<Null>();
     Future.delayed(Duration(seconds: 1)).then((_) {
       completer.complete();
-      setState(() {});
     });
     return completer.future;
   }

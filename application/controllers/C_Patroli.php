@@ -30,8 +30,11 @@
 					COUNT(b.id)				'JumlahCheckin',
 					CASE WHEN COUNT(b.id) >= 1 THEN 1 ELSE 0 END sts
 				FROM tcheckpoint a
-				LEFT JOIN patroli b on a.KodeCheckPoint = b.KodeCheckPoint AND a.LocationID = b.LocationID AND a.RecordOwnerID = b.RecordOwnerID AND DATE(b.TanggalPatroli) = DATE('".$TanggalPatroli."') AND b.KodeKaryawan = '".$KodeKaryawan."'
+				LEFT JOIN patroli b on a.KodeCheckPoint = b.KodeCheckPoint AND a.LocationID = b.LocationID AND a.RecordOwnerID = b.RecordOwnerID 
+				AND DATE(CASE WHEN (SELECT x.GantiHari FROM tshift x where x.id = b.Shift and x.RecordOwnerID = b.RecordOwnerID AND x.LocationID = b.LocationID) = 1 THEN DATE_ADD(b.TanggalPatroli, INTERVAL -1 DAY) ELSE b.TanggalPatroli END) = DATE('".$TanggalPatroli."') 
+				AND b.KodeKaryawan = '".$KodeKaryawan."'
 				LEFT JOIN tlokasipatroli c on a.LocationID = c.id AND a.RecordOwnerID = c.RecordOwnerID
+				LEFT JOIN tshift d on b.shift = d.id and b.LocationID = d.LocationID and b.RecordOwnerID = d.RecordOwnerID
 				where a.RecordOwnerID = '".$RecordOwnerID."'
 				AND a.LocationID = '".$KodeLokasi."'
 			";
@@ -47,11 +50,13 @@
 			$SQL2 = "
 				SELECT 
 					a.LocationID,
-					(TIMESTAMPDIFF(MINUTE, StartPatroli, EndPatroli) * COUNT(a.KodeCheckPoint)) / (c.IntervalPatroli * 60) JumlahRencanaPatroli,
+					(TIMESTAMPDIFF(MINUTE, d.MulaiBekerja, d.SelesaiBekerja) * COUNT(DISTINCT a.KodeCheckPoint)) / (d.IntervalPatroli * 60) JumlahRencanaPatroli,
 					COUNT(b.id) JumlahPatroliAktual
 				FROM tcheckpoint a
-				LEFT JOIN patroli b on a.KodeCheckPoint = b.KodeCheckPoint AND a.LocationID = b.LocationID AND a.RecordOwnerID = b.RecordOwnerID AND DATE(b.TanggalPatroli) = DATE('".$TanggalPatroli."') AND b.KodeKaryawan = '".$KodeKaryawan."'
-				LEFT JOIN tlokasipatroli c on a.LocationID = c.id AND a.RecordOwnerID = c.RecordOwnerID
+				LEFT JOIN patroli b on a.KodeCheckPoint = b.KodeCheckPoint AND a.LocationID = b.LocationID AND a.RecordOwnerID = b.RecordOwnerID 
+				AND DATE(CASE WHEN (SELECT x.GantiHari FROM tshift x where x.id = b.Shift and x.RecordOwnerID = b.RecordOwnerID AND x.LocationID = b.LocationID) = 1 THEN DATE_ADD(b.TanggalPatroli, INTERVAL -1 DAY) ELSE b.TanggalPatroli END) = DATE('".$TanggalPatroli."') 
+				AND b.KodeKaryawan = '".$KodeKaryawan."'
+				LEFT JOIN tshift d on b.shift = d.id and b.LocationID = d.LocationID and b.RecordOwnerID = d.RecordOwnerID
 				where a.RecordOwnerID = '".$RecordOwnerID."'
 				AND a.LocationID = '".$KodeLokasi."'
 				GROUP BY a.LocationID
@@ -84,20 +89,33 @@
 			$Image 				= $this->input->post('Image');
 			$ImageName 			= $this->input->post('ImageName');
 			$Catatan 			= $this->input->post('Catatan');
+			$Shift 				= $this->input->post('Shift');
+
 
 			$baseDir = FCPATH.'Assets/images/patroli/'.$ImageName;
 
 			try {
 				file_put_contents($baseDir,base64_decode($Image));
-					$oParam = array(
+				$oParam = array(
 					'RecordOwnerID'	=> $RecordOwnerID,
 					'LocationID'	=> $LocationID,
 					'KodeCheckPoint'=> $KodeCheckPoint,
 					'KodeKaryawan'	=> $KodeKaryawan,
 					'TanggalPatroli'=> $TanggalPatroli
 				);
-				$max = $this->ModelsExecuteMaster->FindData($oParam, 'patroli');
 
+				$xSQL = "
+					SELECT a.* FROM patroli a
+					LEFT JOIN tshift b on a.shift = b.id and a.LocationID = b.LocationID and a.RecordOwnerID = b.RecordOwnerID
+					WHERE RecordOwnerID = '".$RecordOwnerID."'
+					AND LocationID = '".$LocationID."'
+					AND KodeCheckPoint = '".$KodeCheckPoint."'
+					AND KodeKaryawan = '".$KodeKaryawan."'
+					AND DATE(CASE WHEN (SELECT x.GantiHari FROM tshift x where x.id = a.Shift and x.RecordOwnerID = a.RecordOwnerID AND x.LocationID = a.LocationID) = 1 THEN DATE_ADD(a.TanggalPatroli, INTERVAL -1 DAY) ELSE a.TanggalPatroli END) = DATE('".$TanggalPatroli."') 
+				";
+
+				// $max = $this->ModelsExecuteMaster->FindData($oParam, 'patroli');
+				$max = $this->db->query($xSQL);
 				$Rank = $max->num_rows();
 
 				$param = array(
@@ -110,6 +128,7 @@
 					'Image' 			=> $ImageName,
 					'Catatan' 			=> $Catatan,
 					'Rank' 				=> $Rank,
+					'Shift'				=> $Shift
 				);
 
 				$rs = $this->ModelsExecuteMaster->ExecInsert($param,$this->table);

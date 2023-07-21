@@ -13,42 +13,11 @@
         <div class="col-md-12 col-sm-12  ">
           <div class="x_panel">
             <div class="x_title">
-              <h2>Security</h2>
+              <h2>Shift</h2>
               <div class="clearfix"></div>
             </div>
             <div class="x_content">
               <div class="row">
-                <div class="col-md-4 col-sm-12  ">
-                  Lokasi :
-                  <select id="KodeLokasi" name="KodeLokasi" class="form-control">
-                    <?php
-                      $oParam = array();
-
-                      if ($this->session->userdata('AreaUser') != "") {
-                        $oParam = array(
-                          'RecordOwnerID' => $this->session->userdata('RecordOwnerID'),
-                          'id' => $this->session->userdata('AreaUser'),
-                        );
-                      }
-                      else{
-                        echo "<option value=''>Pilih Lokasi</option>";
-                        $oParam = array(
-                          'RecordOwnerID' => $this->session->userdata('RecordOwnerID')
-                        );
-                      }
-                      // var_dump($oParam);
-                      $rs = $this->ModelsExecuteMaster->FindData($oParam,'tlokasipatroli')->result();
-
-                      foreach ($rs as $key) {
-                        echo "<option value = '".$key->id."'>".$key->NamaArea."</option>";
-                      }
-                    ?>
-                  </select>
-                </div>
-                <div class="col-md-6 col-sm-12  ">
-                  <br>
-                  <button class="btn btn-warning" id="btSearch">Cari</button>
-                </div>
                 <div class="col-md-12 col-sm-12  ">
                   <div class="dx-viewport demo-container">
                     <div id="data-grid-demo">
@@ -71,75 +40,72 @@
       <div class="modal-content">
 
         <div class="modal-header">
-          <h4 class="modal-title" id="myModalLabel">Security</h4>
+          <h4 class="modal-title" id="myModalLabel">Shift</h4>
           <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span>
           </button>
         </div>
         <div class="modal-body">
           <form id="post_" data-parsley-validate class="form-horizontal form-label-left">
             <div class="item form-group">
-              <label class="col-form-label col-md-3 col-sm-3 label-align" for="first-name">Nomer Induk Karyawan <span class="required">*</span>
+              <label class="col-form-label col-md-3 col-sm-3 label-align" for="first-name">Nama Shift <span class="required">*</span>
               </label>
               <div class="col-md-6 col-sm-6 ">
-                <input type="text" name="NIK" id="NIK" required="" placeholder="Nomer Induk Karyawan" class="form-control ">
+                <input type="text" name="NamaShift" id="NamaShift" required="" placeholder="Nama Shift" class="form-control ">
+                <input type="hidden" name="id" id="id">
                 <input type="hidden" name="formtype" id="formtype" value="add">
                 <input type="hidden" name="RecordOwnerID" id="RecordOwnerID" value="<?php echo $this->session->userdata('RecordOwnerID') ?>">
+                <input type="hidden" name="LocationID" id="LocationID" value="<?php echo $LocationID ?>">
               </div>
             </div>
 
             <div class="item form-group">
-              <label class="col-form-label col-md-3 col-sm-3 label-align" for="first-name">Nama Karyawan <span class="required">*</span>
+              <label class="col-form-label col-md-3 col-sm-3 label-align" for="first-name">Mulai Jam Kerja <span class="required">*</span>
               </label>
               <div class="col-md-6 col-sm-6 ">
-                <input type="text" name="NamaSecurity" id="NamaSecurity" required="" placeholder="Nama Karyawan" class="form-control ">
+                <input type="time" name="MulaiBekerja" id="MulaiBekerja" required="" placeholder="Mulai Patroli" class="form-control ">
               </div>
             </div>
 
             <div class="item form-group">
-              <label class="col-form-label col-md-3 col-sm-3 label-align" for="first-name">Tgl Bergabung <span class="required">*</span>
+              <label class="col-form-label col-md-3 col-sm-3 label-align" for="first-name">Selesai Jam Kerja <span class="required">*</span>
               </label>
               <div class="col-md-6 col-sm-6 ">
-                <input type="date" name="JoinDate" id="JoinDate" required="" placeholder="Nama Karyawan" class="form-control ">
+                <input type="time" name="SelesaiBekerja" id="SelesaiBekerja" required="" placeholder="Selesai Patroli" class="form-control ">
               </div>
             </div>
 
             <div class="item form-group">
-              <label class="col-form-label col-md-3 col-sm-3 label-align" for="first-name">Lokasi Patroli <span class="required">*</span>
+              <label class="col-form-label col-md-3 col-sm-3 label-align" for="first-name">Interval <span class="required">*</span>
               </label>
-              <div class="col-md-6 col-sm-6 ">
-                <select id="LocationID" name="LocationID" class="form-control">
-                  <option value="">Pilih Lokasi..</option>
-                  <?php
-                    $rs = $this->ModelsExecuteMaster->FindData(array('RecordOwnerID'=>$this->session->userdata('RecordOwnerID')),'tlokasipatroli')->result();
-
-                    foreach ($rs as $key) {
-                      echo "<option value = '".$key->id."'>".$key->NamaArea."</option>";
-                    }
-                  ?>
+              <div class="col-md-3 col-sm-3  form-group">
+                <input type="number" name="IntervalPatroli" id="IntervalPatroli" required="" placeholder="Interval" class="form-control ">
+              </div>
+              <div class="col-md-3 col-sm-3  form-group">
+                <select class="form-control" id="IntervalType" name="IntervalType">
+                  <option value="DAY">Hari</option>
+                  <option value="HOUR">Jam</option>
+                  <!-- <option value="MINUTE">Menit</option> -->
                 </select>
               </div>
             </div>
 
             <div class="item form-group">
-              <label class="col-form-label col-md-3 col-sm-3 label-align" for="first-name">Shift <span class="required">*</span>
+              <label class="col-form-label col-md-3 col-sm-3 label-align" for="first-name">Toleransi <span class="required">*</span>
               </label>
               <div class="col-md-6 col-sm-6 ">
-                <select class="form-control " name="Shift" id="Shift">
-                  <option value="">Pilih Shift</option>
-                </select>
+                <input type="number" name="Toleransi" id="Toleransi" required="" placeholder="Toleransi. *Menit" class="form-control ">
               </div>
             </div>
 
             <div class="item form-group">
-              <label class="col-form-label col-md-3 col-sm-3 label-align" for="first-name">Status <span class="required">*</span>
+              <label class="col-form-label col-md-3 col-sm-3 label-align" for="first-name">Shift Ganti Hari ? <span class="required">*</span>
               </label>
               <div class="col-md-6 col-sm-6 ">
-                <select id="Status" name="Status" class="form-control">
-                  <option value="1">Open</option>
-                  <option value="0">Close</option>
-                </select>
+                <input type="checkbox" name="xGantiHari" id="xGantiHari" class="form-control ">
+                <input type="hidden" name="GantiHari" id="GantiHari" class="form-control ">
               </div>
             </div>
+
 
             <div class="item" form-group>
               <button class="btn btn-primary" id="btn_Save">Save</button>
@@ -163,17 +129,29 @@
 <script type="text/javascript">
   $(function () {
     var RecordOwnerID = $('#RecordOwnerID').val();
+    var LocationID = $('#LocationID').val();
     $(document).ready(function () {
       $.ajax({
         type: "post",
-        url: "<?=base_url()?>C_Security/Read",
-        data: {'NIK':'', 'RecordOwnerID': RecordOwnerID,'LocationID':$('#KodeLokasi').val()},
+        url: "<?=base_url()?>C_Shift/Read",
+        data: {'id':'', 'RecordOwnerID': RecordOwnerID,'LocationID':LocationID},
         dataType: "json",
         success: function (response) {
           bindGrid(response.data);
         }
       });
     });
+    $('#xGantiHari').click(function() {
+        // $("#txtAge").toggle(this.checked);
+        // console.log($('#xGantiHari').val());
+        if ($('#xGantiHari').is(':checked')) {
+          $('#GantiHari').val("1");
+        }
+        else{
+          $('#GantiHari').val("0");
+        }
+    });
+
     $('#post_').submit(function (e) {
       $('#btn_Save').text('Tunggu Sebentar.....');
       $('#btn_Save').attr('disabled',true);
@@ -183,7 +161,7 @@
 
       $.ajax({
             type    :'post',
-            url     : '<?=base_url()?>C_Security/CRUD',
+            url     : '<?=base_url()?>C_Shift/CRUD',
             data    : me.serialize(),
             dataType: 'json',
             success : function (response) {
@@ -217,62 +195,37 @@
     $('.close').click(function() {
       location.reload();
     });
-    $('#btSearch').click(function () {
-      $.ajax({
-        type: "post",
-        url: "<?=base_url()?>C_Security/Read",
-        data: {'KodeCheckPoint':'', 'RecordOwnerID': RecordOwnerID,'LocationID':$('#KodeLokasi').val()},
-        dataType: "json",
-        success: function (response) {
-          bindGrid(response.data);
-        }
-      });
-    });
-
-    $('#LocationID').change(function () {
-      $.ajax({
-        async:false,
-        type: "post",
-        url: "<?=base_url()?>C_Shift/Read",
-        data: {
-          'RecordOwnerID' :$('#RecordOwnerID').val(),
-          'LocationID'    :$('#LocationID').val()
-        },
-        dataType: "json",
-        success: function (response) {
-          // bindGrid(response.data);
-          $('#Shift').empty();
-          if (response.data.length > 0) {
-            $('#Shift').append('<option value="-1">Pilih Shift</option>');
-            $.each(response.data,function (k,v) {
-              $('#Shift').append('<option value="' + v.id + '">' + v.NamaShift + '</option>');
-            });
-          }
-          else{
-            $('#Shift').append('<option value="-1">Pilih Shift</option>');
-          }
-        }
-      });
-    })
+    
     function GetData(id) {
       var where_field = 'id';
       var where_value = id;
       var table = 'users';
       $.ajax({
         type: "post",
-        url: "<?=base_url()?>C_Security/Read",
-        data: {'NIK':id, 'RecordOwnerID':RecordOwnerID},
+        url: "<?=base_url()?>C_Shift/Read",
+        data: {'id':id, 'RecordOwnerID':RecordOwnerID,'LocationID':LocationID},
         dataType: "json",
         success: function (response) {
           $.each(response.data,function (k,v) {
             // $('#KodePenyakit').val(v.KodePenyakit).change;
-            $('#NIK').val(v.NIK);
-            $('#NamaSecurity').val(v.NamaSecurity);
-            $('#JoinDate').val(v.JoinDate);
-            $('#LocationID').val(v.LocationID).change();
-            $('#Status').val(v.Status).change();
+            $('#id').val(v.id);
+            $('#NamaShift').val(v.NamaShift);
+            $('#MulaiBekerja').val(v.MulaiBekerja.split(".")[0]);
+            $('#SelesaiBekerja').val(v.SelesaiBekerja.split(".")[0]);
+            $('#IntervalPatroli').val(v.IntervalPatroli);
+            $('#IntervalType').val(v.IntervalType).change();
+            $('#Toleransi').val(v.Toleransi);
+            $('#LocationID').val(v.LocationID);
+
+            // console.log(v.GantiHari)
+            $( "#GantiHari").val(v.GantiHari);
+            if (v.GantiHari == "1") {
+              $( "#xGantiHari").prop('checked', true);
+            }
+            else{
+              $( "#xGantiHari").prop('checked', false);
+            }
             $('#RecordOwnerID').val(v.RecordOwnerID);
-            $('#Shift').val(v.Shift).change();
 
             $('#formtype').val("edit");
             $('#modal_').modal('show');
@@ -285,7 +238,7 @@
       $("#gridContainer").dxDataGrid({
         allowColumnResizing: true,
             dataSource: data,
-            keyExpr: "NIK",
+            keyExpr: "id",
             showBorders: true,
             allowColumnReordering: true,
             allowColumnResizing: true,
@@ -314,35 +267,36 @@
             },
             columns: [
                 {
-                    dataField: "NIK",
-                    caption: "Nomer Induk Karyawan",
+                    dataField: "id",
+                    caption: "#",
+                    allowEditing:false,
+                    visible:false
+                },
+                {
+                    dataField: "NamaShift",
+                    caption: "Shift",
                     allowEditing:false
                 },
                 {
-                    dataField: "NamaSecurity",
-                    caption: "Nama",
+                    dataField: "MulaiBekerja",
+                    caption: "Mulai",
                     allowEditing:false
                 },
                 {
-                    dataField: "JoinDate",
-                    caption: "Join Date",
-                    allowEditing:false
-                },
-                {
-                    dataField: "NamaArea",
-                    caption: "Nama Area",
+                    dataField: "SelesaiBekerja",
+                    caption: "Selesai",
                     allowEditing:false
                 },
             ],
             onEditingStart: function(e) {
-                GetData(e.data.NIK);
+                GetData(e.data.id);
             },
             onInitNewRow: function(e) {
                 // logEvent("InitNewRow");
                 $('#modal_').modal('show');
             },
             onRowRemoving: function(e) {
-              id = e.data.NIK;
+              id = e.data.id;
               Swal.fire({
                 title: 'Apakah anda yakin?',
                 text: "anda akan menghapus data di baris ini !",
@@ -356,8 +310,8 @@
 
                   $.ajax({
                       type    :'post',
-                      url     : '<?=base_url()?>C_Security/CRUD',
-                      data    : {'NIK':id,'formtype':'delete', 'RecordOwnerID':RecordOwnerID},
+                      url     : '<?=base_url()?>C_Shift/CRUD',
+                      data    : {'id':id,'formtype':'delete', 'RecordOwnerID':RecordOwnerID,'LocationID':LocationID},
                       dataType: 'json',
                       success : function (response) {
                         if(response.success == true){

@@ -394,7 +394,9 @@ class Auth extends CI_Controller {
 					'LocationID'	=>'',
 					'NamaUser'		=>'',
 					'username'		=>'',
-					'unique_id'		=>''
+					'unique_id'		=>'',
+					'Shift'			=>'',
+					'JadwalShift'	=> array()
 				);
 
 		$RecordOwnerID = $this->input->post('RecordOwnerID');
@@ -427,6 +429,11 @@ class Auth extends CI_Controller {
 			goto jump;
 		}
 		else{
+
+			$oSecurity = $this->ModelsExecuteMaster->FindData(array('NIK'=>$Username,'RecordOwnerID'=> $RecordOwnerID), 'tsecurity');
+
+			$oLokasi = $this->ModelsExecuteMaster->FindData(array('LocationID'=>$oUser->row()->AreaUser,'RecordOwnerID'=> $RecordOwnerID), 'tshift');
+
 			$sess_data['userid']=$oUser->row()->id;
 			$sess_data['NamaUser'] = $oUser->row()->nama;
 			$sess_data['UserName'] = $oUser->row()->username;
@@ -439,6 +446,8 @@ class Auth extends CI_Controller {
 			$data['RecordOwnerID'] = $oUser->row()->RecordOwnerID;
 			$data['LocationID'] = $oUser->row()->AreaUser;
 			$data['NamaUser'] = $oUser->row()->nama;
+			$data['Shift'] = $oSecurity->row()->Shift;
+			$data['JadwalShift'] = $oLokasi->result();
 		}
 
 

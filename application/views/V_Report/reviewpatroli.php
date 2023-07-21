@@ -7,6 +7,9 @@
   a:link, a:visited {
     color: white;
   }
+  .over{
+    color: red;
+  }
 </style>
 <!-- page content -->
 <div class="right_col" role="main">
@@ -242,14 +245,36 @@
                     groupIndex:2
                 },
                 {
+                    dataField: "NamaShift",
+                    caption: "Shift",
+                    allowEditing:false,
+                    groupIndex:3
+                },
+                {
                     dataField: "id",
                     caption: "#",
                     allowEditing:false,
                     visible:false
                 },
                 {
-                    dataField: "Tanggal",
+                    dataField: "TanggalPatroli",
                     caption: "Tanggal",
+                    allowEditing:false,
+                    cssClass: "TglPatrol",
+                },
+                {
+                    dataField: "JamJadwal",
+                    caption: "Jam Jadwal Patroli",
+                    allowEditing:false
+                },
+                {
+                    dataField: "Toleransi",
+                    caption: "Toleransi",
+                    allowEditing:false
+                },
+                {
+                    dataField: "JamAktual",
+                    caption: "Jam Patroli",
                     allowEditing:false
                 },
                 {
@@ -280,35 +305,46 @@
                   }
                 }
             ],
-            onSelectionChanged(selectedItems) {
-              const data = selectedItems.selectedRowsData[0];
-              if (data) {
-                $.ajax({
-                  type: "post",
-                  url: "<?=base_url()?>C_TagihanSiswa/ReadDetail",
-                  async: false,
-                  data: {
-                    'NoTransaksi':data.NoTransaksi
-                  },
-                  dataType: "json",
-                  success: function (response) {
-                    var items_data = [];
+            onCellPrepared: function (cellInfo) {
+              if (cellInfo.rowType === "data") {
+                // console.log(cellInfo);
+                // var tgl = cellInfo.data.TanggalPatroli.split("/");
+                // console.log(parseInt(tgl[1]));
+                const date = new Date();
 
-                    for (var i = 0; i < response.data.length; i++) {
-                      var arr ={
-                          NoTransaksi     : response.data[i].NoTransaksi,
-                          LineNumber      : response.data[i].LineNumber,
-                          KodeItemTagihan : response.data[i].KodeItemTagihan,
-                          NamaItemTagihan : response.data[i].NamaItemTagihan,
-                          JumlahTagihan   : ThousandSparator(response.data[i].JumlahTagihan)
-                      }
-                      items_data.push(arr);
-                    }
-                    bindGridDetail(items_data);
-                  }
-                });
+                let day = date.getDate();
+                let month = date.getMonth();
+                let year = date.getFullYear();
+
+                let currentDate = day+'-'+month+'-'+year;
+                const xJadwalPatroli = cellInfo.data.JamJadwal.split(":");
+                const xToleransi = cellInfo.data.Toleransi.split(":");
+                const xJamAktual = cellInfo.data.JamAktual.split(":");
+
+                // console.log(currentDate + ' ' +xJadwalPatroli);
+
+                const JadwalPatroli = new Date(+year,+month,+day,+xJadwalPatroli[0],+xJadwalPatroli[1],+xJadwalPatroli[2]);
+                const Toleransi =  new Date(+year,+month,+day,+xToleransi[0],+xToleransi[1],+xToleransi[2]);
+                const JamAktual = new Date(+year,+month,+day,+xJamAktual[0],+xJamAktual[1],+xJamAktual[2]);
+
+                JadwalPatroli.setMinutes(JadwalPatroli.getMinutes() + xToleransi[1]);
+
+                var fixJadwal = new Date(JadwalPatroli);
+
+                // console.log(JadwalPatroli)
+
+                // cellInfo.cellElement.css("backgroundColor", "red");
+
+                if (JamAktual > fixJadwal) {
+                  cellInfo.cellElement.css("backgroundColor", "red");
+                  cellInfo.cellElement.css("color", "white");
+                }
+
+
+                // console.log(fixJadwal)
+                // console.log(JadwalPatroli);
               }
-            },
+            }
         });
 
         // add dx-toolbar-after
