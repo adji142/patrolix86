@@ -50,7 +50,7 @@
 			$SQL2 = "
 				SELECT 
 					a.LocationID,
-					(TIMESTAMPDIFF(MINUTE, d.MulaiBekerja, d.SelesaiBekerja) * COUNT(DISTINCT a.KodeCheckPoint)) / (d.IntervalPatroli * 60) JumlahRencanaPatroli,
+					COALESCE((TIMESTAMPDIFF(MINUTE, d.MulaiBekerja, d.SelesaiBekerja) * COUNT(DISTINCT a.KodeCheckPoint)) / (d.IntervalPatroli * 60),0) JumlahRencanaPatroli,
 					COUNT(b.id) JumlahPatroliAktual
 				FROM tcheckpoint a
 				LEFT JOIN patroli b on a.KodeCheckPoint = b.KodeCheckPoint AND a.LocationID = b.LocationID AND a.RecordOwnerID = b.RecordOwnerID 
