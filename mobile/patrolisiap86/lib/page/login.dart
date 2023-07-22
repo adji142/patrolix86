@@ -390,8 +390,9 @@ class _LoginMobilePotraitState extends State<LoginMobilePotrait> {
                       this.widget.sess!.LocationID =int.parse(th["LocationID"].toString());
                       this.widget.sess!.shift = th["Shift"];
                       this.widget.sess!.jadwalShift = th["JadwalShift"];
+                      this.widget.sess!.isGantiHari = int.parse(th["isGantiHari"]);
 
-                      var xShared = th["unique_id"] +"|" +th["NamaUser"] +"|" +th["username"] +"|" +th["RecordOwnerID"] +"|" +th["LocationID"] +"|" +th["Shift"];
+                      var xShared = th["unique_id"] +"|" +th["NamaUser"] +"|" +th["username"] +"|" +th["RecordOwnerID"] +"|" +th["LocationID"] +"|" +th["Shift"]+"|"+th["isGantiHari"].toString();
 
                       SharedPreference().setString("accountInfo", xShared);
 

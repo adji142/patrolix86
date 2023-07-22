@@ -396,6 +396,7 @@ class Auth extends CI_Controller {
 					'username'		=>'',
 					'unique_id'		=>'',
 					'Shift'			=>'',
+					'isGantiHari'	=> 0,
 					'JadwalShift'	=> array()
 				);
 
@@ -444,6 +445,12 @@ class Auth extends CI_Controller {
 			$data['NamaUser'] = $oUser->row()->nama;
 			if ($oSecurity->num_rows() > 0) {
 				$data['Shift'] = $oSecurity->row()->Shift;
+
+				foreach ($oLokasi->result() as $key) {
+					if ($key->id == $oSecurity->row()->Shift) {
+						$data['isGantiHari'] = $key->GantiHari;
+					}
+				}
 			}
 			$data['JadwalShift'] = $oLokasi->result();
 
