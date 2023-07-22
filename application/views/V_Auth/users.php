@@ -2,6 +2,7 @@
     require_once(APPPATH."views/parts/Header.php");
     require_once(APPPATH."views/parts/Sidebar.php");
     $active = 'dashboard';
+    // echo $this->session->userdata('RecordOwnerID');
 ?>
 <style type="text/css">
   .select2-container {
@@ -149,9 +150,9 @@
           // $('#roles').select2({
           //   width : 'resolve'
           // });
-
+          var RecordOwnerID = "<?php echo $this->session->userdata('RecordOwnerID') ?>";
           var kriteria = '';
-          var skrip = '';
+          var skrip = " a.RecordOwnerID = '" + RecordOwnerID+"' ";
           var userid = '';
           var roleid = $('#fil_roles').val();
 
@@ -167,7 +168,7 @@
         });
         $('#filter_').click(function () {
           var kriteria = '';
-          var skrip = '';
+          var skrip = " a.RecordOwnerID = '" + RecordOwnerID+"' ";
           var userid = '';
           var roleid = $('#fil_roles').val();
 

@@ -1,5 +1,5 @@
 class session {
-  String server = ""; // development
+  String server = "http://patroli.aissystem.org/"; // development
   int idUser = -1;
   String KodeUser = "";
   String NamaUser = "";

@@ -30,7 +30,7 @@ class _LoginMobilePotraitState extends State<LoginMobilePotrait> {
 
   @override
   void initState() {
-    _Server.text = "http://patroli.aissystem.org/";
+    // _Server.text = "http://patroli.aissystem.org/";
     super.initState();
   }
 
@@ -93,92 +93,92 @@ class _LoginMobilePotraitState extends State<LoginMobilePotrait> {
                   ),
                 ),
               )),
-          Align(
-              alignment: Alignment.topLeft,
-              child: Padding(
-                  padding: EdgeInsets.only(
-                      left: this.widget.sess!.hight * 5,
-                      top: this.widget.sess!.hight * 2),
-                  child: FutureBuilder(
-                      future: SharedPreference().getString("Server"),
-                      builder: (context, snapshot) {
-                        _isReadonlyServer = snapshot.data != "" ? true : false;
-                        if (snapshot.hasData) {
-                          _Server.text = snapshot.data.toString();
-                          this.widget.sess!.server = snapshot.data.toString();
-                          // setState(() {});
-                        }
-                        return Container(
-                            width: this.widget.sess!.width * 90,
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: this.widget.sess!.width * 72,
-                                  child: Center(
-                                    child: Padding(
-                                      padding: EdgeInsets.only(
-                                          bottom: this.widget.sess!.hight * 2),
-                                      child: Focus(
-                                        child: TextField(
-                                          controller: _Server,
-                                          readOnly: _isReadonlyServer,
-                                          focusNode: _serverNode,
-                                          decoration: InputDecoration(
-                                              icon: Icon(Icons.wifi,
-                                                  size:
-                                                      this.widget.sess!.hight *
-                                                          4,
-                                                  color: Theme.of(context)
-                                                      .primaryColor),
-                                              labelText: "Server",
-                                              labelStyle: TextStyle(
-                                                  fontSize:
-                                                      this.widget.sess!.hight *
-                                                          2,
-                                                  color: Theme.of(context)
-                                                      .primaryColor)),
+          // Align(
+          //     alignment: Alignment.topLeft,
+          //     child: Padding(
+          //         padding: EdgeInsets.only(
+          //             left: this.widget.sess!.hight * 5,
+          //             top: this.widget.sess!.hight * 2),
+          //         child: FutureBuilder(
+          //             future: SharedPreference().getString("Server"),
+          //             builder: (context, snapshot) {
+          //               _isReadonlyServer = snapshot.data != "" ? true : false;
+          //               if (snapshot.hasData) {
+          //                 _Server.text = snapshot.data.toString();
+          //                 this.widget.sess!.server = snapshot.data.toString();
+          //                 // setState(() {});
+          //               }
+          //               return Container(
+          //                   width: this.widget.sess!.width * 90,
+          //                   child: Row(
+          //                     children: [
+          //                       Container(
+          //                         width: this.widget.sess!.width * 72,
+          //                         child: Center(
+          //                           child: Padding(
+          //                             padding: EdgeInsets.only(
+          //                                 bottom: this.widget.sess!.hight * 2),
+          //                             child: Focus(
+          //                               child: TextField(
+          //                                 controller: _Server,
+          //                                 readOnly: _isReadonlyServer,
+          //                                 focusNode: _serverNode,
+          //                                 decoration: InputDecoration(
+          //                                     icon: Icon(Icons.wifi,
+          //                                         size:
+          //                                             this.widget.sess!.hight *
+          //                                                 4,
+          //                                         color: Theme.of(context)
+          //                                             .primaryColor),
+          //                                     labelText: "Server",
+          //                                     labelStyle: TextStyle(
+          //                                         fontSize:
+          //                                             this.widget.sess!.hight *
+          //                                                 2,
+          //                                         color: Theme.of(context)
+          //                                             .primaryColor)),
 
-                                          // onTap: () {
-                                          //   _ratio = 3.5;
-                                          // },
-                                          // onSubmitted: (_) {
-                                          //   _ratio = 2;
-                                          // },
-                                        ),
-                                        onFocusChange: (value) {
-                                          if (!value) {
-                                            SharedPreference().setString(
-                                                "Server", _Server.text);
-                                            this.widget.sess!.server =
-                                                _Server.text;
-                                            // print("Enable");
-                                            setState(() {});
-                                          }
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                GestureDetector(
-                                  child: Text(
-                                    "Ganti",
-                                    style: TextStyle(
-                                        color: Theme.of(context).primaryColor,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: "Montserrat",
-                                        fontSize: this.widget.sess!.hight * 2),
-                                  ),
-                                  onTap: () async {
-                                    await SharedPreference()
-                                        .removeKey("Server");
-                                    this.widget.sess!.server = "";
-                                    // print("Enable");
-                                    setState(() {});
-                                  },
-                                )
-                              ],
-                            ));
-                      }))),
+          //                                 // onTap: () {
+          //                                 //   _ratio = 3.5;
+          //                                 // },
+          //                                 // onSubmitted: (_) {
+          //                                 //   _ratio = 2;
+          //                                 // },
+          //                               ),
+          //                               onFocusChange: (value) {
+          //                                 if (!value) {
+          //                                   SharedPreference().setString(
+          //                                       "Server", _Server.text);
+          //                                   this.widget.sess!.server =
+          //                                       _Server.text;
+          //                                   // print("Enable");
+          //                                   setState(() {});
+          //                                 }
+          //                               },
+          //                             ),
+          //                           ),
+          //                         ),
+          //                       ),
+          //                       GestureDetector(
+          //                         child: Text(
+          //                           "Ganti",
+          //                           style: TextStyle(
+          //                               color: Theme.of(context).primaryColor,
+          //                               fontWeight: FontWeight.bold,
+          //                               fontFamily: "Montserrat",
+          //                               fontSize: this.widget.sess!.hight * 2),
+          //                         ),
+          //                         onTap: () async {
+          //                           await SharedPreference()
+          //                               .removeKey("Server");
+          //                           this.widget.sess!.server = "";
+          //                           // print("Enable");
+          //                           setState(() {});
+          //                         },
+          //                       )
+          //                     ],
+          //                   ));
+          //             }))),
           Align(
               alignment: Alignment.topLeft,
               child: Padding(

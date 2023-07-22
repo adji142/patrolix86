@@ -329,6 +329,11 @@
                     allowEditing:false
                 },
                 {
+                    dataField: "NamaShift",
+                    caption: "Shift",
+                    allowEditing:false
+                },
+                {
                     dataField: "NamaArea",
                     caption: "Nama Area",
                     allowEditing:false

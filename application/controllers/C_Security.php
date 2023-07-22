@@ -21,9 +21,11 @@
 			$SQL = "
 				SELECT 
 					a.*,
-					b.NamaArea
+					b.NamaArea,
+					c.NamaShift
 				FROM tsecurity a
 				LEFT JOIN tlokasipatroli b on a.LocationID = b.id
+				LEFT JOIN tshift c on c.RecordOwnerID = a.RecordOwnerID AND c.LocationID = b.id AND c.id = a.Shift
 				WHERE a.RecordOwnerID = '".$RecordOwnerID."'
 			";
 

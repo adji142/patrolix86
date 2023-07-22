@@ -121,13 +121,13 @@ class _FormCheckInState extends State<FormCheckIn> {
 
         if(mulai.isNotEmpty){
 
-          DateTime jamMulai = DateTime.utc(now.year, now.month, now.day, int.parse(mulai[0]), int.parse(mulai[1]), int.parse(mulai[0].split(".")[0]));
-          DateTime jamSelesai = DateTime.utc(now.year, now.month, now.day, int.parse(selesai[0]), int.parse(selesai[1]), int.parse(selesai[0].split(".")[0]));
+          DateTime jamMulai = DateTime(now.year, now.month, now.day, int.parse(mulai[0]), int.parse(mulai[1]), int.parse(mulai[0].split(".")[0]));
+          DateTime jamSelesai = DateTime(now.year, now.month, now.day, int.parse(selesai[0]), int.parse(selesai[1]), int.parse(selesai[0].split(".")[0]));
           
           // print(jamMulai);
 
-          if(jamMulai.isAfter(now) && now.isBefore(jamSelesai)){
-            xShift = this.widget.sess.jadwalShift[i]["NamaShift"].toString();
+          if(now.isAfter(jamMulai.toLocal()) && now.isBefore(jamSelesai.toLocal())){
+            xShift = this.widget.sess.jadwalShift[i]["NamaShift"].toString().toUpperCase();
             shift = int.parse(this.widget.sess.jadwalShift[i]["id"]);
           }
 

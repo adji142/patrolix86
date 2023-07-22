@@ -72,18 +72,14 @@
                 </select>
               </div>
 
+              <div class="col-md-3 col-sm-12  form-group">
+                <button class="btn btn-success" id="btSearch">Proses</button>
+              </div>
+
               <div class="col-md-12 col-sm-12  form-group">
                 <div class="dx-viewport demo-container">
                   <div id="data-grid-demo">
                     <div id="gridContainer">
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-12 col-sm-12  form-group">
-                <div class="dx-viewport demo-container">
-                  <div id="data-grid-demo">
-                    <div id="gridContainer_detail">
                     </div>
                   </div>
                 </div>
