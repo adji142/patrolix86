@@ -64,6 +64,21 @@
 				'RecordOwnerID' => $RecordOwnerID,
 			);
 
+			if ($formtype == "delete") {
+				$oParam = array(
+					'KodeCheckPoint' 	=> $KodeCheckPoint,
+					'RecordOwnerID'		=> $RecordOwnerID
+				);
+
+				$count = $this->ModelsExecuteMaster->FindData($oParam, 'tcheckpoint')->num_rows();
+
+				if ($count > 0) {
+					$data['success'] = false;
+					$data['message'] = "Checkpoint sudah dipakai";
+					goto jump;
+				}
+			}
+
 			$rs;
 			$errormessage = '';
 			if ($formtype == 'add') {
@@ -99,6 +114,7 @@
 			else{
 				$data['message'] = "Invalid Form Type";
 			}
+			jump:
 			echo json_encode($data);
 		}
 		public function generateQRCode()

@@ -17,15 +17,19 @@
 			$NIK = $this->input->post('NIK');
 			$RecordOwnerID = $this->input->post('RecordOwnerID');
 			$LocationID = $this->input->post('LocationID');
+			$Status = $this->input->post('Status');
 			
 			$SQL = "
 				SELECT 
 					a.*,
 					b.NamaArea,
-					c.NamaShift
+					COALESCE(d1.NamaShift, e.Nama) NamaShift
 				FROM tsecurity a
 				LEFT JOIN tlokasipatroli b on a.LocationID = b.id
 				LEFT JOIN tshift c on c.RecordOwnerID = a.RecordOwnerID AND c.LocationID = b.id AND c.id = a.Shift
+				LEFT JOIN tjadwal d on a.NIK = d.NIK and date(now()) = d.Tanggal
+				LEFT JOIN tshift d1 on d.Jadwal = d1.id AND d.RecordOwnerID = d1.RecordOwnerID 
+				LEFT JOIN tstatuskehadiran e on d.StatusKehadiran = e.id
 				WHERE a.RecordOwnerID = '".$RecordOwnerID."'
 			";
 
@@ -35,6 +39,10 @@
 
 			if ($LocationID != "") {
 				$SQL .= " AND a.LocationID = '".$LocationID."' ";	
+			}
+
+			if ($Status != "") {
+				$SQL .= " AND a.Status = '".$Status."' ";	
 			}
 
 			$rs = $this->db->query($SQL);
@@ -69,6 +77,34 @@
 				'tempEncrypt' => $this->encryption->encrypt($NIK),
 				'Shift' => $Shift
 			);
+
+			if ($formtype == "delete") {
+				$oParam = array(
+					'KodeKaryawan' 	=> $NIK,
+					'RecordOwnerID'	=> $RecordOwnerID
+				);
+
+				$count = $this->ModelsExecuteMaster->FindData($oParam, 'patroli')->num_rows();
+
+				if ($count > 0) {
+					$data['success'] = false;
+					$data['message'] = "Data Security sudah Pernah melakukan patroli";
+					goto jump;
+				}
+
+				$oParam = array(
+					'NIK' 			=> $NIK,
+					'RecordOwnerID'	=> $RecordOwnerID
+				);
+
+				$count = $this->ModelsExecuteMaster->FindData($oParam, 'tjadwal')->num_rows();
+
+				if ($count > 0) {
+					$data['success'] = false;
+					$data['message'] = "Security masih ada jadwal";
+					goto jump;
+				}
+			}
 
 			$rs;
 			$errormessage = '';

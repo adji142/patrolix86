@@ -403,6 +403,7 @@ class Auth extends CI_Controller {
 		$RecordOwnerID = $this->input->post('RecordOwnerID');
 		$Username = $this->input->post('username');
 		$password = $this->input->post('password');
+		$LoginDate = $this->input->post('LoginDate');
 
 		// Verifikasi Partner ID
 
@@ -444,13 +445,47 @@ class Auth extends CI_Controller {
 			$data['LocationID'] = $oUser->row()->AreaUser;
 			$data['NamaUser'] = $oUser->row()->nama;
 			if ($oSecurity->num_rows() > 0) {
-				$data['Shift'] = $oSecurity->row()->Shift;
+				// Shift
+
+				$LoginDate = strtotime($LoginDate);
+				$Tanggal = date("y-m-d", $LoginDate);
+
+				$defTime = strtotime('00:00:01');
+				$Jam = strtotime(date("h:m:s", $LoginDate));
+
+				// var_dump($Jam);
 
 				foreach ($oLokasi->result() as $key) {
-					if ($key->id == $oSecurity->row()->Shift) {
-						$data['isGantiHari'] = $key->GantiHari;
+					if ($key->GantiHari == "1") {
+						$mulai = strtotime($key->MulaiBekerja);
+						$selesai = strtotime($key->SelesaiBekerja);
+
+						if ($defTime < $Jam && $Jam < $selesai ) {
+							// echo "Ganti Hari";
+							$data['Shift'] = $key->id;
+							$data['isGantiHari'] = $key->GantiHari;
+
+							$Tanggal = date_add($LoginDate, date_interval_create_from_date_string("-1 days"));
+						}
+						else{
+							$data['Shift'] = $key->id;
+							$data['isGantiHari'] = $key->GantiHari;
+						}
 					}
 				}
+
+				$oWhere = array(
+					'TglAwal'		=> $Tanggal,
+					'TglAkhir'		=> $Tanggal,
+					'RecordOwnerID'	=> $oUser->row()->RecordOwnerID,
+					'NIK'			=> $oUser->row()->username
+				);
+
+				// foreach ($oLokasi->result() as $key) {
+				// 	if ($key->id == $oSecurity->row()->Shift) {
+				// 		$data['isGantiHari'] = $key->GantiHari;
+				// 	}
+				// }
 			}
 			$data['JadwalShift'] = $oLokasi->result();
 

@@ -84,6 +84,7 @@ $route['lokasi'] = 'Home/lokasipatroli';
 $route['checkpoint'] = 'Home/checkpoint';
 $route['security'] = 'Home/security';
 $route['shift/(:num)'] = 'Home/shift/$1';
+$route['jadwal/(:any)'] = 'Home/jadwal/$1';
 // Report
 $route['review'] = 'Home/readReview';
 $route['map/(:num)'] = 'Home/loadmap/$1';

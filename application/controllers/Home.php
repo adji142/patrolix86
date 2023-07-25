@@ -32,7 +32,35 @@ class home extends CI_Controller {
 	}
 	public function test()
 	{
-		echo $this->GlobalVar->systemInfo();
+		// echo $this->GlobalVar->systemInfo();
+		$defTime = strtotime('00:00:01');
+		$Jam = strtotime('01:44:05');
+		$TanggalDetail = getDate($Jam);
+
+		$oLokasi = $this->ModelsExecuteMaster->FindData(array('LocationID'=>'1','RecordOwnerID'=> 'CL0001'), 'tshift');
+		$tempDate = '2023-07-26';
+
+		// var_dump(getDate($Tanggal));
+
+		foreach ($oLokasi->result() as $key) {
+
+			if ($key->GantiHari == "1") {
+				$mulai = strtotime($key->MulaiBekerja);
+				$selesai = strtotime($key->SelesaiBekerja);
+
+				if ($defTime < $Jam && $Jam < $selesai ) {
+					echo "Ganti Hari";
+				}
+			}
+
+			// if ($Jam > $defTime && $Jam < $selesai && $selesai < $defTime) {
+			// 	# code...
+			// 	echo 'Shift: '.$key->NamaShift.' Standar : '.$defTime. ' Mulai: '.$mulai. " Selesai: ".$selesai."<BR>";
+			// }
+
+			// echo $Tanggal > $mulai;
+			// echo $Tanggal < $selesai;
+		}
 	}
 	public function index()
 	{
@@ -163,6 +191,12 @@ class home extends CI_Controller {
 		$data['LocationID'] = $value;
 		
 		$this->load->view('V_Master/shift',$data);	
+	}
+	public function jadwal($value)
+	{
+		$data['NIK'] = $value;
+		
+		$this->load->view('V_Master/jadwal',$data);	
 	}
 
 	// Report

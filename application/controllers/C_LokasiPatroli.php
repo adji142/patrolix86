@@ -65,6 +65,29 @@
 				'Toleransi'	=> $Toleransi
 			);
 
+			if ($formtype == "delete") {
+				$oParam = array(
+					'LocationID' 	=> $id,
+					'RecordOwnerID'	=> $RecordOwnerID
+				);
+
+				$count = $this->ModelsExecuteMaster->FindData($oParam, 'tcheckpoint')->num_rows();
+
+				if ($count > 0) {
+					$data['success'] = false;
+					$data['message'] = "Data Lokasi sudah dipakai di Data Checkpoint";
+					goto jump;
+				}
+
+				$count = $this->ModelsExecuteMaster->FindData($oParam, 'tsecurity')->num_rows();
+
+				if ($count > 0) {
+					$data['success'] = false;
+					$data['message'] = "Data Lokasi sudah dipakai di Data Security";
+					goto jump;
+				}
+			}
+
 			$rs;
 			$errormessage = '';
 			if ($formtype == 'add') {

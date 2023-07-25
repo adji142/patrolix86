@@ -18,6 +18,7 @@ class Mod_Auth {
   Future<Map> Login() async{
     var url = Uri.parse(sess!.server+"APILogin");
     final response = await http.post(url,body: this.Parameter);
+    print(this.Parameter);
     return json.decode(response.body);
   }
 

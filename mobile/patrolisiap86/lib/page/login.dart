@@ -370,6 +370,7 @@ class _LoginMobilePotraitState extends State<LoginMobilePotrait> {
                       "RecordOwnerID": _PartnerCode.text,
                       "username": _UserName.text,
                       "password": _Password.text,
+                      "LoginDate" : DateTime.now().toString()
                     };
                   }
 

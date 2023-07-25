@@ -123,7 +123,7 @@ class NotificationController {
               second: 10,
               timeZone: localTimeZone,
               preciseAlarm: true,
-              repeats: true
+              repeats: false
             )
           );
   }
@@ -206,7 +206,7 @@ class _MainState extends State<MyApp> {
             sess.LocationID = int.parse(xData[4]);
             sess.shift = xData[5].toString();
             sess.isGantiHari = int.parse(xData[6]);
-            sess.server = _Server;
+            // sess.server = _Server;
 
             // print(SharedPreference().getString("Server"));
 
