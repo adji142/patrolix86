@@ -447,11 +447,11 @@ class Auth extends CI_Controller {
 			if ($oSecurity->num_rows() > 0) {
 				// Shift
 
-				$LoginDate = strtotime($LoginDate);
-				$Tanggal = date("y-m-d", $LoginDate);
+				$xLoginDate = strtotime($LoginDate);
+				$Tanggal = date("y-m-d", $xLoginDate);
 
 				$defTime = strtotime('00:00:01');
-				$Jam = strtotime(date("h:m:s", $LoginDate));
+				$Jam = strtotime(date("h:m:s", $xLoginDate));
 
 				// var_dump($Jam);
 
@@ -465,7 +465,7 @@ class Auth extends CI_Controller {
 							$data['Shift'] = $key->id;
 							$data['isGantiHari'] = $key->GantiHari;
 
-							$Tanggal = date_add($LoginDate, date_interval_create_from_date_string("-1 days"));
+							$Tanggal = date("y-m-d", strtotime($LoginDate.' -1 Days'));
 						}
 						else{
 							$data['Shift'] = $key->id;
