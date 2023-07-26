@@ -109,10 +109,10 @@
 				$xSQL = "
 					SELECT a.* FROM patroli a
 					LEFT JOIN tshift b on a.shift = b.id and a.LocationID = b.LocationID and a.RecordOwnerID = b.RecordOwnerID
-					WHERE RecordOwnerID = '".$RecordOwnerID."'
-					AND LocationID = '".$LocationID."'
-					AND KodeCheckPoint = '".$KodeCheckPoint."'
-					AND KodeKaryawan = '".$KodeKaryawan."'
+					WHERE a.RecordOwnerID = '".$RecordOwnerID."'
+					AND a.LocationID = '".$LocationID."'
+					AND a.KodeCheckPoint = '".$KodeCheckPoint."'
+					AND a.KodeKaryawan = '".$KodeKaryawan."'
 					AND DATE(CASE WHEN (SELECT x.GantiHari FROM tshift x where x.id = a.Shift and x.RecordOwnerID = a.RecordOwnerID AND x.LocationID = a.LocationID) = 1 THEN DATE_ADD(a.TanggalPatroli, INTERVAL -1 DAY) ELSE a.TanggalPatroli END) = DATE('".$TanggalPatroli."') 
 				";
 
