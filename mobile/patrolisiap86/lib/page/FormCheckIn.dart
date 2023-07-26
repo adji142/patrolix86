@@ -121,7 +121,7 @@ class _FormCheckInState extends State<FormCheckIn> {
 
         if(mulai.isNotEmpty){
 
-          DateTime jamMulai = DateTime(now.year, now.month, now.day, int.parse(mulai[0]), int.parse(mulai[1]), int.parse(mulai[0].split(".")[0]));
+          DateTime jamMulai = DateTime(now.year, now.month, this.widget.sess.isGantiHari == 1 ? now.day -1 : now.day, int.parse(mulai[0]), int.parse(mulai[1]), int.parse(mulai[0].split(".")[0]));
           DateTime jamSelesai = DateTime.utc(now.year, now.month, this.widget.sess.isGantiHari == 1 ? now.day +1 : now.day , int.parse(selesai[0]), int.parse(selesai[1]), int.parse(selesai[0].split(".")[0]));
           
           // print(jamMulai);

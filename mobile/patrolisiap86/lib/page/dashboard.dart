@@ -379,11 +379,12 @@ class _dashboardState extends State<Dashboard> {
                               for (var i = 0; i < this.widget.sess!.jadwalShift.length; i++) {
                                 var mulai = this.widget.sess!.jadwalShift[i]["MulaiBekerja"].toString().split(":");
                                 var selesai = this.widget.sess!.jadwalShift[i]["SelesaiBekerja"].toString().split(":");
-                                var isGantiHari = this.widget.sess!.jadwalShift[i]["GantiHari"];
+                                // var isGantiHari = this.widget.sess!.jadwalShift[i]["GantiHari"];
+                                var isGantiHari = this.widget.sess!.isGantiHari;
                                 if(mulai.isNotEmpty){
 
-                                  DateTime jamMulai = DateTime(now.year, now.month, now.day, int.parse(mulai[0]), int.parse(mulai[1]), int.parse(mulai[0].split(".")[0]));
-                                  DateTime jamSelesai = DateTime.utc(now.year, now.month, int.parse(isGantiHari) == 1 ? now.day +1 : now.day , int.parse(selesai[0]), int.parse(selesai[1]), int.parse(selesai[0].split(".")[0]));
+                                  DateTime jamMulai = DateTime(now.year, now.month, isGantiHari == 1 ? now.day -1 : now.day, int.parse(mulai[0]), int.parse(mulai[1]), int.parse(mulai[0].split(".")[0]));
+                                  DateTime jamSelesai = DateTime.utc(now.year, now.month, isGantiHari == 1 ? now.day +1 : now.day , int.parse(selesai[0]), int.parse(selesai[1]), int.parse(selesai[0].split(".")[0]));
                                   
                                   // print(now.isAfter(jamMulai));
                                   // print(now.isBefore(jamSelesai));
@@ -397,10 +398,11 @@ class _dashboardState extends State<Dashboard> {
                                   //   shift = int.parse(this.widget.sess!.jadwalShift[i]["id"]);
                                   // }
                                   // print(isGantiHari);
-                                  // print(now.toString() + " > " + jamMulai.toString());
-                                  // print(now.isAfter(jamMulai.toLocal()));
+                                  print(now.toString() + " > " + jamMulai.toString());
+                                  print(now.toString() + " < " + jamSelesai.toString());
+                                  print(now.toLocal().isAfter(jamMulai.toLocal()));
                                   
-                                  if(now.isAfter(jamMulai.toLocal()) && now.isBefore(jamSelesai.toLocal())){
+                                  if(now.toLocal().isAfter(jamMulai.toLocal()) && now.toLocal().isBefore(jamSelesai.toLocal())){
                                     xShift = this.widget.sess!.jadwalShift[i]["NamaShift"].toString().toUpperCase();
                                     shift = int.parse(this.widget.sess!.jadwalShift[i]["id"]);
                                   }

@@ -455,6 +455,7 @@ class Auth extends CI_Controller {
 
 				// var_dump($Jam);
 
+				$data['isGantiHari'] = "0";
 				foreach ($oLokasi->result() as $key) {
 					if ($key->GantiHari == "1") {
 						$mulai = strtotime($key->MulaiBekerja);
@@ -469,7 +470,6 @@ class Auth extends CI_Controller {
 						}
 						else{
 							$data['Shift'] = $key->id;
-							$data['isGantiHari'] = $key->GantiHari;
 						}
 					}
 				}
