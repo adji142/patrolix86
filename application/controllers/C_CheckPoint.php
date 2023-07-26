@@ -70,7 +70,7 @@
 					'RecordOwnerID'		=> $RecordOwnerID
 				);
 
-				$count = $this->ModelsExecuteMaster->FindData($oParam, 'tcheckpoint')->num_rows();
+				$count = $this->ModelsExecuteMaster->FindData($oParam, 'patroli')->num_rows();
 
 				if ($count > 0) {
 					$data['success'] = false;
