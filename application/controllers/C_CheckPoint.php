@@ -139,7 +139,7 @@
 				delete_files($baseDir.$RecordOwnerID.'/');
 				// var_dump($RecordOwnerID);
 				foreach ($rs as $key) {
-					$fileName = $baseDir.$RecordOwnerID.'/'.$key->KodeCheckPoint.'-'.$key->NamaCheckPoint.'.png';
+					$fileName = $baseDir.$RecordOwnerID.'/'.$key->KodeCheckPoint.'-'.str_replace("/", " ", $key->NamaCheckPoint).'.png';
 					$params['data'] = $key->KodeCheckPoint;
 					$params['level'] = 'H';
 					$params['size'] = 10;

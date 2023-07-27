@@ -205,7 +205,7 @@
       $.ajax({
         type: "post",
         url: "<?=base_url()?>C_Jadwal/Read",
-        data: {'KodeCheckPoint':'', 'RecordOwnerID': RecordOwnerID,'LocationID':$('#KodeLokasi').val()},
+        data: {'NIK':$('#NIK').val(), 'RecordOwnerID': RecordOwnerID,'LocationID':$('#KodeLokasi').val(),'TglAwal': $('#FromDate').val(), 'TglAkhir':$('#ToDate').val()},
         dataType: "json",
         success: function (response) {
           bindGrid(response.data);
