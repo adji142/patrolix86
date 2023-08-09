@@ -368,7 +368,8 @@ class _dashboardState extends State<Dashboard> {
                         child: StreamBuilder(
                           stream: Stream.periodic(Duration(seconds: 1)),
                           builder: (context, snapshot){
-                            final DateTime now = DateTime.now();
+                            // final DateTime now = DateTime(2023,07,27,09,59,00).toLocal();
+                            final DateTime now = DateTime.now().toLocal();
                             final String temp = DateFormat('jm').format(now).trim();
                             final ampm = temp.substring(temp.length - 2, temp.length);
 
@@ -379,12 +380,25 @@ class _dashboardState extends State<Dashboard> {
                               for (var i = 0; i < this.widget.sess!.jadwalShift.length; i++) {
                                 var mulai = this.widget.sess!.jadwalShift[i]["MulaiBekerja"].toString().split(":");
                                 var selesai = this.widget.sess!.jadwalShift[i]["SelesaiBekerja"].toString().split(":");
-                                // var isGantiHari = this.widget.sess!.jadwalShift[i]["GantiHari"];
-                                var isGantiHari = this.widget.sess!.isGantiHari;
+                                var isGantiHari = int.parse(this.widget.sess!.jadwalShift[i]["GantiHari"]);
+                                // var isGantiHari = this.widget.sess!.isGantiHari;
                                 if(mulai.isNotEmpty){
 
-                                  DateTime jamMulai = DateTime(now.year, now.month, isGantiHari == 1 ? now.day -1 : now.day, int.parse(mulai[0]), int.parse(mulai[1]), int.parse(mulai[0].split(".")[0]));
-                                  DateTime jamSelesai = DateTime.utc(now.year, now.month, isGantiHari == 1 ? now.day +1 : now.day , int.parse(selesai[0]), int.parse(selesai[1]), int.parse(selesai[0].split(".")[0]));
+                                  DateTime defTime = DateTime(now.year, now.month, now.day, 0,0,1).toLocal();
+
+                                  // print(defTime);
+                                  DateTime jamMulai = DateTime(now.year, now.month, now.day, int.parse(mulai[0]), int.parse(mulai[1]), int.parse(mulai[0].split(".")[0]));
+                                  // DateTime jamSelesai = DateTime.utc(now.year, now.month, isGantiHari == 1 ? now.day +1 : now.day , int.parse(selesai[0]), int.parse(selesai[1]), int.parse(selesai[0].split(".")[0]));
+                                  DateTime jamSelesai = DateTime(now.year, now.month, now.day , int.parse(selesai[0]), int.parse(selesai[1]), int.parse(selesai[0].split(".")[0]));
+
+                                  // print(defTime.isAfter(now));
+                                  if (isGantiHari == 1 && now.isAfter(defTime) && now.isBefore(jamSelesai)){
+                                    print("IN");
+                                    jamMulai = DateTime(now.year, now.month, now.day -1, int.parse(mulai[0]), int.parse(mulai[1]), int.parse(mulai[0].split(".")[0]));
+                                  }
+                                  else{
+                                    jamSelesai = DateTime(now.year, now.month, now.day +1 , int.parse(selesai[0]), int.parse(selesai[1]), int.parse(selesai[0].split(".")[0]));
+                                  }
                                   
                                   // print(now.isAfter(jamMulai));
                                   // print(now.isBefore(jamSelesai));
@@ -398,9 +412,9 @@ class _dashboardState extends State<Dashboard> {
                                   //   shift = int.parse(this.widget.sess!.jadwalShift[i]["id"]);
                                   // }
                                   // print(isGantiHari);
-                                  print(now.toString() + " > " + jamMulai.toString());
-                                  print(now.toString() + " < " + jamSelesai.toString());
-                                  print(now.toLocal().isAfter(jamMulai.toLocal()));
+                                  // print("Shift : " + this.widget.sess!.jadwalShift[i]["NamaShift"].toString() + now.toString() + " > " + jamMulai.toString()+" = " + now.toLocal().isAfter(jamMulai.toLocal()).toString());
+                                  // print("Shift : " + this.widget.sess!.jadwalShift[i]["NamaShift"].toString() + now.toString() + " < " + jamSelesai.toString()+" = " + now.toLocal().isBefore(jamSelesai.toLocal()).toString());
+                                  // print(now.toLocal().isAfter(jamMulai.toLocal()));
                                   
                                   if(now.toLocal().isAfter(jamMulai.toLocal()) && now.toLocal().isBefore(jamSelesai.toLocal())){
                                     xShift = this.widget.sess!.jadwalShift[i]["NamaShift"].toString().toUpperCase();
@@ -421,7 +435,7 @@ class _dashboardState extends State<Dashboard> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                   SizedBox(height: 1),
-                                  Text(DateFormat("hh:mm:ss").format(now),
+                                  Text(DateFormat("HH:mm:ss").format(now),
                                     style: TextStyle(
                                       fontSize: this.widget.sess!.width * 5.5,
                                       color: Colors.red,
