@@ -1,4 +1,4 @@
-import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:mobilepatrol/general/dialog.dart';
 import 'package:mobilepatrol/general/session.dart';
@@ -396,6 +396,29 @@ class _LoginMobilePotraitState extends State<LoginMobilePotrait> {
                       var xShared = th["unique_id"] +"|" +th["NamaUser"] +"|" +th["username"] +"|" +th["RecordOwnerID"] +"|" +th["LocationID"] +"|" +th["Shift"]+"|"+th["isGantiHari"].toString();
 
                       SharedPreference().setString("accountInfo", xShared);
+
+                      // Update Token
+
+                      var message = FirebaseMessaging.instance;
+
+                      message.getToken().then((value) {
+                        Map param(){
+                          return{
+                            'username'      : _UserName.text,
+                            'RecordOwnerID' : _PartnerCode.text,
+                            'FireBaseToken' : value.toString()
+                          };
+                        }
+
+                        var updateToken = Mod_Auth(this.widget.sess, Parameter: param()).UpdateToken().then((value) {
+                          if(value['success'].toString() =='true'){
+                            print("Update Token Successful");
+                          }
+                          else{
+                            print(value['message']);
+                          }
+                        });
+                      });
 
                       Navigator.of(context, rootNavigator: true).pop();
                       // Navigator.of(context).pop();

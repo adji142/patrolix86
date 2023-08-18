@@ -39,4 +39,10 @@ class Mod_Auth {
     final response = await http.post(url,body: this.Parameter);
     return json.decode(response.body);
   }
+
+  Future<Map> UpdateToken() async{
+    var url = Uri.parse(sess!.server+"APIUpdateToken");
+    final response = await http.post(url,body: this.Parameter);
+    return json.decode(response.body);
+  }
 }

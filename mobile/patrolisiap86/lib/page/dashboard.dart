@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -8,18 +10,25 @@ import 'package:mobilepatrol/main.dart';
 import 'package:mobilepatrol/models/patroli.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:mobilepatrol/page/FormCheckIn.dart';
-import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:mobilepatrol/shared/sharedprefrence.dart';
 
 class Dashboard extends StatefulWidget {
   final session? sess;
-  final int ? interval;
+  final int? interval;
   Dashboard(this.sess, {this.interval});
 
   @override
   _dashboardState createState() => _dashboardState();
 }
 
+class PushNotification {
+  PushNotification({
+    this.title,
+    this.body,
+  });
+  String? title;
+  String? body;
+}
 
 class _dashboardState extends State<Dashboard> {
   DateTime? _tanggal;
@@ -33,7 +42,9 @@ class _dashboardState extends State<Dashboard> {
   String _scanBarcode = 'Unknown';
 
   final f = NumberFormat("##0");
-  static ReceivedAction? initialAction;
+
+  // Notifikasi
+  late final FirebaseMessaging _messaging;
   //Time Change
   //---------------------------------------------------------------------------
   DateTime? _timeChange(DateTime now) {
@@ -45,21 +56,48 @@ class _dashboardState extends State<Dashboard> {
     int shift = -1;
 
     // print(now.hour);
-    if(this.widget.sess!.jadwalShift.length > 0){
+    if (this.widget.sess!.jadwalShift.length > 0) {
       // print(this.widget.sess!.jadwalShift);
       for (var i = 0; i < this.widget.sess!.jadwalShift.length; i++) {
-        var mulai = this.widget.sess!.jadwalShift[i]["MulaiBekerja"].toString().split(":");
-        var selesai = this.widget.sess!.jadwalShift[i]["SelesaiBekerja"].toString().split(":");
+        var mulai = this
+            .widget
+            .sess!
+            .jadwalShift[i]["MulaiBekerja"]
+            .toString()
+            .split(":");
+        var selesai = this
+            .widget
+            .sess!
+            .jadwalShift[i]["SelesaiBekerja"]
+            .toString()
+            .split(":");
 
-        if(mulai.isNotEmpty){
+        if (mulai.isNotEmpty) {
+          DateTime jamMulai = DateTime.utc(
+              now.year,
+              now.month,
+              now.day,
+              int.parse(mulai[0]),
+              int.parse(mulai[1]),
+              int.parse(mulai[0].split(".")[0]));
+          DateTime jamSelesai = DateTime.utc(
+              now.year,
+              now.month,
+              this.widget.sess!.isGantiHari == 1 ? now.day + 1 : now.day,
+              int.parse(selesai[0]),
+              int.parse(selesai[1]),
+              int.parse(selesai[0].split(".")[0]));
 
-          DateTime jamMulai = DateTime.utc(now.year, now.month, now.day, int.parse(mulai[0]), int.parse(mulai[1]), int.parse(mulai[0].split(".")[0]));
-          DateTime jamSelesai = DateTime.utc(now.year, now.month, this.widget.sess!.isGantiHari == 1 ? now.day +1 : now.day , int.parse(selesai[0]), int.parse(selesai[1]), int.parse(selesai[0].split(".")[0]));
-          
           print(jamMulai);
 
-          if(now.isAfter(jamMulai.toLocal()) && now.isBefore(jamSelesai.toLocal())){
-            xShift = this.widget.sess!.jadwalShift[i]["NamaShift"].toString().toUpperCase();
+          if (now.isAfter(jamMulai.toLocal()) &&
+              now.isBefore(jamSelesai.toLocal())) {
+            xShift = this
+                .widget
+                .sess!
+                .jadwalShift[i]["NamaShift"]
+                .toString()
+                .toUpperCase();
             shift = int.parse(this.widget.sess!.jadwalShift[i]["id"]);
           }
 
@@ -124,28 +162,27 @@ class _dashboardState extends State<Dashboard> {
     return barcodeScanRes;
   }
 
-  void generateNotif(){
-    Map oParamLokasi(){
+  void generateNotif() {
+    Map oParamLokasi() {
       return {
-        'id' : this.widget.sess!.LocationID.toString(),
-        'RecordOwnerID':this.widget.sess!.RecordOwnerID,
+        'id': this.widget.sess!.LocationID.toString(),
+        'RecordOwnerID': this.widget.sess!.RecordOwnerID,
       };
     }
 
-    var x = Mod_Patroli(this.widget.sess, Parameter: oParamLokasi()).readLokasi().then((value) async {
+    var x = Mod_Patroli(this.widget.sess, Parameter: oParamLokasi())
+        .readLokasi()
+        .then((value) async {
       int interval = 0;
 
       // int.parse(value["data"][0]["IntervalPatroli"]) * 60;
-      if(value["data"][0]["IntervalType"] == "DAY"){
+      if (value["data"][0]["IntervalType"] == "DAY") {
         interval = int.parse(value["data"][0]["IntervalPatroli"]) * 1440;
-      }
-      else if(value["data"][0]["IntervalType"] == "HOUR"){
+      } else if (value["data"][0]["IntervalType"] == "HOUR") {
         interval = int.parse(value["data"][0]["IntervalPatroli"]) * 60;
-      }
-      else if(value["data"][0]["IntervalType"] == "MINUTE"){
+      } else if (value["data"][0]["IntervalType"] == "MINUTE") {
         interval = int.parse(value["data"][0]["IntervalPatroli"]);
       }
-      createNewNotification(interval,value["data"][0]["StartPatroli"], context);
     });
   }
 
@@ -153,96 +190,16 @@ class _dashboardState extends State<Dashboard> {
   void initState() {
     // Timer.periodic(Duration(seconds: 1), (Timer t) => _timeChange());
     // _fetchData();
-    generateNotif();
+    // generateNotif();
+    // checkForInitialMessage();
     super.initState();
   }
 
   @override
-  void dispose(){
+  void dispose() {
     super.dispose();
   }
-  static Future<bool> displayNotificationRationale(BuildContext context) async {
-    bool userAuthorized = false;
-    // BuildContext context = MyApp.navigatorKey.currentContext!;
-    await showDialog(
-        context: context,
-        builder: (BuildContext ctx) {
-          return AlertDialog(
-            title: Text('Get Notified!',
-                style: Theme.of(context).textTheme.titleLarge),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Image.asset(
-                        'assets/animated-bell.gif',
-                        height: MediaQuery.of(context).size.height * 0.3,
-                        fit: BoxFit.fitWidth,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                    'Izinkan aplikasi untuk memberi notifikasi!'),
-              ],
-            ),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(ctx).pop();
-                  },
-                  child: Text(
-                    'Deny',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge
-                        ?.copyWith(color: Colors.red),
-                  )),
-              TextButton(
-                  onPressed: () async {
-                    userAuthorized = true;
-                    Navigator.of(ctx).pop();
-                  },
-                  child: Text(
-                    'Allow',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge
-                        ?.copyWith(color: Colors.deepPurple),
-                  )),
-            ],
-          );
-        });
-    return userAuthorized &&
-        await AwesomeNotifications().requestPermissionToSendNotifications();
-  }
-  static Future<void> createNewNotification(int x, String StartPatroli, BuildContext context) async {
-    bool isAllowed = await AwesomeNotifications().isNotificationAllowed();
-    if (!isAllowed) isAllowed = await displayNotificationRationale(context);
-    if (!isAllowed) return;
-    String localTimeZone = await AwesomeNotifications().getLocalTimeZoneIdentifier();
-    // print(localTimeZone);
-    var listTime = StartPatroli.split(":");
-    await AwesomeNotifications().createNotification(
-        content: NotificationContent(
-            id: 123123123, // -1 is replaced by a random number
-            channelKey: 'alerts',
-            title: 'Informasi Patroli',
-            body: "Sudah Waktunya Patroli Lagi.!!!",
-            notificationLayout: NotificationLayout.Messaging,
-            payload: {'notificationId': '1234567890'}),
-            schedule: NotificationCalendar.fromDate(
-              // date: DateTime(DateTime.now().year,DateTime.now().month,DateTime.now().day,int.parse(listTime[0]),int.parse(listTime[1]), int.parse(listTime[2])).add(Duration(minutes: x == null ? 0 : x)),
-              date: DateTime.now().add(Duration(minutes: x == null ? 0 : x)),
-              repeats: true,
-              preciseAlarm: true,
-              allowWhileIdle: true
-            ),
-          );
-  }
+
   Widget build(BuildContext context) {
     Map oParam() {
       return {
@@ -267,16 +224,16 @@ class _dashboardState extends State<Dashboard> {
                     child: Text(
                       "Logout",
                       style: TextStyle(
-                        fontSize: this.widget.sess!.width * 4,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: "Arial"
-                      ),
+                          fontSize: this.widget.sess!.width * 4,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: "Arial"),
                     ),
-                    onTap: () async{
+                    onTap: () async {
                       // print("data tabed");
                       // await awesomeNotification;
                       SharedPreference().removeKey("accountInfo");
-                      Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => MyApp()));
+                      Navigator.pushReplacement(context,
+                          MaterialPageRoute(builder: (context) => MyApp()));
                     },
                   )
                 ],
@@ -331,9 +288,8 @@ class _dashboardState extends State<Dashboard> {
           children: [
             Padding(
               padding: EdgeInsets.only(
-                bottom: this.widget.sess!.width * 2,
-                top:this.widget.sess!.width * 2
-              ),
+                  bottom: this.widget.sess!.width * 2,
+                  top: this.widget.sess!.width * 2),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -366,96 +322,225 @@ class _dashboardState extends State<Dashboard> {
                       ),
                       child: Center(
                         child: StreamBuilder(
-                          stream: Stream.periodic(Duration(seconds: 1)),
-                          builder: (context, snapshot){
-                            // final DateTime now = DateTime(2023,07,27,09,59,00).toLocal();
-                            final DateTime now = DateTime.now().toLocal();
-                            final String temp = DateFormat('jm').format(now).trim();
-                            final ampm = temp.substring(temp.length - 2, temp.length);
+                            stream: Stream.periodic(Duration(seconds: 1)),
+                            builder: (context, snapshot) {
+                              // final DateTime now = DateTime(2023,07,27,09,59,00).toLocal();
+                              final DateTime now = DateTime.now().toLocal();
+                              final String temp =
+                                  DateFormat('jm').format(now).trim();
+                              final ampm =
+                                  temp.substring(temp.length - 2, temp.length);
 
-                            String xShift = "";
-                            int shift = -1;
-                            if(this.widget.sess!.jadwalShift.length > 0){
-                              // print(this.widget.sess!.jadwalShift);
-                              for (var i = 0; i < this.widget.sess!.jadwalShift.length; i++) {
-                                var mulai = this.widget.sess!.jadwalShift[i]["MulaiBekerja"].toString().split(":");
-                                var selesai = this.widget.sess!.jadwalShift[i]["SelesaiBekerja"].toString().split(":");
-                                var isGantiHari = int.parse(this.widget.sess!.jadwalShift[i]["GantiHari"]);
-                                // var isGantiHari = this.widget.sess!.isGantiHari;
-                                if(mulai.isNotEmpty){
+                              String xShift = "";
+                              int shift = -1;
+                              if (this.widget.sess!.jadwalShift.length > 0) {
+                                // print(this.widget.sess!.jadwalShift);
+                                for (var i = 0;
+                                    i < this.widget.sess!.jadwalShift.length;
+                                    i++) {
+                                  var mulai = this
+                                      .widget
+                                      .sess!
+                                      .jadwalShift[i]["MulaiBekerja"]
+                                      .toString()
+                                      .split(":");
+                                  var selesai = this
+                                      .widget
+                                      .sess!
+                                      .jadwalShift[i]["SelesaiBekerja"]
+                                      .toString()
+                                      .split(":");
+                                  var isGantiHari = int.parse(this
+                                      .widget
+                                      .sess!
+                                      .jadwalShift[i]["GantiHari"]);
+                                  // var isGantiHari = this.widget.sess!.isGantiHari;
+                                  if (mulai.isNotEmpty) {
+                                    DateTime defTime = DateTime(now.year,
+                                            now.month, now.day, 0, 0, 1)
+                                        .toLocal();
 
-                                  DateTime defTime = DateTime(now.year, now.month, now.day, 0,0,1).toLocal();
+                                    // print(defTime);
+                                    DateTime jamMulai = DateTime(
+                                        now.year,
+                                        now.month,
+                                        now.day,
+                                        int.parse(mulai[0]),
+                                        int.parse(mulai[1]),
+                                        int.parse(mulai[0].split(".")[0]));
+                                    // DateTime jamSelesai = DateTime.utc(now.year, now.month, isGantiHari == 1 ? now.day +1 : now.day , int.parse(selesai[0]), int.parse(selesai[1]), int.parse(selesai[0].split(".")[0]));
+                                    DateTime jamSelesai = DateTime(
+                                        now.year,
+                                        now.month,
+                                        now.day,
+                                        int.parse(selesai[0]),
+                                        int.parse(selesai[1]),
+                                        int.parse(selesai[0].split(".")[0]));
 
-                                  // print(defTime);
-                                  DateTime jamMulai = DateTime(now.year, now.month, now.day, int.parse(mulai[0]), int.parse(mulai[1]), int.parse(mulai[0].split(".")[0]));
-                                  // DateTime jamSelesai = DateTime.utc(now.year, now.month, isGantiHari == 1 ? now.day +1 : now.day , int.parse(selesai[0]), int.parse(selesai[1]), int.parse(selesai[0].split(".")[0]));
-                                  DateTime jamSelesai = DateTime(now.year, now.month, now.day , int.parse(selesai[0]), int.parse(selesai[1]), int.parse(selesai[0].split(".")[0]));
+                                    // print(defTime.isAfter(now));
+                                    if (isGantiHari == 1 &&
+                                        now.isAfter(defTime) &&
+                                        now.isBefore(jamSelesai)) {
+                                      print("IN");
+                                      jamMulai = DateTime(
+                                          now.year,
+                                          now.month,
+                                          now.day - 1,
+                                          int.parse(mulai[0]),
+                                          int.parse(mulai[1]),
+                                          int.parse(mulai[0].split(".")[0]));
+                                    } else {
+                                      jamSelesai = DateTime(
+                                          now.year,
+                                          now.month,
+                                          now.day + 1,
+                                          int.parse(selesai[0]),
+                                          int.parse(selesai[1]),
+                                          int.parse(selesai[0].split(".")[0]));
+                                    }
 
-                                  // print(defTime.isAfter(now));
-                                  if (isGantiHari == 1 && now.isAfter(defTime) && now.isBefore(jamSelesai)){
-                                    print("IN");
-                                    jamMulai = DateTime(now.year, now.month, now.day -1, int.parse(mulai[0]), int.parse(mulai[1]), int.parse(mulai[0].split(".")[0]));
+                                    // print(now.isAfter(jamMulai));
+                                    // print(now.isBefore(jamSelesai));
+
+                                    // if(now.isAfter(jamMulai) && now.isBefore(jamSelesai)){
+                                    //   xShift = this.widget.sess!.jadwalShift[i]["NamaShift"].toString();
+                                    //   shift = int.parse(this.widget.sess!.jadwalShift[i]["id"]);
+                                    // }
+                                    // else if(now.isBefore(jamMulai) && now.isAfter(jamSelesai) && xShift == ""){
+                                    //   xShift = this.widget.sess!.jadwalShift[i]["NamaShift"].toString();
+                                    //   shift = int.parse(this.widget.sess!.jadwalShift[i]["id"]);
+                                    // }
+                                    // print(isGantiHari);
+                                    // print("Shift : " + this.widget.sess!.jadwalShift[i]["NamaShift"].toString() + now.toString() + " > " + jamMulai.toString()+" = " + now.toLocal().isAfter(jamMulai.toLocal()).toString());
+                                    // print("Shift : " + this.widget.sess!.jadwalShift[i]["NamaShift"].toString() + now.toString() + " < " + jamSelesai.toString()+" = " + now.toLocal().isBefore(jamSelesai.toLocal()).toString());
+                                    // print(now.toLocal().isAfter(jamMulai.toLocal()));
+
+                                    if (now
+                                            .toLocal()
+                                            .isAfter(jamMulai.toLocal()) &&
+                                        now
+                                            .toLocal()
+                                            .isBefore(jamSelesai.toLocal())) {
+                                      xShift = this
+                                          .widget
+                                          .sess!
+                                          .jadwalShift[i]["NamaShift"]
+                                          .toString()
+                                          .toUpperCase();
+                                      shift = int.parse(this
+                                          .widget
+                                          .sess!
+                                          .jadwalShift[i]["id"]);
+                                    }
+                                    // print(now.isAfter(jamMulai.toLocal()).toString() + "+" + now.isBefore(jamSelesai.toLocal()).toString());
                                   }
-                                  else{
-                                    jamSelesai = DateTime(now.year, now.month, now.day +1 , int.parse(selesai[0]), int.parse(selesai[1]), int.parse(selesai[0].split(".")[0]));
-                                  }
-                                  
-                                  // print(now.isAfter(jamMulai));
-                                  // print(now.isBefore(jamSelesai));
-
-                                  // if(now.isAfter(jamMulai) && now.isBefore(jamSelesai)){
-                                  //   xShift = this.widget.sess!.jadwalShift[i]["NamaShift"].toString();
-                                  //   shift = int.parse(this.widget.sess!.jadwalShift[i]["id"]);
-                                  // }
-                                  // else if(now.isBefore(jamMulai) && now.isAfter(jamSelesai) && xShift == ""){
-                                  //   xShift = this.widget.sess!.jadwalShift[i]["NamaShift"].toString();
-                                  //   shift = int.parse(this.widget.sess!.jadwalShift[i]["id"]);
-                                  // }
-                                  // print(isGantiHari);
-                                  // print("Shift : " + this.widget.sess!.jadwalShift[i]["NamaShift"].toString() + now.toString() + " > " + jamMulai.toString()+" = " + now.toLocal().isAfter(jamMulai.toLocal()).toString());
-                                  // print("Shift : " + this.widget.sess!.jadwalShift[i]["NamaShift"].toString() + now.toString() + " < " + jamSelesai.toString()+" = " + now.toLocal().isBefore(jamSelesai.toLocal()).toString());
-                                  // print(now.toLocal().isAfter(jamMulai.toLocal()));
-                                  
-                                  if(now.toLocal().isAfter(jamMulai.toLocal()) && now.toLocal().isBefore(jamSelesai.toLocal())){
-                                    xShift = this.widget.sess!.jadwalShift[i]["NamaShift"].toString().toUpperCase();
-                                    shift = int.parse(this.widget.sess!.jadwalShift[i]["id"]);
-                                  }
-                                  // print(now.isAfter(jamMulai.toLocal()).toString() + "+" + now.isBefore(jamSelesai.toLocal()).toString());
-
                                 }
                               }
-                            }
-                            print(xShift);
-                            _kodeShift = xShift;
-                            _idShift = shift;
-                            _tanggal = now;
-                            // Widget
+                              print(xShift);
+                              _kodeShift = xShift;
+                              _idShift = shift;
+                              _tanggal = now;
+                              // Widget
 
-                            return now == null ? Container() : Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                  SizedBox(height: 1),
-                                  Text(DateFormat("HH:mm:ss").format(now),
-                                    style: TextStyle(
-                                      fontSize: this.widget.sess!.width * 5.5,
-                                      color: Colors.red,
-                                      fontWeight: FontWeight.bold)),
-                                  Text(
-                                    "Shift : " + _kodeShift,
-                                    style: TextStyle(
-                                      fontSize: this.widget.sess!.width * 4,
-                                      color: Theme.of(context).primaryColor,
-                                      fontWeight: FontWeight.bold
-                                    ),
-                                  )
-                                ],
-                              );
-                          }
-                        ),
+                              return now == null
+                                  ? Container()
+                                  : Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        SizedBox(height: 1),
+                                        Text(DateFormat("HH:mm:ss").format(now),
+                                            style: TextStyle(
+                                                fontSize:
+                                                    this.widget.sess!.width *
+                                                        5.5,
+                                                color: Colors.red,
+                                                fontWeight: FontWeight.bold)),
+                                        Text(
+                                          "Shift : " + _kodeShift,
+                                          style: TextStyle(
+                                              fontSize:
+                                                  this.widget.sess!.width * 4,
+                                              color: Theme.of(context)
+                                                  .primaryColor,
+                                              fontWeight: FontWeight.bold),
+                                        )
+                                      ],
+                                    );
+                            }),
                       ),
                     ),
                   )
                 ],
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(
+                left: this.widget.sess!.width * 2,
+                right: this.widget.sess!.width * 2,
+                bottom: this.widget.sess!.width * 2,
+              ),
+              child: Container(
+                width: double.infinity,
+                height: this.widget.sess!.hight * 15,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                        width: this.widget.sess!.width * 45,
+                        child: Container(
+                          height: this.widget.sess!.hight * 15,
+                          child: TextButton(
+                              onPressed: () {},
+                              child: Text(
+                                "SOS",
+                                style: TextStyle(
+                                    fontFamily: "Arial",
+                                    color: Colors.white,
+                                    fontSize: this.widget.sess!.width * 10),
+                              )),
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle, color: Colors.red),
+                        )),
+                    SizedBox(
+                        width: this.widget.sess!.width * 45,
+                        child: Container(
+                          height: this.widget.sess!.hight * 15,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.only(
+                                    right: this.widget.sess!.width * 2,
+                                    bottom: this.widget.sess!.hight * 1),
+                                child: IconButton(
+                                    onPressed: () {},
+                                    icon: Icon(
+                                      Icons.timer_outlined,
+                                      size: this.widget.sess!.width * 10,
+                                      color: Colors.white,
+                                    )),
+                              ),
+                              Padding(
+                                  padding: EdgeInsets.only(
+                                      bottom: this.widget.sess!.hight * 1.2),
+                                  child: Center(
+                                    child: Text(
+                                      "Absensi",
+                                      style: TextStyle(
+                                          fontFamily: "Arial",
+                                          color: Colors.white,
+                                          fontSize:
+                                              this.widget.sess!.width * 4),
+                                    ),
+                                  ))
+                            ],
+                          ),
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle, color: Colors.green),
+                        ))
+                  ],
+                ),
               ),
             ),
             Padding(
@@ -507,7 +592,7 @@ class _dashboardState extends State<Dashboard> {
               ),
               child: Container(
                 width: double.infinity,
-                height: this.widget.sess!.width * 90,
+                height: this.widget.sess!.width * 65,
                 // color: Colors.black,
                 // child: _listData(_data.length > 0 ? _data["data"] : []),
                 child: FutureBuilder(

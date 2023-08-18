@@ -44,7 +44,10 @@ dependencies:
   permission_handler: ^10.4.2
   flutter_barcode_scanner: ^2.0.0
   geocoding: ^2.1.0
-  awesome_notifications:
+  firebase_core: ^2.15.1
+  firebase_messaging: ^14.6.6
+  flutter_local_notifications: ^15.1.0+1
+  # awesome_notifications:
 
 dev_dependencies:
   flutter_test:

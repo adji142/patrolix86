@@ -1,5 +1,7 @@
-import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:mobilepatrol/general/notification_service.dart';
 // import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:mobilepatrol/general/session.dart';
@@ -9,125 +11,45 @@ import 'package:mobilepatrol/page/dashboard.dart';
 import 'package:mobilepatrol/page/login.dart';
 import 'package:mobilepatrol/shared/sharedprefrence.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-Future<void> main() async{
-  WidgetsFlutterBinding.ensureInitialized();
-  await NotificationController.initializeLocalNotifications();
-  runApp(MyApp());
+
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print('Handling a background message ${message.messageId}');
 }
 
-class NotificationController {
-  static ReceivedAction? initialAction;
-    static Future<void> initializeLocalNotifications() async {
-    await AwesomeNotifications().initialize(
-        null, //'resource://drawable/res_app_icon',//
-        [
-          NotificationChannel(
-              channelKey: 'alerts',
-              channelName: 'Alerts',
-              channelDescription: 'Notification tests as alerts',
-              playSound: true,
-              onlyAlertOnce: true,
-              groupAlertBehavior: GroupAlertBehavior.Children,
-              importance: NotificationImportance.High,
-              defaultPrivacy: NotificationPrivacy.Private,
-              defaultColor: Colors.deepPurple,
-              ledColor: Colors.deepPurple)
-        ],
-        debug: true);
-  }
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
-  static Future<bool> displayNotificationRationale(BuildContext context) async {
-    bool userAuthorized = false;
-    // BuildContext context = MyApp.navigatorKey.currentContext!;
-    await showDialog(
-        context: context,
-        builder: (BuildContext ctx) {
-          return AlertDialog(
-            title: Text('Get Notified!',
-                style: Theme.of(context).textTheme.titleLarge),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Image.asset(
-                        'assets/animated-bell.gif',
-                        height: MediaQuery.of(context).size.height * 0.3,
-                        fit: BoxFit.fitWidth,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                    'Izinkan aplikasi untuk memberi notifikasi!'),
-              ],
-            ),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(ctx).pop();
-                  },
-                  child: Text(
-                    'Deny',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge
-                        ?.copyWith(color: Colors.red),
-                  )),
-              TextButton(
-                  onPressed: () async {
-                    userAuthorized = true;
-                    Navigator.of(ctx).pop();
-                  },
-                  child: Text(
-                    'Allow',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge
-                        ?.copyWith(color: Colors.deepPurple),
-                  )),
-            ],
-          );
-        });
-    return userAuthorized &&
-        await AwesomeNotifications().requestPermissionToSendNotifications();
-  }
+Future <void> init() async{
+  final AndroidInitializationSettings androidInitializationSettings = AndroidInitializationSettings('app_icon');
 
-  static Future<void> createNewNotification(int x, String StartPatroli, BuildContext context) async {
-    bool isAllowed = await AwesomeNotifications().isNotificationAllowed();
-    if (!isAllowed) isAllowed = await displayNotificationRationale(context);
-    if (!isAllowed) return;
-    String localTimeZone = await AwesomeNotifications().getLocalTimeZoneIdentifier();
-    // print(localTimeZone);
-    var listTime = StartPatroli.split(":");
-    print("Hit the planet : "+ x.toString());
-    await AwesomeNotifications().createNotification(
-        content: NotificationContent(
-            id: -1, // -1 is replaced by a random number
-            channelKey: 'alerts',
-            title: 'Informasi Patroli',
-            body: "Sudah Waktunya Patroli Lagi.!!!",
-            notificationLayout: NotificationLayout.Messaging,
-            payload: {'notificationId': '1234567890'}),
-            // schedule: NotificationCalendar.fromDate(
-            //   // date: DateTime(DateTime.now().year,DateTime.now().month,DateTime.now().day,int.parse(listTime[0]),int.parse(listTime[1]), 0).add(Duration(minutes: x == null ? 0 : x)),
-            //   // minutes: x == null ? 0 : x
-            //   date: DateTime.now().add(Duration(seconds: 10)),
-            //   repeats: true,
-            //   preciseAlarm: true,
-            //   allowWhileIdle: true
-            // ),
-            schedule: NotificationCalendar(
-              second: 10,
-              timeZone: localTimeZone,
-              preciseAlarm: true,
-              repeats: false
-            )
-          );
-  }
+  final InitializationSettings initializationSettings = InitializationSettings(
+    android: androidInitializationSettings
+  );
+  await flutterLocalNotificationsPlugin.initialize(
+    initializationSettings
+  );
+}
+
+Future<void> main() async{
+  WidgetsFlutterBinding.ensureInitialized();
   
+  await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  await FirebaseMessaging.instance.subscribeToTopic("SOSTopic");
+  
+  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    print("Ini Message Lho");
+    print(message.notification?.title);
+  });
+  runApp(MyApp());
 }
 
 class MyApp extends StatefulWidget {
@@ -244,7 +166,6 @@ class _MainState extends State<MyApp> {
               else if(value["data"][0]["IntervalType"] == "MINUTE"){
                 interval = int.parse(value["data"][0]["IntervalPatroli"]);
               }
-              NotificationController.createNewNotification(interval,value["data"][0]["StartPatroli"], context);
             });
             return Dashboard(sess);
           }
