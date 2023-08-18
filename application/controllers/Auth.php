@@ -502,4 +502,45 @@ class Auth extends CI_Controller {
 
 		echo json_encode($data);
 	}
+
+	public function updateToken()
+	{
+		$data = array(
+			'success' 		=> false ,
+			'message'		=>'',
+			'data' 			=> array()
+		);
+
+		$RecordOwnerID = $this->input->post('RecordOwnerID');
+		$Username = $this->input->post('username');
+		$FireBaseToken = $this->input->post('FireBaseToken');
+
+		$oUser = $this->ModelsExecuteMaster->FindData(array('username'=>$Username,'RecordOwnerID'=> $RecordOwnerID), 'users');
+
+		if ($oUser->num_rows() == 0) {
+			$data['success'] = false;
+			$data['message'] = 'Username Tidak Ditemukan, Silahkan Hubungi Operator';
+			goto jump;
+		}
+
+		$where = array(
+			'id' => $oUser->row()->id,
+			'RecordOwnerID' => $RecordOwnerID
+		);
+
+		$dataUpdated = array(
+			'UserToken' => $FireBaseToken
+		);
+
+		$rs = $this->ModelsExecuteMaster->ExecUpdate($dataUpdated, $where, 'users');
+
+		if($rs){
+			$data['success'] = true;
+			$data['message'] = "";
+		}
+
+		jump:
+
+		echo json_encode($data);
+	}
 }

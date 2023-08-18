@@ -65,6 +65,7 @@ $route['APITest'] = 'API/API_Test/testGlobal';
 
 // API TOKEN
 $route['APILogin'] = 'Auth/loginprocessing';
+$route['APIUpdateToken'] = 'Auth/updateToken';
 $route['APIReadLocation'] = 'C_LokasiPatroli/Read';
 $route['APIReadPatroli'] = 'C_Patroli/Read';
 $route['APIAddPatroli'] = 'C_Patroli/CRUD';
