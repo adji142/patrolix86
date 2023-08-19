@@ -25,6 +25,7 @@ class home extends CI_Controller {
 		parent::__construct();
 		$this->load->model('ModelsExecuteMaster');
 		$this->load->model('GlobalVar');
+		$this->load->model('Notification');
 		// $this->load->model('deficeinfo');
 		// require APPPATH.'libraries/phpmailer/src/Exception.php';
   //       require APPPATH.'libraries/phpmailer/src/PHPMailer.php';
@@ -61,6 +62,11 @@ class home extends CI_Controller {
 			// echo $Tanggal > $mulai;
 			// echo $Tanggal < $selesai;
 		}
+	}
+
+	public function testSendNotif()
+	{
+		$this->Notification->BroadcastTopic('SOSTopic1');
 	}
 	public function index()
 	{
