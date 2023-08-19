@@ -37,7 +37,7 @@ Future<void> main() async{
   await Firebase.initializeApp();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  await FirebaseMessaging.instance.subscribeToTopic("SOSTopic");
+  // await FirebaseMessaging.instance.subscribeToTopic("SOSTopic");
   
   await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
     alert: true,

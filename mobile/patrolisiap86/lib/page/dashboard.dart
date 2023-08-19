@@ -5,11 +5,13 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:mobilepatrol/general/dialog.dart';
 import 'package:mobilepatrol/general/session.dart';
 import 'package:mobilepatrol/main.dart';
 import 'package:mobilepatrol/models/patroli.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:mobilepatrol/page/FormCheckIn.dart';
+import 'package:mobilepatrol/page/sos.dart';
 import 'package:mobilepatrol/shared/sharedprefrence.dart';
 
 class Dashboard extends StatefulWidget {
@@ -186,12 +188,18 @@ class _dashboardState extends State<Dashboard> {
     });
   }
 
+  Future<void> assingTopic() async{
+    await Firebase.initializeApp();
+    await FirebaseMessaging.instance.subscribeToTopic("SOSTopic"+ this.widget.sess!.LocationID.toString());
+  }
+
   @override
   void initState() {
     // Timer.periodic(Duration(seconds: 1), (Timer t) => _timeChange());
     // _fetchData();
     // generateNotif();
     // checkForInitialMessage();
+    assingTopic();
     super.initState();
   }
 
@@ -491,7 +499,12 @@ class _dashboardState extends State<Dashboard> {
                         child: Container(
                           height: this.widget.sess!.hight * 15,
                           child: TextButton(
-                              onPressed: () {},
+                              onPressed: () async{
+                                bool konfirmasi = await messageDialog(context: context, title: "SOS", message: "Kirim Pesan SOS ?");
+                                if(konfirmasi){
+                                  Navigator.push(context,MaterialPageRoute(builder: (context) => sosMessage(this.widget.sess!)));
+                                }
+                              },
                               child: Text(
                                 "SOS",
                                 style: TextStyle(
