@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -45,9 +47,27 @@ Future<void> main() async{
     sound: true,
   );
 
+  NotificationSettings setting = await FirebaseMessaging.instance.requestPermission(
+    alert: true,
+    announcement: false,
+    badge: true,
+    carPlay: false,
+    criticalAlert: false,
+    provisional: false,
+    sound: true,
+  );
+
+  print('User granted permission: ${setting.authorizationStatus}');
+
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     print("Ini Message Lho");
-    print(message.notification?.title);
+    // print(message.notification?.title);
+    var rng = new Random();
+    String? title = message.notification!.title.toString();
+    String ?body = message.notification!.body.toString();
+
+    NotificationService().init(rng.nextInt(100), title, body);
+    
   });
   runApp(MyApp());
 }

@@ -502,6 +502,7 @@ class _dashboardState extends State<Dashboard> {
                               onPressed: () async{
                                 bool konfirmasi = await messageDialog(context: context, title: "SOS", message: "Kirim Pesan SOS ?");
                                 if(konfirmasi){
+                                  
                                   Navigator.push(context,MaterialPageRoute(builder: (context) => sosMessage(this.widget.sess!)));
                                 }
                               },

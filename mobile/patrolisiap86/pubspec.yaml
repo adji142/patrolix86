@@ -76,6 +76,7 @@ flutter:
   assets:
     - assets/logo.gif
     - assets/animated-bell.gif
+    - sound/
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 
