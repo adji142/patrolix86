@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -6,13 +7,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:mobilepatrol/general/dialog.dart';
+import 'package:mobilepatrol/general/notification_service.dart';
 import 'package:mobilepatrol/general/session.dart';
 import 'package:mobilepatrol/main.dart';
 import 'package:mobilepatrol/models/patroli.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:mobilepatrol/models/sos.dart';
 import 'package:mobilepatrol/page/FormCheckIn.dart';
+import 'package:mobilepatrol/page/absensi.dart';
 import 'package:mobilepatrol/page/sos.dart';
 import 'package:mobilepatrol/shared/sharedprefrence.dart';
+import 'package:uuid/uuid.dart';
 
 class Dashboard extends StatefulWidget {
   final session? sess;
@@ -45,6 +50,7 @@ class _dashboardState extends State<Dashboard> {
 
   final f = NumberFormat("##0");
 
+  bool _inSOS = false;
   // Notifikasi
   late final FirebaseMessaging _messaging;
   //Time Change
@@ -200,6 +206,20 @@ class _dashboardState extends State<Dashboard> {
     // generateNotif();
     // checkForInitialMessage();
     assingTopic();
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print("Ini Message Lho");
+      // print(message.notification?.title);
+      var rng = new Random();
+      String? title = message.notification!.title.toString();
+      String? body = message.notification!.body.toString();
+      String? payload = message.data["ID"];
+      // notifdata = message.data;
+      if(message.data["type"] == "notif"){
+        _inSOS = true;
+      }
+      NotificationService().init(this.widget.sess!,rng.nextInt(100), title, body, payload.toString(), context);
+    });
     super.initState();
   }
 
@@ -475,7 +495,8 @@ class _dashboardState extends State<Dashboard> {
                                         )
                                       ],
                                     );
-                            }),
+                            }
+                          ),
                       ),
                     ),
                   )
@@ -500,10 +521,36 @@ class _dashboardState extends State<Dashboard> {
                           height: this.widget.sess!.hight * 15,
                           child: TextButton(
                               onPressed: () async{
-                                bool konfirmasi = await messageDialog(context: context, title: "SOS", message: "Kirim Pesan SOS ?");
-                                if(konfirmasi){
-                                  
-                                  Navigator.push(context,MaterialPageRoute(builder: (context) => sosMessage(this.widget.sess!)));
+                                if(_inSOS){
+                                  messageBox(context: context, title: "Informasi", message: "Pesan SOS Bisa dibuat 5 menit setelah pesan sebelumnya");
+                                }
+                                else{
+                                  bool konfirmasi = await messageDialog(context: context, title: "SOS", message: "Kirim Pesan SOS ?");
+                                  if(konfirmasi){
+                                    // Push Default Content
+                                    String uID = Uuid().v4().toString();
+                                    Map oParam(){
+                                      return {
+                                        "id" : uID,
+                                        'RecordOwnerID' : this.widget.sess!.RecordOwnerID,
+                                        'LocationID' : this.widget.sess!.LocationID.toString(),
+                                        'KodeKaryawan' : this.widget.sess!.KodeUser,
+                                        'Comment' : "",
+                                        'Image1' : "",
+                                        'Image2' : "",
+                                        'Image3' : "",
+                                        'Koordinat' : "",
+                                        'SubmitDate' : DateTime.now().toString(),
+                                        'VoiceNote' : "",
+                                        "formMode" : "add"
+                                      };
+                                    }
+
+                                    var save = Mod_SOS(this.widget.sess, oParam()).create().then((value) {
+                                      Navigator.push(context,MaterialPageRoute(builder: (context) => sosMessage(this.widget.sess!, uID)));
+                                    });
+                                    // Navigator.push(context,MaterialPageRoute(builder: (context) => sosMessage(this.widget.sess!, uID)));
+                                  }
                                 }
                               },
                               child: Text(
@@ -528,7 +575,9 @@ class _dashboardState extends State<Dashboard> {
                                     right: this.widget.sess!.width * 2,
                                     bottom: this.widget.sess!.hight * 1),
                                 child: IconButton(
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      Navigator.push(context,MaterialPageRoute(builder: (context) => FormAbsensi(this.widget.sess!, _kodeShift)));
+                                    },
                                     icon: Icon(
                                       Icons.timer_outlined,
                                       size: this.widget.sess!.width * 10,

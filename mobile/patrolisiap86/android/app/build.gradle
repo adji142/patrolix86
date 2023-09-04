@@ -35,7 +35,8 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace "ais.patroli.mobilepatrol"
-    compileSdkVersion flutter.compileSdkVersion
+    // compileSdkVersion flutter.compileSdkVersion
+    compileSdkVersion 34
     ndkVersion flutter.ndkVersion
 
     compileOptions {
