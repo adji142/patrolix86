@@ -70,6 +70,11 @@ $route['APIReadLocation'] = 'C_LokasiPatroli/Read';
 $route['APIReadPatroli'] = 'C_Patroli/Read';
 $route['APIAddPatroli'] = 'C_Patroli/CRUD';
 $route['APIShiftRead'] = 'C_Shift/Read';
+$route['APISOSCreate'] = 'C_SOS/Create';
+$route['APISOSRead'] = 'C_SOS/Read';
+$route['APIAttRead'] = 'C_Absensi/Read';
+$route['APIAttCRUD'] = 'C_Absensi/CRUD';
+$route['APIGetJadwal'] = 'C_Jadwal/Read';
 // API TOKEN
 
 $route['permissionread'] = 'Auth/C_Permission/permission';

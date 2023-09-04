@@ -64,6 +64,7 @@
 			$Status = $this->input->post('Status');
 			$RecordOwnerID = $this->input->post('RecordOwnerID');
 			$Shift = $this->input->post('Shift');
+			$image_base64 = $this->input->post('image_base64');
 
 			$formtype = $this->input->post('formtype');
 
@@ -75,8 +76,9 @@
 				'Status' => $Status,
 				'RecordOwnerID' => $RecordOwnerID,
 				'tempEncrypt' => $this->encryption->encrypt($NIK),
-				'Shift' => $Shift
-			);
+				'Shift' => $Shift,
+				'Image' => $image_base64
+ 			);
 
 			if ($formtype == "delete") {
 				$oParam = array(
