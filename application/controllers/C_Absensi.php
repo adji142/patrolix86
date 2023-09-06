@@ -46,10 +46,10 @@
             $KodeKaryawan = $this->input->post('KodeKaryawan');
             $KoordinatIN = $this->input->post('KoordinatIN');
             $ImageIN = $this->input->post('ImageIN');
-            $ImageNameIN = $this->input->post('ImageNameIN');
+            // $ImageNameIN = $this->input->post('ImageNameIN');
             $KoordinatOUT = $this->input->post('KoordinatOUT');
             $ImageOUT = $this->input->post('ImageOUT');
-            $ImageNameOUT = $this->input->post('ImageNameOUT');
+            // $ImageNameOUT = $this->input->post('ImageNameOUT');
             $Tanggal = $this->input->post('Tanggal');
             $Shift = $this->input->post('Shift');
             $Checkin = $this->input->post('Checkin');
@@ -66,9 +66,14 @@
 
             try {
                 if($formMode == "in"){
+                    $getDate = str_replace(":", "", str_replace("-", "", $Checkin));
+                    // 2023-09-06 16:11:38.658465
+                    $ImageNameIN = "IN".$KodeKaryawan."-".$RecordOwnerID.substr($getDate, 0,14).".png";
                     $baseDir = FCPATH.'Assets/images/Absensi/'.$ImageNameIN;
-
-                    file_put_contents($baseDir,base64_decode($ImageIN));
+                    $ifp = fopen( $baseDir, 'wb' ); 
+                    fwrite($ifp, base64_decode($ImageIN));
+                    fclose($ifp);
+                    // file_put_contents($baseDir,$ImageIN);
 
                     $inputData = array(
                         'RecordOwnerID'     => $RecordOwnerID,
@@ -88,6 +93,8 @@
                     $rs = $this->ModelsExecuteMaster->ExecInsert($inputData,'absensi');
                 }
                 elseif ($formMode == "out") {
+                    $getDate = str_replace(":", "", str_replace("-", "", $CheckOut));
+                    $ImageNameOUT = "OUT".$KodeKaryawan."-".$RecordOwnerID.substr($getDate, 0,14).".png";
                     $baseDir = FCPATH.'Assets/images/Absensi/'.$ImageNameOUT;
 
                     file_put_contents($baseDir,base64_decode($ImageOUT));
@@ -103,7 +110,7 @@
                 }
                 else{
                     $data['success'] = false;
-                    $data['message'] = "Invalid Form Type";
+                    $data['message'] = "Invalid Form Mode";
                     goto jump;
                 }
             } catch (Exception $e) {

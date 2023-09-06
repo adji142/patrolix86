@@ -32,7 +32,8 @@
 					c.NamaShift,
 					d.Nama 	StatusKehadiran,
 					a.Keterangan,
-					c.id ShiftID
+					c.id ShiftID,
+					b.Image
 				FROM tjadwal a
 				LEFT JOIN tsecurity b on a.NIK = b.NIK and a.RecordOwnerID = b.RecordOwnerID
 				LEFT JOIN tshift c on a.Jadwal = c.id and a.RecordOwnerID = c.RecordOwnerID
