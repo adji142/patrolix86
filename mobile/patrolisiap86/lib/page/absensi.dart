@@ -1,9 +1,14 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:mobilepatrol/general/dialog.dart';
 import 'package:mobilepatrol/general/session.dart';
 import 'package:mobilepatrol/models/absensi.dart';
 import 'package:mobilepatrol/models/shift.dart';
+import 'package:flutter_face_api/face_api.dart' as Regula;
 
 class FormAbsensi extends StatefulWidget {
   final session sess;
@@ -17,8 +22,65 @@ class FormAbsensi extends StatefulWidget {
 class _FormAbsensi extends State<FormAbsensi> {
   final GlobalKey<State> _keyLoader = new GlobalKey<State>();
 
+  var image1 = new Regula.MatchFacesImage();
+  var image2 = new Regula.MatchFacesImage();
+
   List ? dataJadwal= [];
   List ? dataAbsen = [];
+  List ? dataKaryawan = [];
+
+  bool isMatch = false;
+
+  Position? _currentPosition;
+
+  Future<bool> _handleLocationPermission() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text(
+              'Location services are disabled. Please enable the services')));
+      return false;
+    }
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Location permissions are denied')));
+        return false;
+      }
+    }
+    if (permission == LocationPermission.deniedForever) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text(
+              'Location permissions are permanently denied, we cannot request permissions.')));
+      return false;
+    }
+    return true;
+  }
+
+  Future<void> _getCurrentPosition() async {
+    // showLoadingDialog(context, _keyLoader, info: "Geting Current Location");
+
+    final hasPermission = await _handleLocationPermission();
+    if (!hasPermission) return;
+    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high).then((Position position) {
+      // Navigator.of(context, rootNavigator: true).pop();
+      setState(() => _currentPosition = position);
+      // _setEnableCommand();
+    }).catchError((e) {
+      // Navigator.of(context, rootNavigator: true).pop();
+      debugPrint(e);
+    });
+  }
+
+  void _getLocation() async {
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+  }
 
   Future<Map>_getJadwal() async{
     String nowDate = DateTime.now().year.toString() + "-" + DateTime.now().month.toString() + "-" + DateTime.now().day.toString();
@@ -61,6 +123,17 @@ class _FormAbsensi extends State<FormAbsensi> {
     var temp = await Mod_Absensi(this.widget.sess, oParam()).Read();
     return temp;
   }
+  
+
+  Future<void> initPlatformState() async {
+    Regula.FaceSDK.init().then((json) {
+      var response = jsonDecode(json);
+      if (!response["success"]) {
+        print("Init failed: ");
+        print(json);
+      }
+    });
+  }
 
   _fetchJadwal() async{
     var temp = await _getJadwal();
@@ -85,11 +158,143 @@ class _FormAbsensi extends State<FormAbsensi> {
     setState(() => {});
   }
 
+  Future<void> matchFaces(String formType) async {
+    print("Processing00");
+    print(image1.bitmap);
+    print(image2.bitmap);
+    if (image1.bitmap == null ||
+        image1.bitmap == "" ||
+        image2.bitmap == null ||
+        image2.bitmap == ""){};
+    // setState(() => _similarity = "Processing...");
+    var request = new Regula.MatchFacesRequest();
+    request.images = [image1, image2];
+    Regula.FaceSDK.matchFaces(jsonEncode(request)).then((value) {
+      var response = Regula.MatchFacesResponse.fromJson(json.decode(value));
+      print(response);
+      Regula.FaceSDK.matchFacesSimilarityThresholdSplit(jsonEncode(response!.results), 0.9).then((str) async {
+        var split = Regula.MatchFacesSimilarityThresholdSplit.fromJson(json.decode(str));
+        print("printing "+ (split!.matchedFaces[0]!.similarity! * 100 > 95).toString());
+        if(split.matchedFaces.length > 0){
+          if(split.matchedFaces[0]!.similarity! * 100 > 95){
+            // return true;
+            // isMatch = true;
+
+            if(formType == "in"){
+              Map dataParam(){
+                return {
+                  "RecordOwnerID" : this.widget.sess.RecordOwnerID,
+                  "LocationID"    : this.widget.sess.LocationID.toString(),
+                  "KodeKaryawan"  : this.widget.sess.KodeUser,
+                  "KoordinatIN"   : _currentPosition == null ? "" : "${_currentPosition!.latitude},${_currentPosition!.longitude}",
+                  "ImageIN"       : image2.bitmap,
+                  "Tanggal"       : DateTime.now().year.toString() + "-"+ DateTime.now().month.toString() + "-" + DateTime.now().day.toString(),
+                  "Shift"         : dataJadwal![0]["ShiftID"],
+                  "Checkin"       : DateTime.now().toString(),
+                  "CreatedOn"     : DateTime.now().toString(),
+                  "formMode"      : formType
+                };
+              }
+
+              await Mod_Absensi(this.widget.sess, dataParam()).Create().then((value) async{
+                if(value["success"]){
+                  Navigator.of(context, rootNavigator: true).pop();
+                  await messageBox(
+                    context: context, 
+                    title: "Infomasi", 
+                    message: "Berhasil Checkin"
+                  );
+                  Navigator.of(context).pop();
+                }
+                else{
+                  Navigator.of(context, rootNavigator: true).pop();
+                  await messageBox(
+                    context: context, 
+                    title: "Infomasi", 
+                    message: value["message"]
+                  );
+                }
+              });
+            }
+            else if(formType == "out"){
+              print(image2.bitmap);
+              Map dataParam(){
+                return {
+                  "id"            : dataAbsen![0]["id"].toString(),
+                  "RecordOwnerID" : this.widget.sess.RecordOwnerID,
+                  "LocationID"    : this.widget.sess.LocationID.toString(),
+                  "KodeKaryawan"  : this.widget.sess.KodeUser,
+                  "KoordinatOUT"  : _currentPosition == null ? "" : "${_currentPosition!.latitude},${_currentPosition!.longitude}",
+                  "ImageOUT"      : image2.bitmap,
+                  "Shift"         : dataJadwal![0]["NamaShift"],
+                  "CheckOut"      : DateTime.now().toString(),
+                  "UpdatedOn"     : DateTime.now().toString(),
+                  "formMode"      : formType
+                };
+              }
+
+              print(dataParam());
+
+              await Mod_Absensi(this.widget.sess, dataParam()).Create().then((value) async{
+                if(value["success"]){
+                  Navigator.of(context, rootNavigator: true).pop();
+                  await messageBox(
+                    context: context, 
+                    title: "Infomasi", 
+                    message: "Berhasil Checkout"
+                  );
+                  Navigator.of(context).pop();
+                }
+                else{
+                  Navigator.of(context, rootNavigator: true).pop();
+                  await messageBox(
+                    context: context, 
+                    title: "Infomasi", 
+                    message: value["message"]
+                  );
+                }
+              });
+            }
+            else{
+                Navigator.of(context, rootNavigator: true).pop();
+                messageBox(context: context, title: "info", message: "Invalid Form Type");
+            }
+
+            
+          }
+        }
+        else{
+          Navigator.of(context, rootNavigator: true).pop();
+          await messageBox(
+            context: context, 
+            title: "Infomasi", 
+            message: "Face not Match"
+          );
+        }
+      });
+    });
+  }
+
   @override
   void initState() {
     _fetchData();
     // print(dataJadwal);
     super.initState();
+    initPlatformState();
+
+    const EventChannel('flutter_face_api/event/video_encoder_completion').receiveBroadcastStream().listen((event) {
+      var completion = Regula.VideoEncoderCompletion.fromJson(json.decode(event))!;
+      print("VideoEncoderCompletion:");
+      print("    success:  ${completion.success}");
+      print("    transactionId:  ${completion.transactionId}");
+    });
+    const EventChannel('flutter_face_api/event/onCustomButtonTappedEvent').receiveBroadcastStream().listen((event) {
+      print("Pressed button with id: $event");
+    });
+    const EventChannel('flutter_face_api/event/livenessNotification').receiveBroadcastStream().listen((event) {
+      var notification = Regula.LivenessNotification.fromJson(json.decode(event));
+      print("LivenessProcessStatus: ${notification!.status}");
+    });
   }
 
   @override
@@ -123,7 +328,41 @@ class _FormAbsensi extends State<FormAbsensi> {
                         borderRadius: BorderRadius.circular(18.0),
                       )),
                       backgroundColor: MaterialStateProperty.all(Colors.green)),
-                  onPressed: dataAbsen!.length > 0 ? null :() {},
+                  onPressed: dataAbsen!.length > 0 ? null :() async{
+                    _getCurrentPosition();
+                    Regula.FaceSDK.presentFaceCaptureActivity().then((result) async {
+                      var response = Regula.FaceCaptureResponse.fromJson(json.decode(result))!;
+                      if (response.image != null && response.image!.bitmap != null){
+                        showLoadingDialog(context, _keyLoader, info: "Begin Login");
+
+                        // var img1 = Image.memory(dataJadwal![0]["Image"]);
+                        var tempImage1 = base64Decode(dataJadwal![0]["Image"].toString().replaceAll("data:image/jpeg;base64,", ""));
+                        var tempImage2 = base64Decode(response.image!.bitmap!.replaceAll("\n", ""));
+                        // var img2 = Image.memory(tempImage2);
+
+                        image1.bitmap = base64Encode(tempImage1);
+                        image1.imageType = Regula.ImageType.PRINTED;
+                        image2.bitmap = base64Encode(tempImage2);
+                        image2.imageType = Regula.ImageType.LIVE;
+                        setState(() {
+                          
+                        });
+
+
+                        print(image1.bitmap);
+                        await matchFaces("in");
+
+                      }
+                    });
+
+                    // if(isMatch){
+                    //   Navigator.of(context, rootNavigator: true).pop();
+                    //   messageBox(context: context, title: "info", message: "Face Match");
+                    // }
+                    // else{
+                    //   print("emty object");
+                    // }
+                  },
                 ),
               ),
             ),
@@ -143,7 +382,31 @@ class _FormAbsensi extends State<FormAbsensi> {
                         borderRadius: BorderRadius.circular(18.0),
                       )),
                       backgroundColor: MaterialStateProperty.all(Colors.red)),
-                  onPressed: dataAbsen!.length == 0 ? null : () {},
+                  onPressed: dataAbsen!.length == 0 ? null : () {
+                    _getCurrentPosition();
+                    Regula.FaceSDK.presentFaceCaptureActivity().then((result) async {
+                      var response = Regula.FaceCaptureResponse.fromJson(json.decode(result))!;
+                      if (response.image != null && response.image!.bitmap != null){
+                        showLoadingDialog(context, _keyLoader, info: "Begin Login");
+
+                        // var img1 = Image.memory(dataJadwal![0]["Image"]);
+                        var tempImage1 = base64Decode(dataJadwal![0]["Image"].toString().replaceAll("data:image/jpeg;base64,", ""));
+                        var tempImage2 = base64Decode(response.image!.bitmap!.replaceAll("\n", ""));
+                        // var img2 = Image.memory(tempImage2);
+
+                        image1.bitmap = base64Encode(tempImage1);
+                        image1.imageType = Regula.ImageType.PRINTED;
+                        image2.bitmap = base64Encode(tempImage2);
+                        image2.imageType = Regula.ImageType.LIVE;
+                        setState(() {
+                          
+                        });
+
+                        await matchFaces("out");
+
+                      }
+                    });
+                  },
                 ),
               ),
             )
@@ -231,7 +494,8 @@ class _FormAbsensi extends State<FormAbsensi> {
                     width: this.widget.sess.width * 40,
                     height: this.widget.sess.hight * 30,
                     // color: Colors.black,
-                    child: dataAbsen!.length == 0 ? Image.asset("assets/portrait.png") : Image.network(this.widget.sess.server + "Assets/images/Absensi/" + dataAbsen![0]["ImageIN"]),
+                    child: dataAbsen!.length > 0 ? dataAbsen![0]["ImageIN"] == "" ? Image.asset("assets/portrait.png") : Image.network(this.widget.sess.server + "Assets/images/Absensi/" + dataAbsen![0]["ImageIN"]) : Image.asset("assets/portrait.png"),
+                    // child: dataAbsen!.length == 0 ? Image.asset("assets/portrait.png") : Image.memory(jsonDecode(image1.bitmap.toString())),
                   ),
                   Padding(
                     padding: EdgeInsets.only(
@@ -313,7 +577,7 @@ class _FormAbsensi extends State<FormAbsensi> {
                               ),
                               child: Container(
                                 width: this.widget.sess.width * 55,
-                                height: this.widget.sess.hight * 15,
+                                height: this.widget.sess.hight * 10,
                                 // color: Colors.black,
                                 child: Center(
                                   child: Text(
@@ -346,7 +610,7 @@ class _FormAbsensi extends State<FormAbsensi> {
                     width: this.widget.sess.width * 40,
                     height: this.widget.sess.hight * 30,
                     // color: Colors.black,
-                    child: dataAbsen!.length == 0 ? Image.asset("assets/portrait.png") : Image.network(this.widget.sess.server + "Assets/images/Absensi/" + dataAbsen![0]["ImageOUT"]),
+                    child: dataAbsen!.length > 0 ? dataAbsen![0]["ImageOUT"] == "" ? Image.asset("assets/portrait.png") : Image.network(this.widget.sess.server + "Assets/images/Absensi/" + dataAbsen![0]["ImageOUT"]):Image.asset("assets/portrait.png") ,
                   ),
                   Padding(
                     padding: EdgeInsets.only(
@@ -402,7 +666,7 @@ class _FormAbsensi extends State<FormAbsensi> {
                                       style: TextStyle(
                                           fontSize:
                                               this.widget.sess.width * 4)),
-                                  Text(dataAbsen!.length == 0 ? "" : dataAbsen![0]["CheckOut"].toString() ,
+                                  Text(dataAbsen!.length > 0 ? dataAbsen![0]["CheckOut"].toString() == "0000-00-00 00:00:00.000000" ? "" : dataAbsen![0]["CheckOut"].toString() :"",
                                       style: TextStyle(
                                           fontSize: this.widget.sess.width * 4))
                                 ]),
@@ -415,7 +679,7 @@ class _FormAbsensi extends State<FormAbsensi> {
                                       style: TextStyle(
                                           fontSize:
                                               this.widget.sess.width * 4)),
-                                  Text(dataAbsen!.length == 0 ? "" : dataAbsen![0]["CheckOut"].toString(),
+                                  Text(dataAbsen!.length > 0 ? dataAbsen![0]["CheckOut"].toString() == "0000-00-00 00:00:00.000000" ? "" : dataAbsen![0]["CheckOut"].toString():"",
                                       style: TextStyle(
                                           fontSize: this.widget.sess.width * 4))
                                 ])
@@ -429,11 +693,11 @@ class _FormAbsensi extends State<FormAbsensi> {
                               ),
                               child: Container(
                                 width: this.widget.sess.width * 55,
-                                height: this.widget.sess.hight * 15,
+                                height: this.widget.sess.hight * 10,
                                 // color: Colors.black,
                                 child: Center(
                                   child: Text(
-                                    dataAbsen!.length > 0 ? "CHECKOUT" : "",
+                                    dataAbsen!.length > 0 ?dataAbsen![0]["CheckOut"].toString() != "0000-00-00 00:00:00.000000" ? "CHECKOUT" : "" : "",
                                     style: TextStyle(
                                         fontSize: this.widget.sess.width * 8,
                                         fontWeight: FontWeight.bold,

@@ -96,6 +96,7 @@ class _MyAppState extends State<CompareFaces> {
     if (imageFile == null) return;
     setState(() => _similarity = "nil");
     if (first) {
+      print(base64Encode(imageFile));
       image1.bitmap = base64Encode(imageFile);
       image1.imageType = type;
       setState(() {
