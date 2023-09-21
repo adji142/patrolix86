@@ -75,6 +75,8 @@ $route['APISOSRead'] = 'C_SOS/Read';
 $route['APIAttRead'] = 'C_Absensi/Read';
 $route['APIAttCRUD'] = 'C_Absensi/CRUD';
 $route['APIGetJadwal'] = 'C_Jadwal/Read';
+$route['APIGetPayment'] = 'Auth/getMetodePembayaran';
+$route['APIGetLookupPayment'] = 'Auth/lookupMetodePembayaran';
 // API TOKEN
 
 $route['permissionread'] = 'Auth/C_Permission/permission';

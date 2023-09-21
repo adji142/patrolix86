@@ -543,4 +543,54 @@ class Auth extends CI_Controller {
 
 		echo json_encode($data);
 	}
+
+	public function getMetodePembayaran()
+	{
+		$data = array(
+			'success' 		=> false ,
+			'message'		=>'',
+			'data' 			=> array()
+		);
+
+		$id = $this->input->post('id');
+
+		$rs = false;
+		if ($id != "") {
+			$rs = $this->ModelsExecuteMaster->FindData(array('id'=>$id),'tpaymentmethod');
+		}
+		else{
+			$rs = $this->ModelsExecuteMaster->GetData('tpaymentmethod');
+		}
+
+		if ($rs) {
+			$data['success'] = true;
+			$data['data'] = $rs->result();
+		}
+		echo json_encode($data);
+	}
+
+	public function lookupMetodePembayaran()
+	{
+		$data = array(
+			'success' 		=> false ,
+			'message'		=>'',
+			'data' 			=> array()
+		);
+
+		$id = $this->input->post('id');
+
+		$rs = false;
+		$sql = "SELECT id AS ID, NamaMetode AS Title FROM tpaymentmethod WHERE 1 = 1 ";
+
+		if ($id != "") {
+			$sql += " AND id =".$id ;
+		}
+
+		$rs = $this->db->query($sql);
+		if ($rs) {
+			$data['success'] = true;
+			$data['data'] = $rs->result();
+		}
+		echo json_encode($data);
+	}
 }
