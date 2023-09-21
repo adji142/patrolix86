@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:mobilepatrol/general/dialog.dart';
+import 'package:mobilepatrol/general/generalvalidasi.dart';
 import 'package:mobilepatrol/general/notification_service.dart';
 import 'package:mobilepatrol/general/session.dart';
 import 'package:mobilepatrol/main.dart';
@@ -575,8 +576,15 @@ class _dashboardState extends State<Dashboard> {
                                     right: this.widget.sess!.width * 2,
                                     bottom: this.widget.sess!.hight * 1),
                                 child: IconButton(
-                                    onPressed: () {
-                                      Navigator.push(context,MaterialPageRoute(builder: (context) => FormAbsensi(this.widget.sess!, _kodeShift)));
+                                    onPressed: () async{
+                                      var validasi = await checkSchadule(this.widget.sess!, context).then((value) => {
+                                        if(value){
+                                          Navigator.push(context,MaterialPageRoute(builder: (context) => FormAbsensi(this.widget.sess!, _kodeShift)))
+                                        }
+                                        else{
+                                          messageBox(context: context, title: "Validation", message: "Jadwal Belum dibuat")
+                                        }
+                                      });
                                     },
                                     icon: Icon(
                                       Icons.timer_outlined,

@@ -382,7 +382,7 @@ class _FormAbsensi extends State<FormAbsensi> {
                         borderRadius: BorderRadius.circular(18.0),
                       )),
                       backgroundColor: MaterialStateProperty.all(Colors.red)),
-                  onPressed: dataAbsen!.length == 0 ? null : () {
+                  onPressed: dataAbsen!.length == 0 ? null : dataAbsen![0]["ImageOUT"] != "" ? null : () {
                     _getCurrentPosition();
                     Regula.FaceSDK.presentFaceCaptureActivity().then((result) async {
                       var response = Regula.FaceCaptureResponse.fromJson(json.decode(result))!;
@@ -550,7 +550,7 @@ class _FormAbsensi extends State<FormAbsensi> {
                                       style: TextStyle(
                                           fontSize:
                                               this.widget.sess.width * 4)),
-                                  Text(dataAbsen!.length == 0 ? "" : dataAbsen![0]["Checkin"],
+                                  Text(dataAbsen!.length == 0 ? "" : dataAbsen![0]["Checkin"].toString().split(" ")[0],
                                       style: TextStyle(
                                           fontSize: this.widget.sess.width * 4))
                                 ]),
@@ -563,7 +563,7 @@ class _FormAbsensi extends State<FormAbsensi> {
                                       style: TextStyle(
                                           fontSize:
                                               this.widget.sess.width * 4)),
-                                  Text(dataAbsen!.length == 0 ? "" : dataAbsen![0]["Checkin"],
+                                  Text(dataAbsen!.length == 0 ? "" : dataAbsen![0]["Checkin"].toString().split(" ")[1].split(".")[0],
                                       style: TextStyle(
                                           fontSize: this.widget.sess.width * 4))
                                 ])
@@ -666,7 +666,7 @@ class _FormAbsensi extends State<FormAbsensi> {
                                       style: TextStyle(
                                           fontSize:
                                               this.widget.sess.width * 4)),
-                                  Text(dataAbsen!.length > 0 ? dataAbsen![0]["CheckOut"].toString() == "0000-00-00 00:00:00.000000" ? "" : dataAbsen![0]["CheckOut"].toString() :"",
+                                  Text(dataAbsen!.length > 0 ? dataAbsen![0]["CheckOut"].toString() == "0000-00-00 00:00:00.000000" ? "" : dataAbsen![0]["CheckOut"].toString().split(" ")[0] :"",
                                       style: TextStyle(
                                           fontSize: this.widget.sess.width * 4))
                                 ]),
@@ -679,7 +679,7 @@ class _FormAbsensi extends State<FormAbsensi> {
                                       style: TextStyle(
                                           fontSize:
                                               this.widget.sess.width * 4)),
-                                  Text(dataAbsen!.length > 0 ? dataAbsen![0]["CheckOut"].toString() == "0000-00-00 00:00:00.000000" ? "" : dataAbsen![0]["CheckOut"].toString():"",
+                                  Text(dataAbsen!.length > 0 ? dataAbsen![0]["CheckOut"].toString() == "0000-00-00 00:00:00.000000" ? "" : dataAbsen![0]["CheckOut"].toString().split(" ")[1].split(".")[0]:"",
                                       style: TextStyle(
                                           fontSize: this.widget.sess.width * 4))
                                 ])

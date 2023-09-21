@@ -5,6 +5,7 @@ import 'package:mobilepatrol/general/session.dart';
 import 'package:mobilepatrol/models/auth.dart';
 import 'package:mobilepatrol/models/patroli.dart';
 import 'package:mobilepatrol/page/dashboard.dart';
+import 'package:mobilepatrol/page/register.dart';
 import 'package:mobilepatrol/shared/sharedprefrence.dart';
 
 class LoginMobilePotrait extends StatefulWidget {
@@ -36,7 +37,7 @@ class _LoginMobilePotraitState extends State<LoginMobilePotrait> {
 
   @override
   Widget build(BuildContext context) {
-    print(this.widget.sess!.server);
+    // print(this.widget.sess!.server);
     return Scaffold(
       body: ListView(
         // mainAxisAlignment: MainAxisAlignment.start,
@@ -438,7 +439,47 @@ class _LoginMobilePotraitState extends State<LoginMobilePotrait> {
                 },
               ),
             ),
-          )
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(0, this.widget.sess!.hight * 1, 0, 0),
+            child: Center(
+              child: Text(
+                "atau"
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(
+                top: this.widget.sess!.hight * 1,
+                left: this.widget.sess!.width * 20,
+                right: this.widget.sess!.width * 20),
+            child: SizedBox(
+              width: this.widget.sess!.width * 30,
+              height: this.widget.sess!.hight * 4,
+              child: ElevatedButton(
+                child: Text(
+                  "Daftar",
+                  style: TextStyle(
+                      fontFamily: "Montserrat",
+                      fontSize: this.widget.sess!.hight * 2,
+                      color: Theme.of(context).primaryColor
+                    ),
+                ),
+                style: ButtonStyle(
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18.0),
+                        side: BorderSide(color: Theme.of(context).primaryColor)
+                      ),
+                    ),
+                    backgroundColor: MaterialStateProperty.all(Colors.white),
+                  ),
+                onPressed: () async {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => RegisterMobilePotrait(this.widget.sess,)));
+                },
+              ),
+            ),
+          ),
         ],
       ),
     );
