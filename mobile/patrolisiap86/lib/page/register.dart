@@ -26,6 +26,9 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
 
   final GlobalKey<State> _keyLoader = new GlobalKey<State>();
 
+  bool _obscured = false;
+  bool _obscured_re = false;
+
   List ? paymentMethod;
   int ? idPayment = -1;
   String ? namePayment = "";
@@ -246,62 +249,114 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
           Align(
             alignment: Alignment.topLeft,
             child: Padding(
-              padding: EdgeInsets.only(
-                  left: this.widget.sess!.hight * 5,
-                  top: this.widget.sess!.hight * 0.5),
-              child: Container(
-                width: this.widget.sess!.width * 72,
-                child: Center(
-                  child: Padding(
-                    padding:
-                        EdgeInsets.only(bottom: this.widget.sess!.hight * 2),
-                    child: TextField(
-                      controller: _Password,
-                      decoration: InputDecoration(
-                          icon: Icon(Icons.person,
-                              size: this.widget.sess!.hight * 4,
+                padding: EdgeInsets.only(
+                    left: this.widget.sess!.hight * 5,
+                    top: this.widget.sess!.hight * 2),
+                child: Container(
+                    width: this.widget.sess!.width * 90,
+                    child: Row(
+                      children: [
+                        Container(
+                          width: this.widget.sess!.width * 72,
+                          child: Center(
+                            child: Padding(
+                              padding: EdgeInsets.only(
+                                  bottom: this.widget.sess!.hight * 2),
+                              child: TextField(
+                                controller: _Password,
+                                obscureText: !_obscured,
+                                decoration: InputDecoration(
+                                    icon: Icon(Icons.key,
+                                        size: this.widget.sess!.hight * 4,
+                                        color: Theme.of(context).primaryColor),
+                                    labelText: "Password",
+                                    labelStyle: TextStyle(
+                                      color: Theme.of(context).primaryColor,
+                                      fontSize: this.widget.sess!.hight * 2,
+                                    )),
+
+                                // onTap: () {
+                                //   _ratio = 3.5;
+                                // },
+                                // onSubmitted: (_) {
+                                //   _ratio = 2;
+                                // },
+                              ),
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          child: Icon(
+                              _obscured
+                                  ? Icons.visibility_rounded
+                                  : Icons.visibility_off_rounded,
+                              size: this.widget.sess!.hight * 3,
                               color: Theme.of(context).primaryColor),
-                          labelText: "Password",
-                          labelStyle: TextStyle(
-                            color: Theme.of(context).primaryColor,
-                            fontSize: this.widget.sess!.hight * 2,
-                          )),
-                      obscureText: true,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+                          onTap: () {
+                            setState(() {
+                              _obscured = !_obscured;
+                              print("Tabbed");
+                            });
+                          },
+                        )
+                      ],
+                    ))),
           ),
           Align(
             alignment: Alignment.topLeft,
             child: Padding(
-              padding: EdgeInsets.only(
-                  left: this.widget.sess!.hight * 5,
-                  top: this.widget.sess!.hight * 0.5),
-              child: Container(
-                width: this.widget.sess!.width * 72,
-                child: Center(
-                  child: Padding(
-                    padding:
-                        EdgeInsets.only(bottom: this.widget.sess!.hight * 2),
-                    child: TextField(
-                      controller: _RePassword,
-                      decoration: InputDecoration(
-                          icon: Icon(Icons.person,
-                              size: this.widget.sess!.hight * 4,
+                padding: EdgeInsets.only(
+                    left: this.widget.sess!.hight * 5,
+                    top: this.widget.sess!.hight * 2),
+                child: Container(
+                    width: this.widget.sess!.width * 90,
+                    child: Row(
+                      children: [
+                        Container(
+                          width: this.widget.sess!.width * 72,
+                          child: Center(
+                            child: Padding(
+                              padding: EdgeInsets.only(
+                                  bottom: this.widget.sess!.hight * 2),
+                              child: TextField(
+                                controller: _RePassword,
+                                obscureText: !_obscured_re,
+                                decoration: InputDecoration(
+                                    icon: Icon(Icons.key,
+                                        size: this.widget.sess!.hight * 4,
+                                        color: Theme.of(context).primaryColor),
+                                    labelText: "Tulis Ulang Password",
+                                    labelStyle: TextStyle(
+                                      color: Theme.of(context).primaryColor,
+                                      fontSize: this.widget.sess!.hight * 2,
+                                    )),
+
+                                // onTap: () {
+                                //   _ratio = 3.5;
+                                // },
+                                // onSubmitted: (_) {
+                                //   _ratio = 2;
+                                // },
+                              ),
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          child: Icon(
+                              _obscured_re
+                                  ? Icons.visibility_rounded
+                                  : Icons.visibility_off_rounded,
+                              size: this.widget.sess!.hight * 3,
                               color: Theme.of(context).primaryColor),
-                          labelText: "Tulis Ulang Password",
-                          labelStyle: TextStyle(
-                            color: Theme.of(context).primaryColor,
-                            fontSize: this.widget.sess!.hight * 2,
-                          )),
-                      obscureText: true,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+                          onTap: () {
+                            setState(() {
+                              _obscured_re = !_obscured_re;
+                              print("Tabbed");
+                            });
+                          },
+                        )
+                      ],
+                    ))),
           ),
           Align(
             alignment: Alignment.topLeft,
@@ -414,16 +469,19 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                   //   height: this.widget.sess!.hight * 2,
                   // ),
                   ListTile(
+                    visualDensity: VisualDensity(horizontal: 0, vertical: -4),
                     title: Text("Plan dipilih "),
                     subtitle: _planName == "" ? Text("-") : Text(_planName.toString()),
                     trailing: _planAmt == 0 ? Text("Rp. 0") : Text(f.format(_planAmt)),
                   ),
                   ListTile(
+                    visualDensity: VisualDensity(horizontal: 0, vertical: -4),
                     title: Text("Biaya Admin "),
                     subtitle: _totalAdminfee == 0 ? Text("-") : Text("Biaya Layanan"),
                     trailing: _totalAdminfee == 0 ? Text("Rp. 0") : Text(f.format(_totalAdminfee)),
                   ),
                   ListTile(
+                    visualDensity: VisualDensity(horizontal: 0, vertical: -4),
                     title: Text("Total "),
                     trailing: double.parse(_totalAdminfee.toString()) + double.parse(_planAmt.toString()) == 0 ? Text("Rp. 0") : Text(f.format(double.parse(_totalAdminfee.toString()) + double.parse(_planAmt.toString())).toString()),
                   )
@@ -431,27 +489,42 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
               ),
             ),
           ),
-
-          ElevatedButton(
-              onPressed: () async {
-                Map param() {
-                  return {
-                    "Email": "asd.asd.com",
-                    "Password": "Prasetyo Aji Wibowo",
-                    "ConfirmPassword": "Prasetyo Aji Wibowo",
-                    "Data":
-                        '{"KodeUser" : "ADJI142", "NamaUser" : "Prasetyo Aji Wibowo","Password" : "adji142","Token"    : ""}'
-                  };
-                }
-
-                var xTest = await Mod_Auth(this.widget.sess, Parameter: param())
-                    .TestASPNet()
-                    .then((value) {
-                  print(value);
-                  print(value["KodeUser"]);
-                });
-              },
-              child: Text("Test ASP Net"))
+          
+          Align(
+            alignment: Alignment.topLeft,
+            child: Padding(
+              padding: EdgeInsets.only(
+                left: this.widget.sess!.hight * 5,
+                top: this.widget.sess!.hight * 2,
+                right: this.widget.sess!.hight * 5,
+                // bottom: this.widget.sess!.hight * 2,
+              ),
+              child: Container(
+                width: double.infinity,
+                child: ElevatedButton(
+                  child: Text(
+                    "Daftar Sekarang",
+                    style: TextStyle(
+                        fontFamily: "Montserrat",
+                        fontSize: this.widget.sess!.hight * 2,
+                        color: Colors.white),
+                  ),
+                  style: ButtonStyle(
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18.0),
+                      ),
+                    ),
+                    backgroundColor:
+                        MaterialStateProperty.all(Theme.of(context).primaryColor),
+                  ),
+                  onPressed: () {
+                    
+                  },
+                ),
+              )
+            ),
+          ),
         ],
       ),
     );
