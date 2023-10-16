@@ -215,4 +215,8 @@ class home extends CI_Controller {
 		$data['latlang'] = $value;
 		$this->load->view('V_Report/map',$data);	
 	}
+	public function readReviewabsen()
+	{
+		$this->load->view('V_Report/reviewabsen');
+	}
 }

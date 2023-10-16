@@ -77,6 +77,8 @@ $route['APIAttCRUD'] = 'C_Absensi/CRUD';
 $route['APIGetJadwal'] = 'C_Jadwal/Read';
 $route['APIGetPayment'] = 'Auth/getMetodePembayaran';
 $route['APIGetLookupPayment'] = 'Auth/lookupMetodePembayaran';
+$route['APIPricingTable'] = 'C_Pricing/ReadPricingTable';
+$route['APIPricingTerm'] = 'C_Pricing/ReadPricingTerm';
 // API TOKEN
 
 $route['permissionread'] = 'Auth/C_Permission/permission';
@@ -97,6 +99,7 @@ $route['jadwal/(:any)'] = 'Home/jadwal/$1';
 $route['review'] = 'Home/readReview';
 $route['map/(:num)'] = 'Home/loadmap/$1';
 
+$route['reviewabsen'] = 'Home/readReviewabsen';
 // Tools
 $route['backup'] = 'C_SD/bk';
 $route['selftdest'] = 'C_SD/selfDestruct';
