@@ -23,5 +23,6 @@
     
     <script src="<?php echo base_url();?>Assets/js/wysihtml5-0.3.0.js"></script> 
     <script src="<?php echo base_url();?>Assets/js/bootstrap-wysihtml5.js"></script>
+    <script type="text/javascript" src="<?php echo base_url();?>Assets/vendors/webcamjs/webcam.min.js"></script>
   </body>
 </html>

@@ -39,4 +39,22 @@ class Mod_Auth {
     final response = await http.post(url,body: this.Parameter);
     return json.decode(response.body);
   }
+
+  Future<Map> UpdateToken() async{
+    var url = Uri.parse(sess!.server+"APIUpdateToken");
+    final response = await http.post(url,body: this.Parameter);
+    return json.decode(response.body);
+  }
+
+  Future<Map> getPaymentMethod() async{
+    var url = Uri.parse(sess!.server+"APIGetPayment");
+    final response = await http.post(url,body: this.Parameter);
+    return json.decode(response.body);
+  }
+
+  Future<Map> TestASPNet() async{
+    var url = Uri.parse("http://192.168.1.66:51265/api/Account/Register");
+    final response = await http.post(url,body: this.Parameter);
+    return json.decode(response.body);
+  }
 }

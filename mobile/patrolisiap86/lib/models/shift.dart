@@ -12,6 +12,14 @@ class Mod_Shift {
   Future<Map> getShift() async {
     var url = Uri.parse(sess!.server + "APIShiftRead");
     final response = await http.post(url, body: this.Parameter);
+    // print(this.Parameter);
+    return json.decode(response.body);
+  }
+
+  Future<Map> getJadwal() async {
+    var url = Uri.parse(sess!.server + "APIGetJadwal");
+    final response = await http.post(url, body: this.Parameter);
+    // print(this.Parameter);
     return json.decode(response.body);
   }
 }

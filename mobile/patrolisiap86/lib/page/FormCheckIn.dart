@@ -107,23 +107,36 @@ class _FormCheckInState extends State<FormCheckIn> {
   }
 
   void _timeChange() {
-    final DateTime now = DateTime.now();
+    final DateTime now = DateTime.now().toLocal();
     final String temp = DateFormat('jm').format(now).trim();
     final ampm = temp.substring(temp.length - 2, temp.length);
     String xShift = "";
     int shift = 0;
 
-    if(this.widget.sess!.jadwalShift.length > 0){
+    if(this.widget.sess.jadwalShift.length > 0){
       // print(this.widget.sess!.jadwalShift);
       for (var i = 0; i < this.widget.sess.jadwalShift.length; i++) {
         var mulai = this.widget.sess.jadwalShift[i]["MulaiBekerja"].toString().split(":");
         var selesai = this.widget.sess.jadwalShift[i]["SelesaiBekerja"].toString().split(":");
+        var isGantiHari = int.parse(this.widget.sess.jadwalShift[i]["GantiHari"]);
 
         if(mulai.isNotEmpty){
 
-          DateTime jamMulai = DateTime(now.year, now.month, this.widget.sess.isGantiHari == 1 ? now.day -1 : now.day, int.parse(mulai[0]), int.parse(mulai[1]), int.parse(mulai[0].split(".")[0]));
-          DateTime jamSelesai = DateTime.utc(now.year, now.month, this.widget.sess.isGantiHari == 1 ? now.day +1 : now.day , int.parse(selesai[0]), int.parse(selesai[1]), int.parse(selesai[0].split(".")[0]));
+          DateTime defTime = DateTime(now.year, now.month, now.day, 0,0,1).toLocal();
+
+          // print(defTime);
+          DateTime jamMulai = DateTime(now.year, now.month, now.day, int.parse(mulai[0]), int.parse(mulai[1]), int.parse(mulai[0].split(".")[0]));
+          // DateTime jamSelesai = DateTime.utc(now.year, now.month, isGantiHari == 1 ? now.day +1 : now.day , int.parse(selesai[0]), int.parse(selesai[1]), int.parse(selesai[0].split(".")[0]));
+          DateTime jamSelesai = DateTime(now.year, now.month, now.day , int.parse(selesai[0]), int.parse(selesai[1]), int.parse(selesai[0].split(".")[0]));
           
+          // print(defTime.isAfter(now));
+          if (isGantiHari == 1 && now.isAfter(defTime) && now.isBefore(jamSelesai)){
+            print("IN");
+            jamMulai = DateTime(now.year, now.month, now.day -1, int.parse(mulai[0]), int.parse(mulai[1]), int.parse(mulai[0].split(".")[0]));
+          }
+          else{
+            jamSelesai = DateTime(now.year, now.month, now.day +1 , int.parse(selesai[0]), int.parse(selesai[1]), int.parse(selesai[0].split(".")[0]));
+          }
           // print(jamMulai);
 
           if(now.isAfter(jamMulai.toLocal()) && now.isBefore(jamSelesai.toLocal())){

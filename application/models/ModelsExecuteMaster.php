@@ -610,7 +610,7 @@ class ModelsExecuteMaster extends CI_Model
 
 	public function PushNotification($message)
 	{
-		define( 'API_ACCESS_KEY', 'AAAA4dUdBz0:APA91bGqXWbX23XscFU6xbNq9gMI_a4aFfrU81iuposMA9a6Q7hn4OVt50KZ2sue7SynXfkL4dtycS5tJI3peDsw7vClNPIdE5_E92gH1kDbhZnLwA0t4wBcWbjQp7RDUN_0a5kv9qVC' );
+		define('API_ACCESS_KEY', 'AAAAx1wTEfo:APA91bH1gQ0oWm64IZryw8h3am40NXjkpiF3ukHJ3gelHHNwBS3aLQcfZGURhA1h_KIG6ByZUWDhSE7zAYm4p21gQyz4429BYmJtI_IjytzJQsifeh8L4OAXavuGkrwze4_74zSNJXGn');
 		// prep the bundle
 		  
 		$headers = array
@@ -627,6 +627,11 @@ class ModelsExecuteMaster extends CI_Model
 		curl_setopt( $ch,CURLOPT_SSL_VERIFYPEER, false );
 		curl_setopt( $ch,CURLOPT_POSTFIELDS, json_encode( $message ) );
 		$result = curl_exec($ch );
+
+		if (curl_errno($ch)) {
+			$result = curl_error($ch);
+		}
+
 		curl_close( $ch );
 		// echo $result;
 		return $result;

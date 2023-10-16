@@ -455,7 +455,6 @@ class Auth extends CI_Controller {
 
 				// var_dump($Jam);
 
-				$data['isGantiHari'] = "0";
 				foreach ($oLokasi->result() as $key) {
 					if ($key->GantiHari == "1") {
 						$mulai = strtotime($key->MulaiBekerja);
@@ -470,6 +469,7 @@ class Auth extends CI_Controller {
 						}
 						else{
 							$data['Shift'] = $key->id;
+							$data['isGantiHari'] = $key->GantiHari;
 						}
 					}
 				}
@@ -500,6 +500,97 @@ class Auth extends CI_Controller {
 
 		jump:
 
+		echo json_encode($data);
+	}
+
+	public function updateToken()
+	{
+		$data = array(
+			'success' 		=> false ,
+			'message'		=>'',
+			'data' 			=> array()
+		);
+
+		$RecordOwnerID = $this->input->post('RecordOwnerID');
+		$Username = $this->input->post('username');
+		$FireBaseToken = $this->input->post('FireBaseToken');
+
+		$oUser = $this->ModelsExecuteMaster->FindData(array('username'=>$Username,'RecordOwnerID'=> $RecordOwnerID), 'users');
+
+		if ($oUser->num_rows() == 0) {
+			$data['success'] = false;
+			$data['message'] = 'Username Tidak Ditemukan, Silahkan Hubungi Operator';
+			goto jump;
+		}
+
+		$where = array(
+			'id' => $oUser->row()->id,
+			'RecordOwnerID' => $RecordOwnerID
+		);
+
+		$dataUpdated = array(
+			'UserToken' => $FireBaseToken
+		);
+
+		$rs = $this->ModelsExecuteMaster->ExecUpdate($dataUpdated, $where, 'users');
+
+		if($rs){
+			$data['success'] = true;
+			$data['message'] = "";
+		}
+
+		jump:
+
+		echo json_encode($data);
+	}
+
+	public function getMetodePembayaran()
+	{
+		$data = array(
+			'success' 		=> false ,
+			'message'		=>'',
+			'data' 			=> array()
+		);
+
+		$id = $this->input->post('id');
+
+		$rs = false;
+		if ($id != "") {
+			$rs = $this->ModelsExecuteMaster->FindData(array('id'=>$id),'tpaymentmethod');
+		}
+		else{
+			$rs = $this->ModelsExecuteMaster->GetData('tpaymentmethod');
+		}
+
+		if ($rs) {
+			$data['success'] = true;
+			$data['data'] = $rs->result();
+		}
+		echo json_encode($data);
+	}
+
+	public function lookupMetodePembayaran()
+	{
+		$data = array(
+			'success' 		=> false ,
+			'message'		=>'',
+			'data' 			=> array()
+		);
+
+		$id = $this->input->post('id');
+
+		$rs = false;
+		$sql = "SELECT id AS ID, NamaMetode AS Title FROM tpaymentmethod WHERE 1 = 1 ";
+
+		if ($id != "") {
+			$sql += " AND id =".$id ;
+		}
+
+		$rs = $this->db->query($sql);
+		if ($rs) {
+			$data['success'] = true;
+			$data['data'] = $rs->result();
+		}
 		echo json_encode($data);
 	}
 }

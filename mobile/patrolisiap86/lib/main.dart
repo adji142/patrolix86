@@ -1,5 +1,9 @@
-import 'package:awesome_notifications/awesome_notifications.dart';
+import 'dart:math';
+
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:mobilepatrol/general/notification_service.dart';
 // import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:mobilepatrol/general/session.dart';
@@ -7,131 +11,65 @@ import 'package:mobilepatrol/models/patroli.dart';
 import 'package:mobilepatrol/models/shift.dart';
 import 'package:mobilepatrol/page/dashboard.dart';
 import 'package:mobilepatrol/page/login.dart';
+import 'package:mobilepatrol/page/sos.dart';
+import 'package:mobilepatrol/page/sosCallback.dart';
 import 'package:mobilepatrol/shared/sharedprefrence.dart';
+import 'package:mobilepatrol/test/comparefaces.dart';
+import 'package:mobilepatrol/test/face_detector_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-Future<void> main() async{
+
+var notifdata;
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print('Handling a background message ${message.messageId}');
+}
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
+Future<void> init() async {
+  final AndroidInitializationSettings androidInitializationSettings =
+      AndroidInitializationSettings('app_icon');
+
+  final InitializationSettings initializationSettings =
+      InitializationSettings(android: androidInitializationSettings);
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+}
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await NotificationController.initializeLocalNotifications();
+
+  await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // await FirebaseMessaging.instance.subscribeToTopic("SOSTopic");
+
+  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+
+  NotificationSettings setting =
+      await FirebaseMessaging.instance.requestPermission(
+    alert: true,
+    announcement: false,
+    badge: true,
+    carPlay: false,
+    criticalAlert: false,
+    provisional: false,
+    sound: true,
+  );
+
+  print('User granted permission: ${setting.authorizationStatus}');
+
+  
   runApp(MyApp());
 }
 
-class NotificationController {
-  static ReceivedAction? initialAction;
-    static Future<void> initializeLocalNotifications() async {
-    await AwesomeNotifications().initialize(
-        null, //'resource://drawable/res_app_icon',//
-        [
-          NotificationChannel(
-              channelKey: 'alerts',
-              channelName: 'Alerts',
-              channelDescription: 'Notification tests as alerts',
-              playSound: true,
-              onlyAlertOnce: true,
-              groupAlertBehavior: GroupAlertBehavior.Children,
-              importance: NotificationImportance.High,
-              defaultPrivacy: NotificationPrivacy.Private,
-              defaultColor: Colors.deepPurple,
-              ledColor: Colors.deepPurple)
-        ],
-        debug: true);
-  }
-
-  static Future<bool> displayNotificationRationale(BuildContext context) async {
-    bool userAuthorized = false;
-    // BuildContext context = MyApp.navigatorKey.currentContext!;
-    await showDialog(
-        context: context,
-        builder: (BuildContext ctx) {
-          return AlertDialog(
-            title: Text('Get Notified!',
-                style: Theme.of(context).textTheme.titleLarge),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Image.asset(
-                        'assets/animated-bell.gif',
-                        height: MediaQuery.of(context).size.height * 0.3,
-                        fit: BoxFit.fitWidth,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                    'Izinkan aplikasi untuk memberi notifikasi!'),
-              ],
-            ),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(ctx).pop();
-                  },
-                  child: Text(
-                    'Deny',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge
-                        ?.copyWith(color: Colors.red),
-                  )),
-              TextButton(
-                  onPressed: () async {
-                    userAuthorized = true;
-                    Navigator.of(ctx).pop();
-                  },
-                  child: Text(
-                    'Allow',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge
-                        ?.copyWith(color: Colors.deepPurple),
-                  )),
-            ],
-          );
-        });
-    return userAuthorized &&
-        await AwesomeNotifications().requestPermissionToSendNotifications();
-  }
-
-  static Future<void> createNewNotification(int x, String StartPatroli, BuildContext context) async {
-    bool isAllowed = await AwesomeNotifications().isNotificationAllowed();
-    if (!isAllowed) isAllowed = await displayNotificationRationale(context);
-    if (!isAllowed) return;
-    String localTimeZone = await AwesomeNotifications().getLocalTimeZoneIdentifier();
-    // print(localTimeZone);
-    var listTime = StartPatroli.split(":");
-    print("Hit the planet : "+ x.toString());
-    await AwesomeNotifications().createNotification(
-        content: NotificationContent(
-            id: -1, // -1 is replaced by a random number
-            channelKey: 'alerts',
-            title: 'Informasi Patroli',
-            body: "Sudah Waktunya Patroli Lagi.!!!",
-            notificationLayout: NotificationLayout.Messaging,
-            payload: {'notificationId': '1234567890'}),
-            // schedule: NotificationCalendar.fromDate(
-            //   // date: DateTime(DateTime.now().year,DateTime.now().month,DateTime.now().day,int.parse(listTime[0]),int.parse(listTime[1]), 0).add(Duration(minutes: x == null ? 0 : x)),
-            //   // minutes: x == null ? 0 : x
-            //   date: DateTime.now().add(Duration(seconds: 10)),
-            //   repeats: true,
-            //   preciseAlarm: true,
-            //   allowWhileIdle: true
-            // ),
-            schedule: NotificationCalendar(
-              second: 10,
-              timeZone: localTimeZone,
-              preciseAlarm: true,
-              repeats: false
-            )
-          );
-  }
-  
-}
-
 class MyApp extends StatefulWidget {
-  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
   @override
   _MainState createState() => _MainState();
 }
@@ -141,15 +79,15 @@ class _MainState extends State<MyApp> {
   var kodeuser = "";
   String _Server = "";
 
-  Future<String>_getData() async{
+  Future<String> _getData() async {
     var temp = await SharedPreference().getString("Server");
     return temp;
   }
 
-  _fetchData() async{
+  _fetchData() async {
     var temp = await _getData().then((value) {
       setState(() {
-        // _data = value; 
+        // _data = value;
         _Server = value;
       });
     });
@@ -165,11 +103,12 @@ class _MainState extends State<MyApp> {
   Widget build(BuildContext context) {
     var width = MediaQuery.of(context).size.width / 100;
     var height = MediaQuery.of(context).size.height / 100;
-    
+
     setState(() {
       sess.hight = height;
       sess.width = width;
     });
+
     ThemeData themeData(bool isDarkMode, BuildContext context) {
       return ThemeData(
         primaryColor: Color(0xFF226f54),
@@ -192,67 +131,75 @@ class _MainState extends State<MyApp> {
     }
 
     return MaterialApp(
-      title: 'Patroli Siap x86',
-      theme: themeData(false, context),
-      home: FutureBuilder(
-        future: SharedPreference().getString("accountInfo"),
-        builder: (context, snapshot){
-          if (snapshot.hasData && snapshot.data != ""){
-            var xData = snapshot.data!.split("|");
-            sess.idUser = int.parse(xData[0]);
-            sess.NamaUser = xData[1];
-            sess.KodeUser = xData[2];
-            sess.RecordOwnerID = xData[3];
-            sess.LocationID = int.parse(xData[4]);
-            sess.shift = xData[5].toString();
-            sess.isGantiHari = int.parse(xData[6]);
-            // sess.server = _Server;
+        title: 'Patroli Siap x86',
+        theme: themeData(false, context),
+        home: FutureBuilder(
+            future: SharedPreference().getString("accountInfo"),
+            builder: (context, snapshot) {
+              if (snapshot.hasData && snapshot.data != "") {
+                var xData = snapshot.data!.split("|");
+                sess.idUser = int.parse(xData[0]);
+                sess.NamaUser = xData[1];
+                sess.KodeUser = xData[2];
+                sess.RecordOwnerID = xData[3];
+                sess.LocationID = int.parse(xData[4]);
+                sess.shift = xData[5].toString();
+                sess.isGantiHari = int.parse(xData[6]);
+                // sess.server = _Server;
 
-            // print(SharedPreference().getString("Server"));
+                // print(SharedPreference().getString("Server"));
 
-            Map oParamShift(){
-              return {
-                'RecordOwnerID':sess.RecordOwnerID.toString(),
-                'LocationID' : sess.LocationID.toString()
-              };
-            };
+                Map oParamShift() {
+                  return {
+                    'RecordOwnerID': sess.RecordOwnerID.toString(),
+                    'LocationID': sess.LocationID.toString()
+                  };
+                }
 
-            var oShfit = Mod_Shift(sess, oParamShift());
+                ;
 
-            oShfit.getShift().then((value) {
-              if(value["success"].toString() == "true"){
-                sess.jadwalShift = value["data"];
+                var oShfit = Mod_Shift(sess, oParamShift());
+
+                try {
+                  oShfit.getShift().then((value) {
+                    if (value["success"].toString() == "true") {
+                      sess.jadwalShift = value["data"];
+                    }
+                  });
+                } catch (e) {
+                  print(e);
+                }
+
+                Map oParamLokasi() {
+                  return {
+                    'id': sess.LocationID.toString(),
+                    'RecordOwnerID': sess.RecordOwnerID,
+                  };
+                }
+
+                var x = Mod_Patroli(sess, Parameter: oParamLokasi())
+                    .readLokasi()
+                    .then((value) async {
+                  int interval = 0;
+
+                  // int.parse(value["data"][0]["IntervalPatroli"]) * 60;
+                  if (value["data"][0]["IntervalType"] == "DAY") {
+                    interval =
+                        int.parse(value["data"][0]["IntervalPatroli"]) * 1440;
+                  } else if (value["data"][0]["IntervalType"] == "HOUR") {
+                    interval =
+                        int.parse(value["data"][0]["IntervalPatroli"]) * 60;
+                  } else if (value["data"][0]["IntervalType"] == "MINUTE") {
+                    interval = int.parse(value["data"][0]["IntervalPatroli"]);
+                  }
+                });
+                return Dashboard(sess);
+              } else {
+                return LoginMobilePotrait(sess);
               }
-            });
-
-            Map oParamLokasi(){
-              return {
-                'id' : sess.LocationID.toString(),
-                'RecordOwnerID':sess.RecordOwnerID,
-              };
             }
-            var x = Mod_Patroli(sess, Parameter: oParamLokasi()).readLokasi().then((value) async {
-              int interval = 0;
-
-              // int.parse(value["data"][0]["IntervalPatroli"]) * 60;
-              if(value["data"][0]["IntervalType"] == "DAY"){
-                interval = int.parse(value["data"][0]["IntervalPatroli"]) * 1440;
-              }
-              else if(value["data"][0]["IntervalType"] == "HOUR"){
-                interval = int.parse(value["data"][0]["IntervalPatroli"]) * 60;
-              }
-              else if(value["data"][0]["IntervalType"] == "MINUTE"){
-                interval = int.parse(value["data"][0]["IntervalPatroli"]);
-              }
-              NotificationController.createNewNotification(interval,value["data"][0]["StartPatroli"], context);
-            });
-            return Dashboard(sess);
-          }
-          else{
-            return LoginMobilePotrait(sess);
-          }
-        }
-      )
-    );
+          )
+          
+        );
   }
 }

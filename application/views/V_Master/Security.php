@@ -149,6 +149,21 @@
               </div>
             </div>
 
+            <div class="item form-group">
+              <label class="col-form-label col-md-3 col-sm-3 label-align" for="first-name">Foto <span class="required">*</span>
+              </label>
+              <div class="col-md-6 col-sm-6 ">
+                <div id="my_camera"></div>
+                <div id="image_result"></div>
+                <textarea id = "image_base64" name = "image_base64" style="display:none"> </textarea>
+                <br>
+                <a class="btn btn-success" id = "bt_take_picture"> Take Picture </a>
+                <!-- <a class="btn btn-warning" id = "bt_Upload"> Upload </a> -->
+                <input type="file" id="Attachment" name="Attachment" accept=".jpg" class="btn btn-warning"/>
+                <a class="btn btn-danger" id = "bt_clear"> Clear </a>
+              </div>
+            </div>
+
             <div class="item" form-group>
               <button class="btn btn-primary" id="btn_Save">Save</button>
             </div>
@@ -170,7 +185,16 @@
 
 <script type="text/javascript">
   $(function () {
+    var _URL = window.URL || window.webkitURL;
+    var _URLePub = window.URL || window.webkitURL;
     var RecordOwnerID = $('#RecordOwnerID').val();
+    Webcam.set({
+			width: 320,
+			height: 240,
+			image_format: 'jpeg',
+			jpeg_quality: 90
+		});
+		Webcam.attach( '#my_camera' );
     $(document).ready(function () {
       $('#Status').val("1").change();
       $.ajax({
@@ -182,6 +206,8 @@
           bindGrid(response.data);
         }
       });
+
+      
     });
     $('#post_').submit(function (e) {
       $('#btn_Save').text('Tunggu Sebentar.....');
@@ -189,6 +215,7 @@
 
       e.preventDefault();
       var me = $(this);
+      // var form_data = new FormData(this);
 
       $.ajax({
             type    :'post',
@@ -283,11 +310,70 @@
             $('#RecordOwnerID').val(v.RecordOwnerID);
             $('#Shift').val(v.Shift).change();
 
+            $('#image_result').html("<img src ='"+v.Image+"' width = '400'> ");
+            $('#image_base64').val(v.Image);
+
             $('#formtype').val("edit");
             $('#modal_').modal('show');
           });
         }
       });
+    }
+
+    $('#bt_take_picture').click(function(){
+      Webcam.snap(function(data_uri){
+        // console.log(data_uri);
+        $('#my_camera').css('display','none');
+        $('#image_result').html("<img src ='"+data_uri+"' width = '400'> ");
+        // $('#result').css('display','');
+        $('#image_base64').val(data_uri);
+      })
+    });
+    $('#bt_clear').click(function(){
+      $('#my_camera').css('display','');
+      $('#image_base64').val("");
+      // $('#image_result').css('display','none');
+    });
+
+    $("#Attachment").change(function(){
+      var file = $(this)[0].files[0];
+      img = new Image();
+      img.src = _URL.createObjectURL(file);
+      var imgwidth = 0;
+      var imgheight = 0;
+      img.onload = function () {
+        imgwidth = this.width;
+        imgheight = this.height;
+        $('#width').val(imgwidth);
+        $('#height').val(imgheight);
+      }
+      readURL(this);
+      encodeImagetoBase64(this);
+      // alert("Current width=" + imgwidth + ", " + "Original height=" + imgheight);
+    });
+
+    function readURL(input) {
+      if (input.files && input.files[0]) {
+        var reader = new FileReader();
+          
+        reader.onload = function (e) {
+          console.log(e.target.result);
+            // $('#image_result').attr('src', e.target.result);
+            $('#image_result').html("<img src ='"+e.target.result+"' width = '400'> ");
+        }
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+    function encodeImagetoBase64(element) {
+      $('#image_base64').val('');
+        var file = element.files[0];
+        var reader = new FileReader();
+        reader.onloadend = function() {
+          // $(".link").attr("href",reader.result);
+          // $(".link").text(reader.result);
+          $('#image_base64').val(reader.result);
+        }
+        reader.readAsDataURL(file);
     }
     function bindGrid(data) {
 
