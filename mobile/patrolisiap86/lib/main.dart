@@ -111,7 +111,7 @@ class _MainState extends State<MyApp> {
 
     ThemeData themeData(bool isDarkMode, BuildContext context) {
       return ThemeData(
-        primaryColor: Color(0xFF226f54),
+        primaryColor: Color(0xFF125389),
         backgroundColor: isDarkMode ? Colors.black : Color(0xFFF1F5FB),
         indicatorColor: isDarkMode ? Color(0xFF0E1D36) : Color(0xFF226f54),
         hintColor: isDarkMode ? Color(0xFF280C0B) : Color(0xff133762),
@@ -120,7 +120,7 @@ class _MainState extends State<MyApp> {
         focusColor: isDarkMode ? Color(0xFF0B2512) : Color(0xff133762),
         disabledColor: Colors.grey,
         cardColor: isDarkMode ? Color(0xFF151515) : Colors.white,
-        canvasColor: isDarkMode ? Colors.black : Colors.grey[50],
+        // canvasColor: Color(0xFF000031),
         brightness: isDarkMode ? Brightness.dark : Brightness.light,
         buttonTheme: Theme.of(context).buttonTheme.copyWith(
             colorScheme: isDarkMode ? ColorScheme.dark() : ColorScheme.light()),

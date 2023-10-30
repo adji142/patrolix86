@@ -192,6 +192,7 @@ class _sosState extends State<sosMessage> {
                 if(value["success"].toString() == "true"){
                   Navigator.of(context, rootNavigator: true).pop();
                   messageBox(context: context, title: "Informasi", message: "Data Berhasil dikirim ke rekan terdekat");
+                  Navigator.of(context).pop();
                   setState(() {
                     _isSaved = true;
                   });
