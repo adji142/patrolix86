@@ -218,7 +218,10 @@ class _FormCheckInState extends State<FormCheckIn> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Patroli")),
+      appBar: AppBar(
+        title: Text("Checkin : " + widget.NamaCheckPoint),
+        backgroundColor: Theme.of(context).primaryColor,
+      ),
       body: Padding(
         padding: EdgeInsets.all(this.widget.sess.width * 2),
         child: _tanggal == null

@@ -242,6 +242,7 @@ class _dashboardState extends State<Dashboard> {
 
     return Scaffold(
         appBar: AppBar(
+          backgroundColor: Theme.of(context).primaryColor,
           title: Text("Patroli Siap x86"),
           actions: [
             Padding(
@@ -272,6 +273,7 @@ class _dashboardState extends State<Dashboard> {
         ),
         floatingActionButton: FloatingActionButton(
           child: Icon(Icons.add),
+          backgroundColor: Theme.of(context).primaryColor,
           onPressed: () async {
             // Handle Notification
             var data = await barcodeScan().then((value) async {
@@ -347,7 +349,7 @@ class _dashboardState extends State<Dashboard> {
                       height: this.widget.sess!.hight * 10,
                       decoration: new BoxDecoration(
                         borderRadius: new BorderRadius.circular(10.0),
-                        color: Colors.yellow.shade600,
+                        color: Color(0xFFfecb54),
                       ),
                       child: Center(
                         child: StreamBuilder(
@@ -483,7 +485,7 @@ class _dashboardState extends State<Dashboard> {
                                                 fontSize:
                                                     this.widget.sess!.width *
                                                         5.5,
-                                                color: Colors.red,
+                                                color: Color(0xFFbd2a27),
                                                 fontWeight: FontWeight.bold)),
                                         Text(
                                           "Shift : " + _kodeShift,
@@ -562,7 +564,7 @@ class _dashboardState extends State<Dashboard> {
                                     fontSize: this.widget.sess!.width * 10),
                               )),
                           decoration: BoxDecoration(
-                              shape: BoxShape.circle, color: Colors.red),
+                              shape: BoxShape.circle, color: Color(0xFFbd2a27)),
                         )),
                     SizedBox(
                         width: this.widget.sess!.width * 45,
@@ -577,14 +579,15 @@ class _dashboardState extends State<Dashboard> {
                                     bottom: this.widget.sess!.hight * 1),
                                 child: IconButton(
                                     onPressed: () async{
-                                      var validasi = await checkSchadule(this.widget.sess!, context).then((value) => {
-                                        if(value){
-                                          Navigator.push(context,MaterialPageRoute(builder: (context) => FormAbsensi(this.widget.sess!, _kodeShift)))
-                                        }
-                                        else{
-                                          messageBox(context: context, title: "Validation", message: "Jadwal Belum dibuat")
-                                        }
-                                      });
+                                      Navigator.push(context,MaterialPageRoute(builder: (context) => FormAbsensi(this.widget.sess!, _kodeShift)));
+                                      // var validasi = await checkSchadule(this.widget.sess!, context).then((value) => {
+                                      //   if(value){
+                                      //     Navigator.push(context,MaterialPageRoute(builder: (context) => FormAbsensi(this.widget.sess!, _kodeShift)))
+                                      //   }
+                                      //   else{
+                                      //     messageBox(context: context, title: "Validation", message: "Jadwal Belum dibuat")
+                                      //   }
+                                      // });
                                     },
                                     icon: Icon(
                                       Icons.timer_outlined,
@@ -608,7 +611,7 @@ class _dashboardState extends State<Dashboard> {
                             ],
                           ),
                           decoration: BoxDecoration(
-                              shape: BoxShape.circle, color: Colors.green),
+                              shape: BoxShape.circle, color: Theme.of(context).primaryColor),
                         ))
                   ],
                 ),
@@ -622,7 +625,7 @@ class _dashboardState extends State<Dashboard> {
               ),
               child: Container(
                 width: double.infinity,
-                height: this.widget.sess!.hight * 10,
+                height: this.widget.sess!.hight * 8,
                 // color: Colors.black,
                 child: Card(
                   shape: RoundedRectangleBorder(
@@ -632,22 +635,22 @@ class _dashboardState extends State<Dashboard> {
                         topRight: Radius.circular(30)),
                   ),
                   elevation: 0,
-                  color: Theme.of(context).primaryColorLight,
+                  color: Theme.of(context).primaryColor,
                   child: ListTile(
                     leading: Icon(
                       Icons.access_alarm_sharp,
-                      color: Theme.of(context).primaryColor,
+                      color: Colors.white,
                       size: 32,
                     ),
                     title: Text("Progres Patroli",
                         style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Theme.of(context).primaryColor)),
+                            color: Colors.white)),
                     trailing: Text(
                       _penyelesaian,
                       style: TextStyle(
-                          color: Theme.of(context).primaryColor,
+                          color: Colors.white,
                           fontSize: 20,
                           fontWeight: FontWeight.bold),
                     ),
@@ -705,17 +708,27 @@ class _dashboardState extends State<Dashboard> {
                   leading: list[index]["sts"].toString() == "1"
                       ? Icon(
                           Icons.check_box_outlined,
-                          color: Colors.green,
+                          color: Theme.of(context).primaryColor,
                         )
                       : Icon(Icons.check_box_outline_blank_outlined),
                   title: Text(
                     list[index]["NamaCheckPoint"].toString(),
-                    style: TextStyle(color: Colors.green),
+                    style: TextStyle(color: this.widget.sess!.textColor),
                   ),
-                  subtitle: Text(list[index]["Keterangan"]),
+                  subtitle: Text(
+                    list[index]["Keterangan"],
+                    style: TextStyle(
+                      color: this.widget.sess!.lightTextColor
+                    ),
+                  ),
                   trailing: Chip(
-                    label: Text(list[index]["JumlahCheckin"].toString()),
-                    backgroundColor: Colors.green,
+                    label: Text(
+                      list[index]["JumlahCheckin"].toString(),
+                      style: TextStyle(
+                        color: Colors.white
+                      ),
+                    ),
+                    backgroundColor: Theme.of(context).primaryColor,
                   ),
                 );
               },

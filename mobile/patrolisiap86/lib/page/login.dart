@@ -45,10 +45,12 @@ class _LoginMobilePotraitState extends State<LoginMobilePotrait> {
           Align(
             alignment: Alignment.topLeft,
             child: Padding(
-              padding: EdgeInsets.only(left: this.widget.sess!.hight * 5),
+              padding: EdgeInsets.only(
+                left: this.widget.sess!.hight * 5,
+              ),
               child: Image.asset(
-                "assets/logo.gif",
-                width: this.widget.sess!.width * 40,
+                "assets/newlogo.png",
+                width: this.widget.sess!.width * 80,
                 height: this.widget.sess!.hight * 35,
               ),
             ),
@@ -63,6 +65,7 @@ class _LoginMobilePotraitState extends State<LoginMobilePotrait> {
                   fontFamily: "Montserrat",
                   fontSize: this.widget.sess!.hight * 3,
                   fontWeight: FontWeight.bold,
+                  color: Color(0xFF000031)
                 ),
                 textAlign: TextAlign.left,
               ),
@@ -77,7 +80,9 @@ class _LoginMobilePotraitState extends State<LoginMobilePotrait> {
                   style: TextStyle(
                       fontFamily: "Montserrat",
                       fontSize: this.widget.sess!.hight * 3,
-                      fontWeight: FontWeight.bold),
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF000031)
+                    ),
                 ),
               )),
           Align(

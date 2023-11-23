@@ -310,7 +310,10 @@ class _FormAbsensi extends State<FormAbsensi> {
     //   Navigator.of(context).pop();
     // }
     return Scaffold(
-      appBar: AppBar(title: Text("Absensi")),
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).primaryColor,
+        title: Text("Absensi"),
+      ),
       bottomNavigationBar: BottomAppBar(
         child: dataJadwal!.length > 0 ? Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -411,7 +414,12 @@ class _FormAbsensi extends State<FormAbsensi> {
               ),
             )
           ],
-        ) : Container(),
+        ) : Container(
+          child: Align(
+            alignment: Alignment.center,
+            child: Text("Karyawan Tidak ada jadwal"),
+          ),
+        ),
       ),
       body: dataJadwal!.length > 0 ? Column(
         children: [

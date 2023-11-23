@@ -41,6 +41,7 @@ class Mod_Auth {
   }
 
   Future<Map> UpdateToken() async{
+    print(this.Parameter);
     var url = Uri.parse(sess!.server+"APIUpdateToken");
     final response = await http.post(url,body: this.Parameter);
     return json.decode(response.body);

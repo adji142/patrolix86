@@ -397,7 +397,9 @@ class Auth extends CI_Controller {
 					'unique_id'		=>'',
 					'Shift'			=>'',
 					'isGantiHari'	=> 0,
-					'JadwalShift'	=> array()
+					'JadwalShift'	=> array(),
+					'NamaPartner'	=> '',
+					'icon'			=> ''
 				);
 
 		$RecordOwnerID = $this->input->post('RecordOwnerID');
@@ -442,8 +444,10 @@ class Auth extends CI_Controller {
 			$data['username'] = $oUser->row()->username;
 			$data['unique_id'] = $oUser->row()->id;
 			$data['RecordOwnerID'] = $oUser->row()->RecordOwnerID;
+			$data['NamaPartner'] = $oPartner->row()->NamaPartner;
 			$data['LocationID'] = $oUser->row()->AreaUser;
 			$data['NamaUser'] = $oUser->row()->nama;
+			$data['icon'] = $oPartner->row()->icon;
 			if ($oSecurity->num_rows() > 0) {
 				// Shift
 
