@@ -19,6 +19,7 @@ class Mod_Auth {
     var url = Uri.parse(sess!.server+"APILogin");
     final response = await http.post(url,body: this.Parameter);
     print(this.Parameter);
+    print(response.body.toString());
     return json.decode(response.body);
   }
 

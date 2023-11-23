@@ -12,14 +12,14 @@ class Mod_Patroli {
   Future<Map> getPatroliList() async {
     var url = Uri.parse(sess!.server + "APIReadPatroli");
     final response = await http.post(url, body: this.Parameter);
-    // print(this.Parameter);
+    print(this.Parameter);
     return json.decode(response.body);
   }
 
   Future<Map> save() async {
     var url = Uri.parse(sess!.server + "APIAddPatroli");
     final response = await http.post(url, body: this.Parameter);
-    // print(Parameter);
+    print(Parameter);
     return json.decode(response.body);
   }
 

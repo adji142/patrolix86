@@ -145,6 +145,8 @@ class _MainState extends State<MyApp> {
                 sess.LocationID = int.parse(xData[4]);
                 sess.shift = xData[5].toString();
                 sess.isGantiHari = int.parse(xData[6]);
+                sess.NamaPartner = xData[7];
+                sess.icon = xData[8];
                 // sess.server = _Server;
 
                 // print(SharedPreference().getString("Server"));

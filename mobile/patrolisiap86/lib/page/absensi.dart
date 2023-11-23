@@ -195,6 +195,7 @@ class _FormAbsensi extends State<FormAbsensi> {
                   "formMode"      : formType
                 };
               }
+              print(dataParam);
 
               await Mod_Absensi(this.widget.sess, dataParam()).Create().then((value) async{
                 if(value["success"]){

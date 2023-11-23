@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
 import 'package:mobilepatrol/general/dialog.dart';
 import 'package:mobilepatrol/general/generalvalidasi.dart';
@@ -239,11 +240,32 @@ class _dashboardState extends State<Dashboard> {
         "KodeKaryawan": this.widget.sess!.KodeUser
       };
     }
-
+    // print(this.widget.sess!.server + "/Assets/images/profile/" + this.widget.sess!.RecordOwnerID + ".jpeg");
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Theme.of(context).primaryColor,
-          title: Text("Patroli Siap x86"),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Container(
+                width: this.widget.sess!.width * 10,
+                height: this.widget.sess!.width * 10,
+                // color: Colors.black,
+                child: this.widget.sess!.icon == "" ? Icon(Icons.person) : Image.network(this.widget.sess!.server + "/Assets/images/profile/" + this.widget.sess!.RecordOwnerID + ".jpeg"),
+              ),
+              Padding(
+                padding: EdgeInsets.only(
+                  left: this.widget.sess!.width * 2
+                ),
+                child: Text(
+                  this.widget.sess!.NamaPartner,
+                  style: TextStyle(
+                    fontSize: this.widget.sess!.width * 4
+                  ),
+                ),
+              ),
+            ],
+          ),
           actions: [
             Padding(
               padding: EdgeInsets.only(right: this.widget.sess!.width * 5),
