@@ -394,12 +394,14 @@ class _LoginMobilePotraitState extends State<LoginMobilePotrait> {
                       this.widget.sess!.NamaUser = th["NamaUser"];
                       this.widget.sess!.KodeUser = th["username"];
                       this.widget.sess!.RecordOwnerID = th["RecordOwnerID"];
+                      this.widget.sess!.NamaPartner = th["NamaPartner"];
                       this.widget.sess!.LocationID =int.parse(th["LocationID"].toString());
                       this.widget.sess!.shift = th["Shift"];
                       this.widget.sess!.jadwalShift = th["JadwalShift"];
-                      this.widget.sess!.isGantiHari = int.parse(th["isGantiHari"]);
+                      this.widget.sess!.isGantiHari = int.parse(th["isGantiHari"].toString());
+                      this.widget.sess!.icon = th["icon"];
 
-                      var xShared = th["unique_id"] +"|" +th["NamaUser"] +"|" +th["username"] +"|" +th["RecordOwnerID"] +"|" +th["LocationID"] +"|" +th["Shift"]+"|"+th["isGantiHari"].toString();
+                      var xShared = th["unique_id"] +"|" +th["NamaUser"] +"|" +th["username"] +"|" +th["RecordOwnerID"] +"|" +th["LocationID"] +"|" +th["Shift"]+"|"+th["isGantiHari"].toString()+"|"+th["NamaPartner"]+"|"+th["icon"];
 
                       SharedPreference().setString("accountInfo", xShared);
 

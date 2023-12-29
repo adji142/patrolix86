@@ -366,7 +366,10 @@ class Auth extends CI_Controller {
 			'NamaPIC' => $NamaPIC,
 			'CreatedOn' => $CreatedOn,
 			'CreatedBy' => $CreatedBy,
-			'tempStore' => $tempStore
+			'tempStore' => $tempStore,
+			'StartSubs' => date("Y-m-d-H-i-s"),
+			'AllowMobile' => 0,
+			'AllowDashboard' => 0
 		);
 
 		$rs = $this->ModelsExecuteMaster->ExecInsert($oParam,'tcompany');
@@ -424,6 +427,22 @@ class Auth extends CI_Controller {
 			$data['message'] = 'Username Tidak Ditemukan, Silahkan Hubungi Operator';
 			goto jump;
 		}
+
+		// Check Subscription
+
+		$SqlParam = "
+			SELECT * FROM tcompany where KodePartner = '".$RecordOwnerID."'
+			AND DATE_ADD(EndSubs,INTERVAL ExtraDays DAY) > now();
+		";
+
+		$oPartnerSubs = $this->db->query($SqlParam);
+
+		if ($oPartnerSubs->num_rows() == 0) {
+			$data['success'] = false;
+			$data['message'] = 'Langganan Telah Habis, Silahkan Melakukan Perpanjangan Langganan';
+			goto jump;
+		}
+		// Check Subscription
 
 		$validPWD = $this->encryption->decrypt($oUser->row()->password);
 
@@ -503,7 +522,7 @@ class Auth extends CI_Controller {
 
 
 		jump:
-
+		$this->ModelsExecuteMaster->WriteLog($RecordOwnerID,'Login', json_encode($data));
 		echo json_encode($data);
 	}
 

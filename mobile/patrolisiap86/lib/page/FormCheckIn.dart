@@ -355,6 +355,7 @@ class _FormCheckInState extends State<FormCheckIn> {
                       }
 
                       print(image64);
+                      print(oParam);
 
                       var temp = await Mod_Patroli(this.widget.sess, Parameter: oParam()).save().then((value) async{
                         if(value["success"]){

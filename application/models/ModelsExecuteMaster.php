@@ -15,6 +15,27 @@ class ModelsExecuteMaster extends CI_Model
         require APPPATH.'libraries/phpmailer/src/PHPMailer.php';
         require APPPATH.'libraries/phpmailer/src/SMTP.php';
 	}
+	function WriteLog($RecordOwnerID,$Event,$retValue)
+	{
+		$ip = '';
+		if (!empty($_SERVER['HTTP_CLIENT_IP'])) {   //check ip from share internet
+            $ip = $_SERVER['HTTP_CLIENT_IP'];
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {   //to check ip is pass from proxy
+            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        } else {
+            $ip = $_SERVER['REMOTE_ADDR'];
+        }
+
+        $data = array(
+        	'LogDate' => date("Y-m-d-H-i-s"),
+			'Event' => $Event,
+			'IPAddress' => $ip,
+			'RecordOwnerID' => $RecordOwnerID,
+			'retValue' => $retValue
+        );
+
+        return $this->db->insert('logdata',$data);
+	}
 	function GetToken($token)
 	{
 		$this->db->where(array('Token'=>$token));

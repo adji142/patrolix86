@@ -13,6 +13,8 @@ class session {
   String Email = "";
   String Token = "";
   String RecordOwnerID = "";
+  String NamaPartner = "";
+  String icon = "";
   int LocationID = -1;
   int roleID = -1;
   double hight = 0;
