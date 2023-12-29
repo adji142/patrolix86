@@ -27,7 +27,7 @@ class ModelsExecuteMaster extends CI_Model
         }
 
         $data = array(
-        	'LogDate' => date("Y-m-d-H-i-s"),
+        	'LogDate' => date("Y-m-d h:i:sa"),
 			'Event' => $Event,
 			'IPAddress' => $ip,
 			'RecordOwnerID' => $RecordOwnerID,
