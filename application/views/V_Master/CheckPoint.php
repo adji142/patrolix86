@@ -205,7 +205,7 @@
       $.ajax({
         type: "post",
         url: "<?=base_url()?>C_CheckPoint/generateQRCode",
-        // data: {'KodeCheckPoint':id, 'RecordOwnerID':RecordOwnerID},
+        data: {'LocationID':$('#KodeLokasi').val()},
         dataType: "json",
         success: function (response) {
           // console.log(response);
