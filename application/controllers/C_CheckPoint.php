@@ -123,12 +123,18 @@
 			$data = array('success' => false ,'message'=>array(),'data'=>array(), 'DownloadLink'=>'');
 
 			$RecordOwnerID = $this->session->userdata('RecordOwnerID');
+			$LocationID = $this->input->post('LocationID');
 			$DateCreateion = date("Ymd h:i:s");
 
 			// var_dump($DateCreateion);
 
 			try {
-				$rs = $this->ModelsExecuteMaster->FindData(array('RecordOwnerID'=>$RecordOwnerID),$this->table)->result();
+				if ($LocationID != '') {
+					$rs = $this->ModelsExecuteMaster->FindData(array('RecordOwnerID'=>$RecordOwnerID, 'LocationID'=>$LocationID),$this->table)->result();	 
+				}
+				else{
+					$rs = $this->ModelsExecuteMaster->FindData(array('RecordOwnerID'=>$RecordOwnerID),$this->table)->result();
+				}
 
 				$baseDir = FCPATH.'Assets/images/QRCode/';
 
