@@ -41,7 +41,7 @@
             $data = array('success' => false ,'message'=>array(),'data'=>array());
 
             $id = $this->input->post('id');
-            $KodeLokasi = $this->input->post('KodeLokasi');
+            $KodeLokasi = $this->input->post('LocationID');
             $RecordOwnerID = $this->input->post('RecordOwnerID');
             $KodeKaryawan = $this->input->post('KodeKaryawan');
             $TglAwal = $this->input->post('TglAwal');
