@@ -74,6 +74,7 @@
 
               <div class="col-md-3 col-sm-12  form-group">
                 <button class="btn btn-success" id="btSearch">Proses</button>
+                <button class="btn btn-warning" id="btExportpdf">Export PDF</button>
               </div>
 
               <div class="col-md-12 col-sm-12  form-group">
@@ -152,6 +153,28 @@
         }
       });
     });
+
+    $('#btExportpdf').click(function () {
+      $.ajax({
+        type: "post",
+        url: "<?=base_url()?>C_ReviewPatroli/generatePDF",
+        data: {
+          'TglAwal'       :$('#TglAwal').val(),
+          'TglAkhir'      :$('#TglAkhir').val(),
+          'RecordOwnerID' :RecordOwnerID,
+          'KodeKaryawan'  :$('#KodeKaryawan').val(),
+          'LocationID'    :$('#LocationID').val(),
+        },
+        dataType: "json",
+        success: function (response) {
+          // bindGrid(response.data);
+          var linkurl = "<?php echo base_url() ?>Assets/doc/"+RecordOwnerID+".pdf";
+
+          window.open(linkurl, '_blank');
+        }
+      });
+    })
+
     $('#LocationID').change(function () {
       $.ajax({
         async:false,
@@ -215,7 +238,7 @@
                 placeholder: "Search..."
             },
             export: {
-                enabled: false,
+                enabled: true,
                 fileName: "Daftar Patroli"
             },
             selection: {

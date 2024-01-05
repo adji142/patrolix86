@@ -332,6 +332,11 @@
                     allowEditing:false,
                 },
                 {
+                    dataField: "NamaArea",
+                    caption: "Lokasi Project",
+                    allowEditing:false,
+                },
+                {
                     dataField: "Checkin",
                     caption: "Checkin",
                     allowEditing:false,
