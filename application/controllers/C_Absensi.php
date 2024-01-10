@@ -43,13 +43,24 @@
                 $rs = $this->ModelsExecuteMaster->FindData($where, 'absensi');
 
                 if ($rs->num_rows() > 0) {
-                    if ($rs->row()->GantiHari == "1") {
-                        $data['success'] = true;
-                        $data['data'] = $rs->result();
+                    $oParamShift = array(
+                        'id' => $rs->row()->Shift,
+                    );
+                    $oShift = $this->ModelsExecuteMaster->FindData($oParamShift, 'tshift');
+
+                    if ($oShift->num_rows()) {
+                        if ($oShift->row()->GantiHari == "1") {
+                            $data['success'] = true;
+                            $data['data'] = $rs->result();
+                        }
+                        else{
+                            $data['success'] = true;
+                            $data['message'] = "0 Records count";
+                        }   
                     }
                     else{
-                        $data['success'] = true;
-                        $data['message'] = "0 Records count";
+                        $data['success'] = false;
+                        $data['message'] = "Invalid Shift";
                     }
                 }
                 else{
