@@ -57,7 +57,7 @@
 			}
 
 			if ($source=="mobile") {
-				$SQL .= " AND COALESCE(a.StatusKehadiran,'') != '' ";
+				$SQL .= " AND COALESCE(a.StatusKehadiran,'') = '' ";
 			}
 
 
