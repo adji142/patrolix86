@@ -37,7 +37,7 @@
                     'RecordOwnerID'     => $RecordOwnerID,
                     'LocationID'        => $KodeLokasi,
                     'KodeKaryawan'      => $KodeKaryawan,
-                    'Tanggal'           => date('Y-m-d', strtotime($currentDate . ' - 1 days'))
+                    'Tanggal'           => date('Y-m-d', strtotime($Tanggal . ' - 1 days'))
                 );
 
                 $rs = $this->ModelsExecuteMaster->FindData($where, 'absensi');
