@@ -23,6 +23,7 @@
 			$NIK = $this->input->post('NIK');
 			$Shift = $this->input->post('Shift');
 			$Kehadiran = $this->input->post('Kehadiran');
+			$source = $this->input->post('source');
 			
 			$SQL = "
 				SELECT 
@@ -38,7 +39,7 @@
 				LEFT JOIN tsecurity b on a.NIK = b.NIK and a.RecordOwnerID = b.RecordOwnerID
 				LEFT JOIN tshift c on a.Jadwal = c.id and a.RecordOwnerID = c.RecordOwnerID
 				LEFT JOIN tstatuskehadiran d on a.StatusKehadiran = d.id
-				WHERE a.Tanggal BETWEEN '".$TglAwal."' AND '".$TglAkhir."'
+				WHERE a.Tanggal BETWEEN date('".$TglAwal."') AND date('".$TglAkhir."')
 				AND a.RecordOwnerID = '".$RecordOwnerID."'
 				AND a.NIK = '".$NIK."'
 			";
@@ -53,6 +54,10 @@
 
 			if ($Kehadiran != "") {
 				$SQL .= " AND a.StatusKehadiran = '".$Kehadiran."' ";
+			}
+
+			if ($source=="mobile") {
+				$SQL .= " AND COALESCE(a.StatusKehadiran,'') != '' ";
 			}
 
 
