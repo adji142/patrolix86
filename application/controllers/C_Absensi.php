@@ -30,8 +30,34 @@
                 $data['data'] = $rs->result();
             }
             else{
-                $data['success'] = true;
-                $data['message'] = "0 Records count";
+                // $data['success'] = true;
+                // $data['message'] = "0 Records count";
+
+                $where = array(
+                    'RecordOwnerID'     => $RecordOwnerID,
+                    'LocationID'        => $KodeLokasi,
+                    'KodeKaryawan'      => $KodeKaryawan,
+                    'Tanggal'           => date('Y-m-d', strtotime($currentDate . ' - 1 days')); // Example: 2024-01-17
+                );
+
+                $rs = $this->ModelsExecuteMaster->FindData($where, 'absensi');
+
+                if ($rs->num_rows() > 0) {
+                    if ($rs->row()->GantiHari == "1") {
+                        $data['success'] = true;
+                        $data['data'] = $rs->result();
+                    }
+                    else{
+                        $data['success'] = true;
+                        $data['message'] = "0 Records count";
+                    }
+                }
+                else{
+                    $data['success'] = true;
+                    $data['message'] = "0 Records count";
+                }
+
+                // Check Lompat Hari
             }
 
             echo json_encode($data);
