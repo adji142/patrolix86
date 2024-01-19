@@ -50,7 +50,7 @@
 			$SQL2 = "
 				SELECT 
 					a.LocationID,
-					(TIMESTAMPDIFF(MINUTE, d.MulaiBekerja, d.SelesaiBekerja) * COUNT(DISTINCT a.KodeCheckPoint)) / (d.IntervalPatroli * 60) JumlahRencanaPatroli,
+					COUNT(DISTINCT a.KodeCheckPoint) JumlahRencanaPatroli,
 					COUNT(b.id) JumlahPatroliAktual
 				FROM tcheckpoint a
 				LEFT JOIN patroli b on a.KodeCheckPoint = b.KodeCheckPoint AND a.LocationID = b.LocationID AND a.RecordOwnerID = b.RecordOwnerID 
@@ -63,6 +63,7 @@
 			";
 			// CASE WHEN (SELECT x.GantiHari FROM tshift x where x.id = b.Shift and x.RecordOwnerID = b.RecordOwnerID AND x.LocationID = b.LocationID) = 1 THEN DATE_ADD(b.TanggalPatroli, INTERVAL -1 DAY) ELSE b.TanggalPatroli END
 
+			// (TIMESTAMPDIFF(MINUTE, d.MulaiBekerja, d.SelesaiBekerja) * COUNT(DISTINCT a.KodeCheckPoint)) / (d.IntervalPatroli * 60) JumlahRencanaPatroli,
 			$xRS = $this->db->query($SQL2);
 			if ($rs) {
 				// var_dump($xRS->num_rows());
