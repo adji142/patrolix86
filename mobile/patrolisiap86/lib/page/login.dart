@@ -357,7 +357,9 @@ class _LoginMobilePotraitState extends State<LoginMobilePotrait> {
                   "Login",
                   style: TextStyle(
                       fontFamily: "Montserrat",
-                      fontSize: this.widget.sess!.hight * 2),
+                      fontSize: this.widget.sess!.hight * 2,
+                      color: Colors.white
+                      ),
                 ),
                 style: ButtonStyle(
                     shape: MaterialStateProperty.all<RoundedRectangleBorder>(

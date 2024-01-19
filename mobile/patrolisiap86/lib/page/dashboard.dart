@@ -66,6 +66,7 @@ class _dashboardState extends State<Dashboard> {
     int shift = -1;
 
     // print(now.hour);
+    print(this.widget.sess!.jadwalShift);
     if (this.widget.sess!.jadwalShift.length > 0) {
       // print(this.widget.sess!.jadwalShift);
       for (var i = 0; i < this.widget.sess!.jadwalShift.length; i++) {
@@ -251,7 +252,11 @@ class _dashboardState extends State<Dashboard> {
                 width: this.widget.sess!.width * 10,
                 height: this.widget.sess!.width * 10,
                 // color: Colors.black,
-                child: this.widget.sess!.icon == "" ? Icon(Icons.person) : Image.network(this.widget.sess!.server + "/Assets/images/profile/" + this.widget.sess!.RecordOwnerID + ".jpeg"),
+                child: this.widget.sess!.icon == "" ? Icon(Icons.person) : Image.network(
+                  this.widget.sess!.server + "/Assets/images/profile/" + this.widget.sess!.icon,
+                  width: this.widget.sess!.width * 10,
+                  height: this.widget.sess!.width * 10,
+                ),
               ),
               Padding(
                 padding: EdgeInsets.only(
@@ -260,7 +265,8 @@ class _dashboardState extends State<Dashboard> {
                 child: Text(
                   this.widget.sess!.NamaPartner,
                   style: TextStyle(
-                    fontSize: this.widget.sess!.width * 4
+                    fontSize: this.widget.sess!.width * 4,
+                    color: Colors.white
                   ),
                 ),
               ),
@@ -278,7 +284,8 @@ class _dashboardState extends State<Dashboard> {
                       style: TextStyle(
                           fontSize: this.widget.sess!.width * 4,
                           fontWeight: FontWeight.bold,
-                          fontFamily: "Arial"),
+                          fontFamily: "Arial",
+                          color: Colors.white),
                     ),
                     onTap: () async {
                       // print("data tabed");
@@ -294,7 +301,10 @@ class _dashboardState extends State<Dashboard> {
           ],
         ),
         floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.add),
+          child: Icon(
+            Icons.add,
+            color: Colors.white,
+          ),
           backgroundColor: Theme.of(context).primaryColor,
           onPressed: () async {
             // Handle Notification
@@ -309,10 +319,7 @@ class _dashboardState extends State<Dashboard> {
                 };
               }
 
-              var xData =
-                  await Mod_Patroli(this.widget.sess, Parameter: oParamx())
-                      .getPatroliList()
-                      .then((valueData) {
+              var xData = await Mod_Patroli(this.widget.sess, Parameter: oParamx()).getPatroliList().then((valueData) {
                 if (valueData["data"].length > 0) {
                   Navigator.push(
                           context,
@@ -688,7 +695,7 @@ class _dashboardState extends State<Dashboard> {
               ),
               child: Container(
                 width: double.infinity,
-                height: this.widget.sess!.width * 65,
+                height: this.widget.sess!.width * 80,
                 // color: Colors.black,
                 // child: _listData(_data.length > 0 ? _data["data"] : []),
                 child: FutureBuilder(

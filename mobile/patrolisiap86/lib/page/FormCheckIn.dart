@@ -32,7 +32,7 @@ class _FormCheckInState extends State<FormCheckIn> {
   String image64 = "";
   Position? _currentPosition;
 
-  bool _isbuttondisable = true;
+  bool _isbuttondisable = false;
   bool _issaving = false;
 
   String _shift = "";
@@ -93,7 +93,8 @@ class _FormCheckInState extends State<FormCheckIn> {
   Future<void> _getCurrentPosition() async {
     final hasPermission = await _handleLocationPermission();
     if (!hasPermission) return;
-    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high).then((Position position) {
+    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
+        .then((Position position) {
       setState(() => _currentPosition = position);
       _setEnableCommand();
     }).catchError((e) {
@@ -113,34 +114,76 @@ class _FormCheckInState extends State<FormCheckIn> {
     String xShift = "";
     int shift = 0;
 
-    if(this.widget.sess.jadwalShift.length > 0){
+    if (this.widget.sess.jadwalShift.length > 0) {
       // print(this.widget.sess!.jadwalShift);
       for (var i = 0; i < this.widget.sess.jadwalShift.length; i++) {
-        var mulai = this.widget.sess.jadwalShift[i]["MulaiBekerja"].toString().split(":");
-        var selesai = this.widget.sess.jadwalShift[i]["SelesaiBekerja"].toString().split(":");
-        var isGantiHari = int.parse(this.widget.sess.jadwalShift[i]["GantiHari"]);
+        var mulai = this
+            .widget
+            .sess
+            .jadwalShift[i]["MulaiBekerja"]
+            .toString()
+            .split(":");
+        var selesai = this
+            .widget
+            .sess
+            .jadwalShift[i]["SelesaiBekerja"]
+            .toString()
+            .split(":");
+        var isGantiHari =
+            int.parse(this.widget.sess.jadwalShift[i]["GantiHari"]);
 
-        if(mulai.isNotEmpty){
-
-          DateTime defTime = DateTime(now.year, now.month, now.day, 0,0,1).toLocal();
+        if (mulai.isNotEmpty) {
+          DateTime defTime =
+              DateTime(now.year, now.month, now.day, 0, 0, 1).toLocal();
 
           // print(defTime);
-          DateTime jamMulai = DateTime(now.year, now.month, now.day, int.parse(mulai[0]), int.parse(mulai[1]), int.parse(mulai[0].split(".")[0]));
+          DateTime jamMulai = DateTime(
+              now.year,
+              now.month,
+              now.day,
+              int.parse(mulai[0]),
+              int.parse(mulai[1]),
+              int.parse(mulai[0].split(".")[0]));
           // DateTime jamSelesai = DateTime.utc(now.year, now.month, isGantiHari == 1 ? now.day +1 : now.day , int.parse(selesai[0]), int.parse(selesai[1]), int.parse(selesai[0].split(".")[0]));
-          DateTime jamSelesai = DateTime(now.year, now.month, now.day , int.parse(selesai[0]), int.parse(selesai[1]), int.parse(selesai[0].split(".")[0]));
-          
+          DateTime jamSelesai = DateTime(
+              now.year,
+              now.month,
+              now.day,
+              int.parse(selesai[0]),
+              int.parse(selesai[1]),
+              int.parse(selesai[0].split(".")[0]));
+
           // print(defTime.isAfter(now));
-          if (isGantiHari == 1 && now.isAfter(defTime) && now.isBefore(jamSelesai)){
+          if (isGantiHari == 1 &&
+              now.isAfter(defTime) &&
+              now.isBefore(jamSelesai)) {
             print("IN");
-            jamMulai = DateTime(now.year, now.month, now.day -1, int.parse(mulai[0]), int.parse(mulai[1]), int.parse(mulai[0].split(".")[0]));
-          }
-          else{
-            jamSelesai = DateTime(now.year, now.month, now.day +1 , int.parse(selesai[0]), int.parse(selesai[1]), int.parse(selesai[0].split(".")[0]));
+            jamMulai = DateTime(
+                now.year,
+                now.month,
+                now.day - 1,
+                int.parse(mulai[0]),
+                int.parse(mulai[1]),
+                int.parse(mulai[0].split(".")[0]));
+          } else {
+            jamSelesai = DateTime(
+                now.year,
+                now.month,
+                now.day + 1,
+                int.parse(selesai[0]),
+                int.parse(selesai[1]),
+                int.parse(selesai[0].split(".")[0]));
           }
           // print(jamMulai);
 
-          if(now.isAfter(jamMulai.toLocal()) && now.isBefore(jamSelesai.toLocal())){
-            xShift = this.widget.sess.jadwalShift[i]["NamaShift"].toString().toUpperCase();
+          if (now.isAfter(jamMulai.toLocal()) &&
+              now.isBefore(jamSelesai.toLocal())) {
+            xShift = this
+                .widget
+                .sess
+                .jadwalShift[i]["NamaShift"]
+                .toString()
+                .toUpperCase();
             shift = int.parse(this.widget.sess.jadwalShift[i]["id"]);
           }
 
@@ -186,19 +229,18 @@ class _FormCheckInState extends State<FormCheckIn> {
     });
   }
 
-
-  void _setEnableCommand(){
-    if(_currentPosition != null){
-      if("${_currentPosition!.latitude},${_currentPosition!.longitude}" == "," || image64 == ""){
-        _isbuttondisable =true;
-      }
-      else{
-        _isbuttondisable = false;
-      }
-    }
-    else{
-      _isbuttondisable = true;
-    }
+  void _setEnableCommand() {
+    // if(_currentPosition != null){
+    //   if("${_currentPosition!.latitude},${_currentPosition!.longitude}" == "," || image64 == ""){
+    //     _isbuttondisable =true;
+    //   }
+    //   else{
+    //     _isbuttondisable = false;
+    //   }
+    // }
+    // else{
+    //   _isbuttondisable = true;
+    // }
     setState(() {});
   }
 
@@ -329,49 +371,62 @@ class _FormCheckInState extends State<FormCheckIn> {
                   ),
 
                   ElevatedButton(
-                    child: _issaving == true ? CircularProgressIndicator() :Text("Proses Data",style: TextStyle(color: Colors.white),),
+                    child: _issaving == true
+                        ? CircularProgressIndicator()
+                        : Text(
+                            "Proses Data",
+                            style: TextStyle(color: Colors.white),
+                          ),
                     style: ButtonStyle(
-                        shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
-                                RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18.0),
+                        shape:MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0),
                       // side: BorderSide(color: Colors.red)
-                    ))),
-                    onPressed: _isbuttondisable ? null : () async{
-                      showLoadingDialog(context, _keyLoader, info: "Begin Login");
-                      Map oParam(){
-                        return{
-                          'RecordOwnerID' : this.widget.sess.RecordOwnerID,
-                          'KodeCheckPoint' : this.widget.KodeCheckPoint,
-                          'LocationID' : this.widget.sess.LocationID.toString(),
-                          'TanggalPatroli' : _tanggal.toString(),
-                          'KodeKaryawan' : this.widget.sess.KodeUser,
-                          'Koordinat' : "${_currentPosition!.latitude},${_currentPosition!.longitude}",
-                          'Image' : image64.toString(),
-                          'Catatan' : _catatan.text,
-                          'ImageName' : extentionPath,
-                          'Shift' : _kodeShift.toString()
-                        };
-                      }
+                    )),
+                    backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)),
+                    onPressed: _isbuttondisable
+                        ? null
+                        : () async {
+                            showLoadingDialog(context, _keyLoader,
+                                info: "Begin Login");
+                            Map oParam() {
+                              return {
+                                'RecordOwnerID': this.widget.sess.RecordOwnerID,
+                                'KodeCheckPoint': this.widget.KodeCheckPoint,
+                                'LocationID':
+                                    this.widget.sess.LocationID.toString(),
+                                'TanggalPatroli': _tanggal.toString(),
+                                'KodeKaryawan': this.widget.sess.KodeUser,
+                                'Koordinat':
+                                    "${_currentPosition!.latitude},${_currentPosition!.longitude}",
+                                'Image': image64.toString(),
+                                'Catatan': _catatan.text,
+                                'ImageName': extentionPath,
+                                'Shift': _kodeShift.toString()
+                              };
+                            }
 
-                      print(image64);
-                      print(oParam);
+                            print(image64);
+                            print(oParam);
 
-                      var temp = await Mod_Patroli(this.widget.sess, Parameter: oParam()).save().then((value) async{
-                        if(value["success"]){
-                          Navigator.of(context, rootNavigator: true).pop();
-                          Navigator.of(context).pop();
-                        }
-                        else{
-                          Navigator.of(context, rootNavigator: true).pop();
-                          await messageBox(
-                            context: context, 
-                            title: "Infomasi", 
-                            message: value["message"]
-                          );
-                        }
-                      });
-                    },
+                            if(image64 == ""){
+                              await messageBox(context: context,title: "Infomasi",message: "Harus Melampirkan Foto Kondisi Lokasi");
+                              Navigator.of(context, rootNavigator: true).pop();
+                              return;
+                            }
+
+                            var temp = await Mod_Patroli(this.widget.sess,Parameter: oParam()).save().then((value) async {
+                              if (value["success"]) {
+                                Navigator.of(context, rootNavigator: true).pop();
+                                Navigator.of(context).pop();
+                              } else {
+                                Navigator.of(context, rootNavigator: true).pop();
+                                await messageBox(
+                                    context: context,
+                                    title: "Infomasi",
+                                    message: value["message"]);
+                              }
+                            });
+
+                          },
                   )
                 ],
               ),
