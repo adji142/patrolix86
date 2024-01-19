@@ -31,14 +31,14 @@
 					CASE WHEN COUNT(b.id) >= 1 THEN 1 ELSE 0 END sts
 				FROM tcheckpoint a
 				LEFT JOIN patroli b on a.KodeCheckPoint = b.KodeCheckPoint AND a.LocationID = b.LocationID AND a.RecordOwnerID = b.RecordOwnerID 
-				AND DATE(CASE WHEN (SELECT x.GantiHari FROM tshift x where x.id = b.Shift and x.RecordOwnerID = b.RecordOwnerID AND x.LocationID = b.LocationID) = 1 THEN DATE_ADD(b.TanggalPatroli, INTERVAL -1 DAY) ELSE b.TanggalPatroli END) = DATE('".$TanggalPatroli."') 
+				AND DATE(b.TanggalPatroli) = DATE('".$TanggalPatroli."') 
 				AND b.KodeKaryawan = '".$KodeKaryawan."'
 				LEFT JOIN tlokasipatroli c on a.LocationID = c.id AND a.RecordOwnerID = c.RecordOwnerID
 				LEFT JOIN tshift d on b.shift = d.id and b.LocationID = d.LocationID and b.RecordOwnerID = d.RecordOwnerID
 				where a.RecordOwnerID = '".$RecordOwnerID."'
 				AND a.LocationID = '".$KodeLokasi."'
 			";
-
+			// CASE WHEN (SELECT x.GantiHari FROM tshift x where x.id = b.Shift and x.RecordOwnerID = b.RecordOwnerID AND x.LocationID = b.LocationID) = 1 THEN DATE_ADD(b.TanggalPatroli, INTERVAL -1 DAY) ELSE b.TanggalPatroli END
 			if ($KodeCheckPoint != "") {
 				$SQL .= " AND a.KodeCheckPoint = '".$KodeCheckPoint."' ";
 			}
@@ -54,13 +54,14 @@
 					COUNT(b.id) JumlahPatroliAktual
 				FROM tcheckpoint a
 				LEFT JOIN patroli b on a.KodeCheckPoint = b.KodeCheckPoint AND a.LocationID = b.LocationID AND a.RecordOwnerID = b.RecordOwnerID 
-				AND DATE(CASE WHEN (SELECT x.GantiHari FROM tshift x where x.id = b.Shift and x.RecordOwnerID = b.RecordOwnerID AND x.LocationID = b.LocationID) = 1 THEN DATE_ADD(b.TanggalPatroli, INTERVAL -1 DAY) ELSE b.TanggalPatroli END) = DATE('".$TanggalPatroli."') 
+				AND DATE(b.TanggalPatroli) = DATE('".$TanggalPatroli."') 
 				AND b.KodeKaryawan = '".$KodeKaryawan."'
 				LEFT JOIN tshift d on b.shift = d.id and b.LocationID = d.LocationID and b.RecordOwnerID = d.RecordOwnerID
 				where a.RecordOwnerID = '".$RecordOwnerID."'
 				AND a.LocationID = '".$KodeLokasi."'
 				GROUP BY a.LocationID
 			";
+			// CASE WHEN (SELECT x.GantiHari FROM tshift x where x.id = b.Shift and x.RecordOwnerID = b.RecordOwnerID AND x.LocationID = b.LocationID) = 1 THEN DATE_ADD(b.TanggalPatroli, INTERVAL -1 DAY) ELSE b.TanggalPatroli END
 
 			$xRS = $this->db->query($SQL2);
 			if ($rs) {
