@@ -21,7 +21,7 @@
                 'RecordOwnerID'     => $RecordOwnerID,
                 'LocationID'        => $KodeLokasi,
                 'KodeKaryawan'      => $KodeKaryawan,
-                'Tanggal'           => $Tanggal
+                'Tanggal'           => date_format(date_create($Tanggal),'Y-m-d')
             );
             $rs = $this->ModelsExecuteMaster->FindData($where, 'absensi');
 
@@ -49,7 +49,12 @@
                     $oShift = $this->ModelsExecuteMaster->FindData($oParamShift, 'tshift');
 
                     if ($oShift->num_rows()) {
-                        if ($oShift->row()->GantiHari == "1") {
+                        $xTanggalAwal = date('Y-m-d H:i:s', strtotime(date_format(date_create($Tanggal),'Y-m-d').' '.$oShift->row()->MulaiBekerja . ' - 1 days'));
+                        $xTanggalAkhir = date_format(date_create(date_format(date_create($Tanggal),'Y-m-d').' '.$oShift->row()->SelesaiBekerja),'Y-m-d H:i:s');
+                        // echo 'Mulai : '. $xTanggalAwal.'<br> Selesai : '.$xTanggalAkhir.'<br>'.$Tanggal.'<br>';
+
+                        // $oShift->row()->GantiHari == "1"
+                        if ($Tanggal >= $xTanggalAwal && $Tanggal <= $xTanggalAkhir) {
                             $data['success'] = true;
                             $data['data'] = $rs->result();
                         }
