@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mobilepatrol/general/dialog.dart';
 import 'package:mobilepatrol/general/session.dart';
 import 'package:mobilepatrol/models/absensi.dart';
@@ -90,7 +92,8 @@ class _FormAbsensi extends State<FormAbsensi> {
         'TglAkhir'  : nowDate,
         'id'        : '',
         'RecordOwnerID' : this.widget.sess.RecordOwnerID,
-        'NIK'       : this.widget.sess.KodeUser
+        'NIK'       : this.widget.sess.KodeUser,
+        'source'    : "mobile"
       };
     }
 
@@ -149,12 +152,12 @@ class _FormAbsensi extends State<FormAbsensi> {
   }
 
   _fetchData() async{
-    var temJadwal = await _getJadwal();
     var temAbsen = await _getAbsen();
-
-    dataJadwal = temJadwal["data"];
     dataAbsen = temAbsen["data"];
+    setState(() => {});
 
+    var temJadwal = await _getJadwal();
+    dataJadwal = temJadwal["data"];
     setState(() => {});
   }
 
@@ -263,13 +266,21 @@ class _FormAbsensi extends State<FormAbsensi> {
 
             
           }
+          else{
+            Navigator.of(context, rootNavigator: true).pop();
+            await messageBox(
+              context: context, 
+              title: "Infomasi", 
+              message: "Face not Match"
+            );
+          }
         }
         else{
           Navigator.of(context, rootNavigator: true).pop();
           await messageBox(
             context: context, 
             title: "Infomasi", 
-            message: "Face not Match"
+            message: "Face not Found"
           );
         }
       });
@@ -333,31 +344,57 @@ class _FormAbsensi extends State<FormAbsensi> {
                       )),
                       backgroundColor: MaterialStateProperty.all(Colors.green)),
                   onPressed: dataAbsen!.length > 0 ? null :() async{
+                    
                     _getCurrentPosition();
-                    Regula.FaceSDK.presentFaceCaptureActivity().then((result) async {
-                      var response = Regula.FaceCaptureResponse.fromJson(json.decode(result))!;
-                      if (response.image != null && response.image!.bitmap != null){
-                        showLoadingDialog(context, _keyLoader, info: "Begin Login");
+                    final ImagePicker _picker = ImagePicker();
 
-                        // var img1 = Image.memory(dataJadwal![0]["Image"]);
-                        var tempImage1 = base64Decode(dataJadwal![0]["Image"].toString().replaceAll("data:image/jpeg;base64,", ""));
-                        var tempImage2 = base64Decode(response.image!.bitmap!.replaceAll("\n", ""));
-                        // var img2 = Image.memory(tempImage2);
+                    await _picker.pickImage(
+                      source: ImageSource.camera, 
+                      maxHeight: 600,
+                      preferredCameraDevice: CameraDevice.front
+                    ).then((value) {
+                      showLoadingDialog(context, _keyLoader, info: "Begin Scaning");
 
-                        image1.bitmap = base64Encode(tempImage1);
-                        image1.imageType = Regula.ImageType.PRINTED;
-                        image2.bitmap = base64Encode(tempImage2);
-                        image2.imageType = Regula.ImageType.LIVE;
-                        setState(() {
-                          
-                        });
-
-
-                        print(image1.bitmap);
-                        await matchFaces("in");
-
+                      var tempImage1 = base64Decode(dataJadwal![0]["Image"].toString().replaceAll("data:image/jpeg;base64,", ""));
+                      // var tempImage2 = base64Decode(File(value!.path).readAsStringSync());
+                      File? imageFile;
+                      imageFile = File(value!.path);
+                      if (imageFile != null) {
+                        final bites = imageFile.readAsBytesSync();
+                        image2.bitmap = base64Encode(bites);
+                        image2.imageType = Regula.ImageType.PRINTED;
                       }
-                    });
+
+                      image1.bitmap = base64Encode(tempImage1);
+                      image1.imageType = Regula.ImageType.PRINTED;
+                      
+
+                      matchFaces("in");
+                  });
+                    // Regula.FaceSDK.presentFaceCaptureActivity().then((result) async {
+                    //   var response = Regula.FaceCaptureResponse.fromJson(json.decode(result))!;
+                    //   if (response.image != null && response.image!.bitmap != null){
+                    //     showLoadingDialog(context, _keyLoader, info: "Begin Scaning");
+
+                    //     // var img1 = Image.memory(dataJadwal![0]["Image"]);
+                    //     var tempImage1 = base64Decode(dataJadwal![0]["Image"].toString().replaceAll("data:image/jpeg;base64,", ""));
+                    //     var tempImage2 = base64Decode(response.image!.bitmap!.replaceAll("\n", ""));
+                    //     // var img2 = Image.memory(tempImage2);
+
+                    //     image1.bitmap = base64Encode(tempImage1);
+                    //     image1.imageType = Regula.ImageType.PRINTED;
+                    //     image2.bitmap = base64Encode(tempImage2);
+                    //     image2.imageType = Regula.ImageType.LIVE;
+                    //     setState(() {
+                          
+                    //     });
+
+
+                    //     // print(image1.bitmap);
+                    //     await matchFaces("in");
+
+                    //   }
+                    // });
 
                     // if(isMatch){
                     //   Navigator.of(context, rootNavigator: true).pop();
@@ -386,30 +423,55 @@ class _FormAbsensi extends State<FormAbsensi> {
                         borderRadius: BorderRadius.circular(18.0),
                       )),
                       backgroundColor: MaterialStateProperty.all(Colors.red)),
-                  onPressed: dataAbsen!.length == 0 ? null : dataAbsen![0]["ImageOUT"] != "" ? null : () {
+                  onPressed: dataAbsen!.length == 0 ? null : dataAbsen![0]["ImageOUT"] != "" ? null : () async{
                     _getCurrentPosition();
-                    Regula.FaceSDK.presentFaceCaptureActivity().then((result) async {
-                      var response = Regula.FaceCaptureResponse.fromJson(json.decode(result))!;
-                      if (response.image != null && response.image!.bitmap != null){
-                        showLoadingDialog(context, _keyLoader, info: "Begin Login");
+                    final ImagePicker _picker = ImagePicker();
 
-                        // var img1 = Image.memory(dataJadwal![0]["Image"]);
-                        var tempImage1 = base64Decode(dataJadwal![0]["Image"].toString().replaceAll("data:image/jpeg;base64,", ""));
-                        var tempImage2 = base64Decode(response.image!.bitmap!.replaceAll("\n", ""));
-                        // var img2 = Image.memory(tempImage2);
+                    await _picker.pickImage(
+                      source: ImageSource.camera, 
+                      maxHeight: 600,
+                      preferredCameraDevice: CameraDevice.front
+                    ).then((value) {
+                      showLoadingDialog(context, _keyLoader, info: "Begin Scaning");
 
-                        image1.bitmap = base64Encode(tempImage1);
-                        image1.imageType = Regula.ImageType.PRINTED;
-                        image2.bitmap = base64Encode(tempImage2);
-                        image2.imageType = Regula.ImageType.LIVE;
-                        setState(() {
-                          
-                        });
-
-                        await matchFaces("out");
-
+                      var tempImage1 = base64Decode(dataJadwal![0]["Image"].toString().replaceAll("data:image/jpeg;base64,", ""));
+                      // var tempImage2 = base64Decode(File(value!.path).readAsStringSync());
+                      File? imageFile;
+                      imageFile = File(value!.path);
+                      if (imageFile != null) {
+                        final bites = imageFile.readAsBytesSync();
+                        image2.bitmap = base64Encode(bites);
+                        image2.imageType = Regula.ImageType.PRINTED;
                       }
-                    });
+
+                      image1.bitmap = base64Encode(tempImage1);
+                      image1.imageType = Regula.ImageType.PRINTED;
+                      
+
+                      matchFaces("out");
+                  });
+                    // Regula.FaceSDK.presentFaceCaptureActivity().then((result) async {
+                    //   var response = Regula.FaceCaptureResponse.fromJson(json.decode(result))!;
+                    //   if (response.image != null && response.image!.bitmap != null){
+                    //     showLoadingDialog(context, _keyLoader, info: "Begin Scaning");
+
+                    //     // var img1 = Image.memory(dataJadwal![0]["Image"]);
+                    //     var tempImage1 = base64Decode(dataJadwal![0]["Image"].toString().replaceAll("data:image/jpeg;base64,", ""));
+                    //     var tempImage2 = base64Decode(response.image!.bitmap!.replaceAll("\n", ""));
+                    //     // var img2 = Image.memory(tempImage2);
+
+                    //     image1.bitmap = base64Encode(tempImage1);
+                    //     image1.imageType = Regula.ImageType.PRINTED;
+                    //     image2.bitmap = base64Encode(tempImage2);
+                    //     image2.imageType = Regula.ImageType.LIVE;
+                    //     setState(() {
+                          
+                    //     });
+
+                    //     await matchFaces("out");
+
+                    //   }
+                    // });
                   },
                 ),
               ),
