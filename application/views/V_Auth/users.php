@@ -238,6 +238,7 @@
               $.each(response.data,function (k,v) {
                 console.log(response.data);
                 // $('#KodePenyakit').val(v.KodePenyakit).change;
+                $("#uname").prop("disabled", true);
                 $('#uname').val(v.username);
                 $('#nama').val(v.nama);
                 $('#pass').val(response.decript);
@@ -341,7 +342,7 @@
                 // logEvent(e);
             },
             onRowRemoving: function(e) {
-              id = e.data.id;
+              id = e.data.UserId;
               Swal.fire({
                 title: 'Apakah anda yakin?',
                 text: "anda akan menghapus data di baris ini !",
@@ -352,9 +353,6 @@
                 confirmButtonText: 'Yes, delete it!'
               }).then((result) => {
                 if (result.value) {
-                  var table = 'app_setting';
-                  var field = 'id';
-                  var value = id;
 
                   $.ajax({
                       type    :'post',
