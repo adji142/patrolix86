@@ -237,6 +237,7 @@
         success: function (response) {
           $.each(response.data,function (k,v) {
             // $('#KodePenyakit').val(v.KodePenyakit).change;
+            $("#KodeCheckPoint").prop("disabled", true);
             $('#KodeCheckPoint').val(v.KodeCheckPoint);
             $('#NamaCheckPoint').val(v.NamaCheckPoint);
             $('#Keterangan').val(v.Keterangan);

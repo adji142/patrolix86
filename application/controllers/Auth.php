@@ -142,7 +142,15 @@ class Auth extends CI_Controller {
 		}
 		elseif ($formtype == 'delete') {
 			try {
-				$SQL = "DELETE FROM users WHERE id = ".$id;
+				$oUser = $this->ModelsExecuteMaster->FindData(array('userid'=>$id,'roleid'=>3),'userrole');
+
+				if ($oUser->num_rows() >0) {
+					$data['success'] = false;
+					$data['message'] = "User Security hanya bisa dihapus dari Menu Master Security";
+					goto jump;
+				}
+
+				$SQL = "DELETE FROM users WHERE id = ".$id." And RecordOwnerID = '".$this->session->userdata('RecordOwnerID')."'";
 				$rs = $this->db->query($SQL);
 				if ($rs) {
 					$data['success'] = true;
@@ -152,6 +160,7 @@ class Auth extends CI_Controller {
 				$data['message'] = "Gagal memproses data ". $e->getMessage();
 			}
 		}
+		jump:
 		echo json_encode($data);
 	}
 	public function changepass()
