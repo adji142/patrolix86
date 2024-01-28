@@ -302,7 +302,7 @@
         success: function (response) {
           $.each(response.data,function (k,v) {
             // $('#KodePenyakit').val(v.KodePenyakit).change;
-            $("#NIK").prop("disabled", true);
+            $("#NIK").prop("readonly", true);
             $('#NIK').val(v.NIK);
             $('#NamaSecurity').val(v.NamaSecurity);
             $('#JoinDate').val(v.JoinDate);
