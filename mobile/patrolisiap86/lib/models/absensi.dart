@@ -12,6 +12,7 @@ class Mod_Absensi {
   Future<Map> Read() async{
     var url = Uri.parse(sess!.server+"APIAttRead");
     final response = await http.post(url,body: this.Parameter);
+    print(this.Parameter);
     return json.decode(response.body);
   }
 
