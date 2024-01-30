@@ -25,6 +25,8 @@
             );
             $rs = $this->ModelsExecuteMaster->FindData($where, 'absensi');
 
+            // var_dump($rs->result());
+
             if($rs->num_rows() > 0){
                 $data['success'] = true;
                 $data['data'] = $rs->result();
@@ -42,15 +44,18 @@
 
                 $rs = $this->ModelsExecuteMaster->FindData($where, 'absensi');
 
+                // var_dump($rs->result());
+
                 if ($rs->num_rows() > 0) {
                     $oParamShift = array(
                         'id' => $rs->row()->Shift,
                     );
+                    // var_dump($oParamShift);
                     $oShift = $this->ModelsExecuteMaster->FindData($oParamShift, 'tshift');
 
-                    if ($oShift->num_rows()) {
+                    if ($oShift->num_rows() >0) {
                         $xTanggalAwal = date('Y-m-d H:i:s', strtotime(date_format(date_create($Tanggal),'Y-m-d').' '.$oShift->row()->MulaiBekerja . ' - 1 days'));
-                        $xTanggalAkhir = date_format(date_create(date_format(date_create($Tanggal),'Y-m-d').' '.$oShift->row()->SelesaiBekerja),'Y-m-d H:i:s');
+                        $xTanggalAkhir = date_format(date_create(date_format(date_create($Tanggal),'Y-m-d').' 23:59:00'),'Y-m-d H:i:s');
                         // echo 'Mulai : '. $xTanggalAwal.'<br> Selesai : '.$xTanggalAkhir.'<br>'.$Tanggal.'<br>';
 
                         // $oShift->row()->GantiHari == "1"
