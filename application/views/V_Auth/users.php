@@ -238,7 +238,7 @@
               $.each(response.data,function (k,v) {
                 console.log(response.data);
                 // $('#KodePenyakit').val(v.KodePenyakit).change;
-                $("#uname").prop("disabled", true);
+                $("#uname").prop("readonly", true);
                 $('#uname').val(v.username);
                 $('#nama').val(v.nama);
                 $('#pass').val(response.decript);
