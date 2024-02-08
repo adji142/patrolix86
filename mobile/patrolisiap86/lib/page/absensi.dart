@@ -114,13 +114,19 @@ class _FormAbsensi extends State<FormAbsensi> {
   }
 
   Future<Map>_getAbsen() async{
-    String nowDate = DateTime.now().year.toString() + "-" + DateTime.now().month.toString() + "-" + DateTime.now().day.toString();
+    int monthLength = (DateTime.now().month.toString()).length;
+    int dayLength = (DateTime.now().day.toString()).length;
+    int hourLength = (DateTime.now().hour.toString()).length;
+    int minLength = (DateTime.now().minute.toString()).length;
+    int secLength = (DateTime.now().second.toString()).length;
+    
+    String nowDate = DateTime.now().year.toString() + "-" +(monthLength == 1 ? "0"+DateTime.now().month.toString() : DateTime.now().month.toString()) + "-" + (dayLength == 1 ? "0"+DateTime.now().day.toString() : DateTime.now().day.toString()) + " " + (hourLength == 1 ? "0"+DateTime.now().hour.toString(): DateTime.now().hour.toString()) +":" + (minLength == 1 ? "0"+DateTime.now().minute.toString():DateTime.now().minute.toString()) +":"+DateTime.now().second.toString();
     Map oParam(){
       return {
         'KodeLokasi'    : this.widget.sess.LocationID.toString(),
         'RecordOwnerID' : this.widget.sess.RecordOwnerID,
         'KodeKaryawan'  : this.widget.sess.KodeUser,
-        'Tanggal'       : nowDate,
+        'Tanggal'       : nowDate
       };
     }
     var temp = await Mod_Absensi(this.widget.sess, oParam()).Read();
@@ -283,6 +289,14 @@ class _FormAbsensi extends State<FormAbsensi> {
             message: "Face not Found"
           );
         }
+      }).onError((error, stackTrace) async{
+        print("ini ada error : " + error.toString());
+        Navigator.of(context, rootNavigator: true).pop();
+        await messageBox(
+            context: context, 
+            title: "Infomasi", 
+            message: "Wajah tidak ada disistem"
+          );
       });
     });
   }
@@ -324,7 +338,23 @@ class _FormAbsensi extends State<FormAbsensi> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
-        title: Text("Absensi"),
+        title: Text(
+          "Absensi",
+          style: TextStyle(
+            color: Colors.white
+          ),
+        ),
+        actions: [
+          Padding(
+            padding: EdgeInsets.all(5),
+            child: Text(
+              "V 1.0.15",
+              style: TextStyle(
+                color: Colors.white
+              ),
+            ),
+          )
+        ],
       ),
       bottomNavigationBar: BottomAppBar(
         child: dataJadwal!.length > 0 ? Row(
@@ -344,7 +374,7 @@ class _FormAbsensi extends State<FormAbsensi> {
                       )),
                       backgroundColor: MaterialStateProperty.all(Colors.green)),
                   onPressed: dataAbsen!.length > 0 ? null :() async{
-                    
+                    showLoadingDialog(context, _keyLoader, info: "Begin Scaning");
                     _getCurrentPosition();
                     final ImagePicker _picker = ImagePicker();
 
@@ -353,8 +383,6 @@ class _FormAbsensi extends State<FormAbsensi> {
                       maxHeight: 600,
                       preferredCameraDevice: CameraDevice.front
                     ).then((value) {
-                      showLoadingDialog(context, _keyLoader, info: "Begin Scaning");
-
                       var tempImage1 = base64Decode(dataJadwal![0]["Image"].toString().replaceAll("data:image/jpeg;base64,", ""));
                       // var tempImage2 = base64Decode(File(value!.path).readAsStringSync());
                       File? imageFile;
@@ -424,6 +452,7 @@ class _FormAbsensi extends State<FormAbsensi> {
                       )),
                       backgroundColor: MaterialStateProperty.all(Colors.red)),
                   onPressed: dataAbsen!.length == 0 ? null : dataAbsen![0]["ImageOUT"] != "" ? null : () async{
+                    showLoadingDialog(context, _keyLoader, info: "Begin Scaning");
                     _getCurrentPosition();
                     final ImagePicker _picker = ImagePicker();
 
@@ -432,7 +461,7 @@ class _FormAbsensi extends State<FormAbsensi> {
                       maxHeight: 600,
                       preferredCameraDevice: CameraDevice.front
                     ).then((value) {
-                      showLoadingDialog(context, _keyLoader, info: "Begin Scaning");
+                      // showLoadingDialog(context, _keyLoader, info: "Begin Scaning");
 
                       var tempImage1 = base64Decode(dataJadwal![0]["Image"].toString().replaceAll("data:image/jpeg;base64,", ""));
                       // var tempImage2 = base64Decode(File(value!.path).readAsStringSync());
