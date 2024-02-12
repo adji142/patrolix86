@@ -79,6 +79,13 @@ $route['APIGetPayment'] = 'Auth/getMetodePembayaran';
 $route['APIGetLookupPayment'] = 'Auth/lookupMetodePembayaran';
 $route['APIPricingTable'] = 'C_Pricing/ReadPricingTable';
 $route['APIPricingTerm'] = 'C_Pricing/ReadPricingTerm';
+$route['APIGuestLog'] = 'C_GuestLog/Read';
+$route['APIFindGuestLog'] = 'C_GuestLog/Find';
+$route['APICRUDGuestLog'] = 'C_GuestLog/CRUD';
+
+$route['APIDailyActivity'] = 'C_DailyActivity/Read';
+$route['APIFindDailyActivity'] = 'C_DailyActivity/Find';
+$route['APICRUDDailyActivity'] = 'C_DailyActivity/CRUD';
 // API TOKEN
 
 $route['permissionread'] = 'Auth/C_Permission/permission';
@@ -100,6 +107,8 @@ $route['review'] = 'Home/readReview';
 $route['map/(:num)'] = 'Home/loadmap/$1';
 
 $route['reviewabsen'] = 'Home/readReviewabsen';
+$route['reviewbukutamu'] = 'Home/readBukuTamu';
+$route['reviewdailyactivity'] = 'Home/readDailyActivity';
 // Tools
 $route['backup'] = 'C_SD/bk';
 $route['selftdest'] = 'C_SD/selfDestruct';

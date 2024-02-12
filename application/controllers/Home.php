@@ -150,6 +150,86 @@ class home extends CI_Controller {
 	{
 		$this->load->view('applyDocument');
 	}
+
+	public function LoadPerformaPatroli()
+	{
+		$data = array('success' => false ,'message'=>'','data'=>array());
+
+		$TglAwal = $this->input->post('TglAwal');
+		$TglAkhir = $this->input->post('TglAkhir');
+		$RecordOwnerID = $this->input->post('RecordOwnerID');
+		$LocationID = $this->input->post('LocationID');
+
+		$targetPatroli =array();
+		$realisasiPatroli =array();
+
+		$output = array();
+
+		// Target
+		$oWhereTarget = array(
+			'RecordOwnerID' => $RecordOwnerID
+		);
+
+		if ($LocationID != "") {
+			$oWhereTarget['LocationID'] = $LocationID;
+		}
+
+		$target = $this->ModelsExecuteMaster->FindData($oWhereTarget,'tcheckpoint');
+
+		if ($target->num_rows() > 0) {
+			for ($i=0; $i < 12 ; $i++) {
+				$year = explode("-", $TglAwal);
+				$d=cal_days_in_month(CAL_GREGORIAN, $i+1 ,$year[0]);
+				array_push($targetPatroli, $target->num_rows() * $d);
+			}
+		}
+		else{
+			for ($i=0; $i < 12 ; $i++) { 
+				array_push($targetPatroli, 0);
+			}
+		}
+
+		$data['data']['target'] = $targetPatroli;
+
+		// end Target
+
+		// Realisasi
+
+		$owhere = array(
+            'RecordOwnerID'     		=> $RecordOwnerID,
+            'CAST(TanggalPatroli AS DATE) >='  => $TglAwal,
+            'CAST(TanggalPatroli AS DATE) <='	=> $TglAkhir
+        );
+
+        if ($LocationID != "") {
+			$owhere['LocationID'] = $LocationID;
+		}
+
+		$this->db->select('MONTH(TanggalPatroli) as Bulan, COUNT(*) as Realisai ');
+		$this->db->from('patroli');
+		$this->db->where($owhere);
+		$this->db->group_by('MONTH(TanggalPatroli)');
+		$this->db->order_by('MONTH(TanggalPatroli)');
+
+		$rs = $this->db->get();
+
+		if ($rs->num_rows() > 0) {
+			foreach ($rs->result() as $key) {
+				// var_dump($key['Realisai']);
+				array_push($realisasiPatroli, intval($key->Realisai));
+			}
+
+			for ($i=0; $i < 12 - $rs->num_rows() ; $i++) { 
+				array_push($realisasiPatroli, 0);
+			}
+
+			$data['data']['realisasi'] = $realisasiPatroli;
+			$data['success'] = true;
+			$data['message'] = '';
+		}
+
+		echo json_encode($data);
+	}
 	// --------------------------------------- Master ----------------------------------------------------
 	public function permission()
 	{
@@ -218,5 +298,14 @@ class home extends CI_Controller {
 	public function readReviewabsen()
 	{
 		$this->load->view('V_Report/reviewabsen');
+	}
+
+	public function readBukuTamu()
+	{
+		$this->load->view('V_Report/reviewbukutamu');
+	}
+	public function readDailyActivity()
+	{
+		$this->load->view('V_Report/reviewdailyactivity');
 	}
 }
