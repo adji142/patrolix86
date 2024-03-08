@@ -109,6 +109,7 @@ $route['map/(:num)'] = 'Home/loadmap/$1';
 $route['reviewabsen'] = 'Home/readReviewabsen';
 $route['reviewbukutamu'] = 'Home/readBukuTamu';
 $route['reviewdailyactivity'] = 'Home/readDailyActivity';
+$route['attmaintain'] = 'Home/attMaintain';
 // Tools
 $route['backup'] = 'C_SD/bk';
 $route['selftdest'] = 'C_SD/selfDestruct';

@@ -308,4 +308,9 @@ class home extends CI_Controller {
 	{
 		$this->load->view('V_Report/reviewdailyactivity');
 	}
+
+	public function attMaintain()
+	{
+		$this->load->view('V_Report/attandancemaintainance');
+	}
 }
