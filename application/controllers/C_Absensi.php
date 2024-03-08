@@ -115,11 +115,13 @@
                     a.KoordinatIN,
                     a.ImageIN,
                     a.Checkin,
+                    DATE(a.Checkin) oriCheckinDate,
                     DATE_FORMAT(DATE(a.Checkin),'%d-%m-%Y') CheckinDate,
                     DATE_FORMAT(a.Checkin,'%T') CheckinTime,
                     a.KoordinatOUT,
                     a.ImageOUT,
                     a.CheckOut,
+                    DATE(a.CheckOut) oriCheckoutDate,
                     DATE_FORMAT(DATE(a.CheckOut),'%d-%m-%Y') CheckoutDate,
                     DATE_FORMAT(a.CheckOut,'%T') CheckoutTime,
                     a.Tanggal,
@@ -254,6 +256,28 @@
             echo json_encode($data);
         }
 
+        public function UpdateAbsensi()
+        {
+            $data = array('success' => false ,'message'=>array(),'data'=>array());
+
+            $checkindate = $this->input->post('checkindate');
+            $checkoutdata = $this->input->post('checkoutdata');
+            $id = $this->input->post('id');
+
+            $SQL = "UPDATE absensi SET Checkin = '".$checkindate."', CheckOut = '".$checkoutdata."' where id =".$id;
+
+            $rs = $this->db->query($SQL);
+
+            if($rs){
+                $data['success'] = true;
+            }
+            else{
+                $data['success'] = false;
+                $data['message'] = "Sistem Gagal Memproses Data";
+            }
+
+            echo json_encode($data);
+        }
 
 
     }
