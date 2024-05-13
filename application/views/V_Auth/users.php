@@ -244,7 +244,7 @@
                 $('#pass').val(response.decript);
                 $('#roles').val(v.roleid).trigger('change');
                 $('#id').val(v.id);
-                $('#LocationID').val(v.LocationID);
+                $('#LocationID').val(v.AreaUser);
                 // $('#Nilai').val(v.Nilai);
 
                 $('#formtype').val("edit");
