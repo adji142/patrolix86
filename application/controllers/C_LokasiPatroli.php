@@ -79,6 +79,11 @@
 					goto jump;
 				}
 
+				$oParam = array(
+					'LocationID' 	=> $id,
+					'RecordOwnerID'	=> $RecordOwnerID,
+					'Status' => 1
+				);
 				$count = $this->ModelsExecuteMaster->FindData($oParam, 'tsecurity')->num_rows();
 
 				if ($count > 0) {
