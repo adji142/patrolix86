@@ -7,7 +7,7 @@ class Lookup extends StatefulWidget {
   final dynamic datamodel;
   final Map ? parameter;
 
-  Lookup({required this.title, this.datamodel, this.parameter});
+  const Lookup({super.key, required this.title, this.datamodel, this.parameter});
   
   @override
   _LookupState createState() => _LookupState();
@@ -17,8 +17,8 @@ class _LookupState extends State<Lookup> {
 
   int _short = 0;
   bool _searchMode = true;
-  Icon _appIcon = Icon(Icons.search, size: 32.0,);
-  TextEditingController _searchText = TextEditingController();
+  Icon _appIcon = const Icon(Icons.search, size: 32.0,);
+  final TextEditingController _searchText = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -38,12 +38,12 @@ class _LookupState extends State<Lookup> {
                 onPressed: () {
                   _searchMode = _searchMode ? false: true;
                   _searchText.text = "";
-                  setState(() => _appIcon = _searchMode ? Icon(Icons.search) : Icon(Icons.close));                  
+                  setState(() => _appIcon = _searchMode ? const Icon(Icons.search) : const Icon(Icons.close));                  
                 },
               ),
 
               IconButton(
-                icon: Icon(Icons.import_export, size: 32,),
+                icon: const Icon(Icons.import_export, size: 32,),
                 onPressed: (){
                   _short = _short == 0 ? 1 : 0;
                   setState((){});
@@ -53,7 +53,7 @@ class _LookupState extends State<Lookup> {
       ),
       body: Container(
         child: FutureBuilder(
-          future: this.widget.datamodel.getLookup(this.widget.parameter),
+          future: widget.datamodel.getLookup(widget.parameter),
           builder: (context,AsyncSnapshot<Map> snapshot) {
             if (snapshot.hasError) print(snapshot.error);
             return snapshot.hasData
@@ -82,8 +82,8 @@ class _LookupState extends State<Lookup> {
                       }
                     ),
                   )
-                : new Center(
-                      child: new CircularProgressIndicator(),
+                : const Center(
+                      child: CircularProgressIndicator(),
                   );
           },
         )
@@ -93,7 +93,7 @@ class _LookupState extends State<Lookup> {
   
   Widget _searchWidget() {
     if(_searchMode) {
-      return Text(this.widget.title);
+      return Text(widget.title);
     }else {
       return (
         Container(
@@ -103,10 +103,10 @@ class _LookupState extends State<Lookup> {
             child: TextField(
               controller: _searchText,
               autofocus: true,
-              decoration: InputDecoration.collapsed(hintText: "Cari Data"),
+              decoration: const InputDecoration.collapsed(hintText: "Cari Data"),
               textInputAction: TextInputAction.search,
               onChanged: (value) => setState((){
-                this.widget.parameter!.putIfAbsent("kriteria", ()=>_searchText.text);
+                widget.parameter!.putIfAbsent("kriteria", ()=>_searchText.text);
               })
             ),
           )
@@ -145,8 +145,8 @@ class _LookupState extends State<Lookup> {
   Future _refreshData() async{
       setState((){});
 
-      Completer<Null> completer = Completer<Null>();
-      Future.delayed(Duration(seconds: 1)).then( (_) {
+      Completer<void> completer = Completer<void>();
+      Future.delayed(const Duration(seconds: 1)).then( (_) {
         completer.complete();
       });
       return completer.future;

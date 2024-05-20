@@ -7,13 +7,13 @@ Future messageDialog({required BuildContext context, required String title, requ
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          titlePadding: EdgeInsets.all(5),
-          contentPadding: EdgeInsets.fromLTRB(5, 15, 5, 15),
+          titlePadding: const EdgeInsets.all(5),
+          contentPadding: const EdgeInsets.fromLTRB(5, 15, 5, 15),
           title: Container(
               width: double.infinity,
               height: 30,
               color: Theme.of(context).primaryColorDark,
-              child: Center(child: Text(title, style: TextStyle(color: Colors.white),))
+              child: Center(child: Text(title, style: const TextStyle(color: Colors.white),))
           ),
           content: SingleChildScrollView(
             child: ListBody(
@@ -24,13 +24,13 @@ Future messageDialog({required BuildContext context, required String title, requ
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Ya'),
+              child: const Text('Ya'),
               onPressed: () {
                 Navigator.of(context).pop(true);
               },
             ),
             TextButton(
-              child: Text('Batal'),
+              child: const Text('Batal'),
               onPressed: () {
                 Navigator.of(context).pop(false);
               },
@@ -47,13 +47,13 @@ Future messageDialog({required BuildContext context, required String title, requ
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          titlePadding: EdgeInsets.all(5),
-          contentPadding: EdgeInsets.fromLTRB(5, 15, 5, 15),
+          titlePadding: const EdgeInsets.all(5),
+          contentPadding: const EdgeInsets.fromLTRB(5, 15, 5, 15),
           title: Container(
               width: double.infinity,
               height: 30,
               color: Theme.of(context).primaryColorDark,
-              child: Center(child: Text(title, style: TextStyle(color: Colors.white),))
+              child: Center(child: Text(title, style: const TextStyle(color: Colors.white),))
           ),
           content: SingleChildScrollView(
             child: ListBody(
@@ -67,7 +67,7 @@ Future messageDialog({required BuildContext context, required String title, requ
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Tutup'),
+              child: const Text('Tutup'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -84,7 +84,7 @@ Future<void> showLoadingDialog(BuildContext context, GlobalKey key, {required St
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return new WillPopScope(
+          return WillPopScope(
               onWillPop: () async => false,
               child: SimpleDialog(
                   key: key,
@@ -92,9 +92,9 @@ Future<void> showLoadingDialog(BuildContext context, GlobalKey key, {required St
                   children: <Widget>[
                     Center(
                       child: Column(children: [
-                        CircularProgressIndicator(),
-                        SizedBox(height: 10,),
-                        Text("Please Wait :" + info,style: TextStyle(color: Colors.blueAccent),)
+                        const CircularProgressIndicator(),
+                        const SizedBox(height: 10,),
+                        Text("Please Wait :$info",style: const TextStyle(color: Colors.blueAccent),)
                       ]),
                     )
                   ]));

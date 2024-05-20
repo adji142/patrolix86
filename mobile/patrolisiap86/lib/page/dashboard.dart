@@ -5,18 +5,19 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
 import 'package:mobilepatrol/general/dialog.dart';
-import 'package:mobilepatrol/general/generalvalidasi.dart';
 import 'package:mobilepatrol/general/notification_service.dart';
 import 'package:mobilepatrol/general/session.dart';
 import 'package:mobilepatrol/main.dart';
+import 'package:mobilepatrol/models/LocalDatabaseHelper.dart';
 import 'package:mobilepatrol/models/patroli.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:mobilepatrol/models/sos.dart';
 import 'package:mobilepatrol/page/FormCheckIn.dart';
 import 'package:mobilepatrol/page/absensi.dart';
+import 'package:mobilepatrol/page/dailyactivity.dart';
+import 'package:mobilepatrol/page/guestlog.dart';
 import 'package:mobilepatrol/page/sos.dart';
 import 'package:mobilepatrol/shared/sharedprefrence.dart';
 import 'package:uuid/uuid.dart';
@@ -24,7 +25,7 @@ import 'package:uuid/uuid.dart';
 class Dashboard extends StatefulWidget {
   final session? sess;
   final int? interval;
-  Dashboard(this.sess, {this.interval});
+  const Dashboard(this.sess, {super.key, this.interval});
 
   @override
   _dashboardState createState() => _dashboardState();
@@ -44,15 +45,17 @@ class _dashboardState extends State<Dashboard> {
   String _kodeShift = "";
   int _idShift = -1;
 
-  Map _data = {};
+  final Map _data = {};
   String _penyelesaian = "0 %";
   String _jumlahCP = "0 Check Point";
 
-  String _scanBarcode = 'Unknown';
+  final String _scanBarcode = 'Unknown';
 
   final f = NumberFormat("##0");
 
   bool _inSOS = false;
+
+  bool _offlineMode = false;
   // Notifikasi
   late final FirebaseMessaging _messaging;
   //Time Change
@@ -66,18 +69,16 @@ class _dashboardState extends State<Dashboard> {
     int shift = -1;
 
     // print(now.hour);
-    print(this.widget.sess!.jadwalShift);
-    if (this.widget.sess!.jadwalShift.length > 0) {
+    print(widget.sess!.jadwalShift);
+    if (widget.sess!.jadwalShift.isNotEmpty) {
       // print(this.widget.sess!.jadwalShift);
-      for (var i = 0; i < this.widget.sess!.jadwalShift.length; i++) {
-        var mulai = this
-            .widget
+      for (var i = 0; i < widget.sess!.jadwalShift.length; i++) {
+        var mulai = widget
             .sess!
             .jadwalShift[i]["MulaiBekerja"]
             .toString()
             .split(":");
-        var selesai = this
-            .widget
+        var selesai = widget
             .sess!
             .jadwalShift[i]["SelesaiBekerja"]
             .toString()
@@ -94,7 +95,7 @@ class _dashboardState extends State<Dashboard> {
           DateTime jamSelesai = DateTime.utc(
               now.year,
               now.month,
-              this.widget.sess!.isGantiHari == 1 ? now.day + 1 : now.day,
+              widget.sess!.isGantiHari == 1 ? now.day + 1 : now.day,
               int.parse(selesai[0]),
               int.parse(selesai[1]),
               int.parse(selesai[0].split(".")[0]));
@@ -103,13 +104,12 @@ class _dashboardState extends State<Dashboard> {
 
           if (now.isAfter(jamMulai.toLocal()) &&
               now.isBefore(jamSelesai.toLocal())) {
-            xShift = this
-                .widget
+            xShift = widget
                 .sess!
                 .jadwalShift[i]["NamaShift"]
                 .toString()
                 .toUpperCase();
-            shift = int.parse(this.widget.sess!.jadwalShift[i]["id"]);
+            shift = int.parse(widget.sess!.jadwalShift[i]["id"]);
           }
 
           // if (DateTime.utc(1900, 1, 1, int.parse(mulai[0]), int.parse(mulai[1]), int.parse(mulai[0].split(".")[0])).hour <= now.hour && DateTime.utc(1900, 1, 1, int.parse(selesai[0]), int.parse(selesai[1]), int.parse(selesai[0].split(".")[0])).hour >= now.hour) {
@@ -176,12 +176,12 @@ class _dashboardState extends State<Dashboard> {
   void generateNotif() {
     Map oParamLokasi() {
       return {
-        'id': this.widget.sess!.LocationID.toString(),
-        'RecordOwnerID': this.widget.sess!.RecordOwnerID,
+        'id': widget.sess!.LocationID.toString(),
+        'RecordOwnerID': widget.sess!.RecordOwnerID,
       };
     }
 
-    var x = Mod_Patroli(this.widget.sess, Parameter: oParamLokasi())
+    var x = Mod_Patroli(widget.sess, Parameter: oParamLokasi())
         .readLokasi()
         .then((value) async {
       int interval = 0;
@@ -199,7 +199,7 @@ class _dashboardState extends State<Dashboard> {
 
   Future<void> assingTopic() async{
     await Firebase.initializeApp();
-    await FirebaseMessaging.instance.subscribeToTopic("SOSTopic"+ this.widget.sess!.LocationID.toString());
+    await FirebaseMessaging.instance.subscribeToTopic("SOSTopic${widget.sess!.LocationID}");
   }
 
   @override
@@ -213,7 +213,7 @@ class _dashboardState extends State<Dashboard> {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print("Ini Message Lho");
       // print(message.notification?.title);
-      var rng = new Random();
+      var rng = Random();
       String? title = message.notification!.title.toString();
       String? body = message.notification!.body.toString();
       String? payload = message.data["ID"];
@@ -221,7 +221,7 @@ class _dashboardState extends State<Dashboard> {
       if(message.data["type"] == "notif"){
         _inSOS = true;
       }
-      NotificationService().init(this.widget.sess!,rng.nextInt(100), title, body, payload.toString(), context);
+      NotificationService().init(widget.sess!,rng.nextInt(100), title, body, payload.toString(), context);
     });
     super.initState();
   }
@@ -231,50 +231,267 @@ class _dashboardState extends State<Dashboard> {
     super.dispose();
   }
 
+  @override
   Widget build(BuildContext context) {
     Map oParam() {
       return {
         "KodeCheckPoint": "",
-        "KodeLokasi": this.widget.sess!.LocationID.toString(),
-        "RecordOwnerID": this.widget.sess!.RecordOwnerID,
+        "KodeLokasi": widget.sess!.LocationID.toString(),
+        "RecordOwnerID": widget.sess!.RecordOwnerID,
         "TanggalPatroli": _tanggal.toString(),
-        "KodeKaryawan": this.widget.sess!.KodeUser
+        "KodeKaryawan": widget.sess!.KodeUser
       };
     }
     // print(this.widget.sess!.server + "/Assets/images/profile/" + this.widget.sess!.RecordOwnerID + ".jpeg");
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).primaryColor,
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
+        drawer: Drawer(
+          // backgroundColor: Colors.white,
+          child: ListView(
             children: [
               Container(
-                width: this.widget.sess!.width * 10,
-                height: this.widget.sess!.width * 10,
-                // color: Colors.black,
-                child: this.widget.sess!.icon == "" ? Icon(Icons.person) : Image.network(
-                  this.widget.sess!.server + "/Assets/images/profile/" + this.widget.sess!.icon,
-                  width: this.widget.sess!.width * 10,
-                  height: this.widget.sess!.width * 10,
+                width: double.infinity,
+                height: widget.sess!.hight * 20,
+                color: Colors.cyan,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(
+                        left: widget.sess!.width * 2
+                      ),
+                      child: SizedBox(
+                        width: widget.sess!.width * 15,
+                        height: widget.sess!.width * 15,
+                        // color: Colors.black,
+                        child: widget.sess!.icon == "" ? const Icon(Icons.person) : Image.network(
+                          "${widget.sess!.server}/Assets/images/profile/${widget.sess!.icon}",
+                          width: widget.sess!.width * 10,
+                          height: widget.sess!.width * 10,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: widget.sess!.width *55,
+                      height: widget.sess!.hight *20,
+                      // color: Colors.black,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.all(widget.sess!.width * 2),
+                            child: Text(
+                              "This Program Licenced to :",
+                              style: TextStyle(
+                                fontSize: widget.sess!.width * 3
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(
+                              left: widget.sess!.width * 2
+                            ),
+                            child: Text(
+                              widget.sess!.NamaPartner,
+                              style: TextStyle(
+                                fontSize: widget.sess!.width * 4,
+                                color: Colors.white
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.all(widget.sess!.width * 2),
+                            child: Text(
+                              "App Version : ${widget.sess!.appVersion}",
+                            ),
+                          )
+                        ],
+                      ),
+                    )
+                  ],
                 ),
               ),
               Padding(
                 padding: EdgeInsets.only(
-                  left: this.widget.sess!.width * 2
+                  top: widget.sess!.width * 2,
+                  left: widget.sess!.width * 2,
+                  right: widget.sess!.width * 2
                 ),
-                child: Text(
-                  this.widget.sess!.NamaPartner,
-                  style: TextStyle(
-                    fontSize: this.widget.sess!.width * 4,
-                    color: Colors.white
+                child: SizedBox(
+                  width: double.infinity,
+                  height: widget.sess!.hight * 5,
+                  child: GestureDetector(
+                    child: const Card(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(Icons.person_add_sharp),
+                          Text(
+                            "Pencatatan Tamu"
+                          ),
+                          Icon(Icons.arrow_forward_rounded),
+                        ],
+                      ),
+                    ),
+                    onTap: (){
+                      Navigator.push(context,MaterialPageRoute(builder: (context) => GuestLog(widget.sess!)));
+                    },
                   ),
                 ),
               ),
+              Padding(
+                padding: EdgeInsets.only(
+                  top: widget.sess!.width * 2,
+                  left: widget.sess!.width * 2,
+                  right: widget.sess!.width * 2
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: widget.sess!.hight * 5,
+                  child: GestureDetector(
+                    child: const Card(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(Icons.calendar_month),
+                          Text(
+                            "Daily Activity"
+                          ),
+                          Icon(Icons.arrow_forward_rounded),
+                        ],
+                      ),
+                    ),
+                    onTap: (){
+                      Navigator.push(context,MaterialPageRoute(builder: (context) => DailyActivity(widget.sess!)));
+                    },
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(
+                  top: widget.sess!.width * 2,
+                  left: widget.sess!.width * 2,
+                  right: widget.sess!.width * 2
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: widget.sess!.hight * 5,
+                  child: GestureDetector(
+                    child: Card(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          const Text(
+                            "Offline Mode"
+                          ),
+                          // Icon(Icons.arrow_forward_rounded),
+                          Switch(
+                            value: _offlineMode, 
+                            onChanged: (value)async{
+                              _offlineMode = value;
+                              if (_offlineMode) {
+                                await Mod_Patroli(widget.sess, Parameter: oParam()).getPatroliList().then((value) {
+                                  if(value['data'].length > 0){
+                                    Map<String, String> oColumn() {
+                                      return {
+                                        "KodeCheckPoint" : "TEXT",
+                                        "NamaCheckPoint" : "TEXT",
+                                        "RecordOwnerID" : "TEXT",
+                                        "JumlahCheckin" : "integer"
+                                      };
+                                    }
+                                    var dbx = LocalDatabaseHelper("tcheckpoint", oColumn());
+                                    dbx.database.then((dbxvalue) async {
+                                      if (dbxvalue.isOpen) {
+                                        dbxvalue.execute("DELETE FROM tcheckpoint");
+                                        for (var i = 0; i < value['data'].length; i++) {
+                                          Map<String,dynamic> oParam(){
+                                            return{
+                                              "KodeCheckPoint" : value['data'][i]["KodeCheckPoint"],
+                                              "NamaCheckPoint" : value['data'][i]["NamaCheckPoint"],
+                                              "RecordOwnerID" : widget.sess!.RecordOwnerID,
+                                              "JumlahCheckin" : value['data'][i]["JumlahCheckin"]
+                                            };
+                                          }
+
+                                          dbx.insertData(dbxvalue, oParam());
+                                        }
+                                        List<Map<String, dynamic>> oData = await dbx.getData(dbxvalue);
+                                        print(oData);
+                                      }
+                                    });
+
+                                    Map<String, String> oColumnPatrol() {
+                                      return {
+                                        "RecordOwnerID" : "TEXT",
+                                        "KodeCheckPoint" : "TEXT",
+                                        "LocationID" : "integer",
+                                        "TanggalPatroli" : "DATETIME",
+                                        "KodeKaryawan" : "TEXT",
+                                        "Koordinat" : "TEXT",
+                                        "Image" : "TEXT",
+                                        "Catatan" : "TEXT"
+                                      };
+                                    }
+                                    var dbxPatrol = LocalDatabaseHelper("patroli", oColumnPatrol());
+                                  }
+                                });
+                              }
+                              setState(() {
+                                
+                              });
+                            }
+                          )
+                        ],
+                      ),
+                    ),
+                    onTap: (){
+                      // Navigator.push(context,MaterialPageRoute(builder: (context) => DailyActivity(this.widget.sess!)));
+                    },
+                  ),
+                ),
+              )
             ],
           ),
+        ),
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).primaryColor,
+          title: Text(
+            "Amman Digital Patroli",
+            style: TextStyle(
+              fontSize: widget.sess!.width * 4,
+              color: Colors.white
+            ),
+          ),
+          // title: Row(
+          //   mainAxisAlignment: MainAxisAlignment.start,
+          //   children: [
+          //     Container(
+          //       width: this.widget.sess!.width * 10,
+          //       height: this.widget.sess!.width * 10,
+          //       // color: Colors.black,
+          //       child: this.widget.sess!.icon == "" ? Icon(Icons.person) : Image.network(
+          //         this.widget.sess!.server + "/Assets/images/profile/" + this.widget.sess!.icon,
+          //         width: this.widget.sess!.width * 10,
+          //         height: this.widget.sess!.width * 10,
+          //       ),
+          //     ),
+          //     Padding(
+          //       padding: EdgeInsets.only(
+          //         left: this.widget.sess!.width * 2
+          //       ),
+          //       child: Text(
+          //         this.widget.sess!.NamaPartner,
+          //         style: TextStyle(
+          //           fontSize: this.widget.sess!.width * 4,
+          //           color: Colors.white
+          //         ),
+          //       ),
+          //     ),
+          //   ],
+          // ),
           actions: [
             Padding(
-              padding: EdgeInsets.only(right: this.widget.sess!.width * 5),
+              padding: EdgeInsets.only(right: widget.sess!.width * 5),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -282,7 +499,7 @@ class _dashboardState extends State<Dashboard> {
                     child: Text(
                       "Logout",
                       style: TextStyle(
-                          fontSize: this.widget.sess!.width * 4,
+                          fontSize: widget.sess!.width * 4,
                           fontWeight: FontWeight.bold,
                           fontFamily: "Arial",
                           color: Colors.white),
@@ -292,7 +509,7 @@ class _dashboardState extends State<Dashboard> {
                       // await awesomeNotification;
                       SharedPreference().removeKey("accountInfo");
                       Navigator.pushReplacement(context,
-                          MaterialPageRoute(builder: (context) => MyApp()));
+                          MaterialPageRoute(builder: (context) => const MyApp()));
                     },
                   )
                 ],
@@ -301,10 +518,6 @@ class _dashboardState extends State<Dashboard> {
           ],
         ),
         floatingActionButton: FloatingActionButton(
-          child: Icon(
-            Icons.add,
-            color: Colors.white,
-          ),
           backgroundColor: Theme.of(context).primaryColor,
           onPressed: () async {
             // Handle Notification
@@ -312,20 +525,20 @@ class _dashboardState extends State<Dashboard> {
               Map oParamx() {
                 return {
                   "KodeCheckPoint": value,
-                  "KodeLokasi": this.widget.sess!.LocationID.toString(),
-                  "RecordOwnerID": this.widget.sess!.RecordOwnerID,
+                  "KodeLokasi": widget.sess!.LocationID.toString(),
+                  "RecordOwnerID": widget.sess!.RecordOwnerID,
                   "TanggalPatroli": _tanggal.toString(),
-                  "KodeKaryawan": this.widget.sess!.KodeUser
+                  "KodeKaryawan": widget.sess!.KodeUser
                 };
               }
 
-              var xData = await Mod_Patroli(this.widget.sess, Parameter: oParamx()).getPatroliList().then((valueData) {
+              var xData = await Mod_Patroli(widget.sess, Parameter: oParamx()).getPatroliList().then((valueData) {
                 if (valueData["data"].length > 0) {
                   Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (context) => FormCheckIn(
-                                  this.widget.sess!,
+                                  widget.sess!,
                                   value,
                                   valueData["data"][0]["NamaCheckPoint"])))
                       .then((value) {
@@ -335,54 +548,58 @@ class _dashboardState extends State<Dashboard> {
               });
             });
           },
+          child: const Icon(
+            Icons.add,
+            color: Colors.white,
+          ),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         bottomNavigationBar: BottomAppBar(
-            shape: CircularNotchedRectangle(),
+            shape: const CircularNotchedRectangle(),
             color: Theme.of(context).primaryColor,
             child: ListTile(
                 dense: true,
-                title: Text(_jumlahCP, style: TextStyle(color: Colors.white)))),
+                title: Text(_jumlahCP, style: const TextStyle(color: Colors.white)))),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Padding(
               padding: EdgeInsets.only(
-                  bottom: this.widget.sess!.width * 2,
-                  top: this.widget.sess!.width * 2),
+                  bottom: widget.sess!.width * 2,
+                  top: widget.sess!.width * 2),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    width: this.widget.sess!.width * 50,
-                    height: this.widget.sess!.hight * 10,
+                  SizedBox(
+                    width: widget.sess!.width * 50,
+                    height: widget.sess!.hight * 10,
                     child: ListTile(
-                      leading: CircleAvatar(
+                      leading: const CircleAvatar(
                         child: Icon(Icons.person),
                       ),
                       title: Text(
-                        this.widget.sess!.KodeUser,
+                        widget.sess!.KodeUser,
                         style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).primaryColor),
                       ),
-                      subtitle: Text(this.widget.sess!.NamaUser),
+                      subtitle: Text(widget.sess!.NamaUser),
                     ),
                   ),
-                  Container(
-                    width: this.widget.sess!.width * 40,
-                    height: this.widget.sess!.hight * 10,
+                  SizedBox(
+                    width: widget.sess!.width * 40,
+                    height: widget.sess!.hight * 10,
                     child: Container(
-                      width: this.widget.sess!.width * 30,
-                      height: this.widget.sess!.hight * 10,
-                      decoration: new BoxDecoration(
-                        borderRadius: new BorderRadius.circular(10.0),
-                        color: Color(0xFFfecb54),
+                      width: widget.sess!.width * 30,
+                      height: widget.sess!.hight * 10,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10.0),
+                        color: const Color(0xFFfecb54),
                       ),
                       child: Center(
                         child: StreamBuilder(
-                            stream: Stream.periodic(Duration(seconds: 1)),
+                            stream: Stream.periodic(const Duration(seconds: 1)),
                             builder: (context, snapshot) {
                               // final DateTime now = DateTime(2023,07,27,09,59,00).toLocal();
                               final DateTime now = DateTime.now().toLocal();
@@ -393,25 +610,22 @@ class _dashboardState extends State<Dashboard> {
 
                               String xShift = "";
                               int shift = -1;
-                              if (this.widget.sess!.jadwalShift.length > 0) {
+                              if (widget.sess!.jadwalShift.isNotEmpty) {
                                 // print(this.widget.sess!.jadwalShift);
                                 for (var i = 0;
-                                    i < this.widget.sess!.jadwalShift.length;
+                                    i < widget.sess!.jadwalShift.length;
                                     i++) {
-                                  var mulai = this
-                                      .widget
+                                  var mulai = widget
                                       .sess!
                                       .jadwalShift[i]["MulaiBekerja"]
                                       .toString()
                                       .split(":");
-                                  var selesai = this
-                                      .widget
+                                  var selesai = widget
                                       .sess!
                                       .jadwalShift[i]["SelesaiBekerja"]
                                       .toString()
                                       .split(":");
-                                  var isGantiHari = int.parse(this
-                                      .widget
+                                  var isGantiHari = int.parse(widget
                                       .sess!
                                       .jadwalShift[i]["GantiHari"]);
                                   // var isGantiHari = this.widget.sess!.isGantiHari;
@@ -481,14 +695,12 @@ class _dashboardState extends State<Dashboard> {
                                         now
                                             .toLocal()
                                             .isBefore(jamSelesai.toLocal())) {
-                                      xShift = this
-                                          .widget
+                                      xShift = widget
                                           .sess!
                                           .jadwalShift[i]["NamaShift"]
                                           .toString()
                                           .toUpperCase();
-                                      shift = int.parse(this
-                                          .widget
+                                      shift = int.parse(widget
                                           .sess!
                                           .jadwalShift[i]["id"]);
                                     }
@@ -508,19 +720,19 @@ class _dashboardState extends State<Dashboard> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
-                                        SizedBox(height: 1),
+                                        const SizedBox(height: 1),
                                         Text(DateFormat("HH:mm:ss").format(now),
                                             style: TextStyle(
                                                 fontSize:
-                                                    this.widget.sess!.width *
+                                                    widget.sess!.width *
                                                         5.5,
-                                                color: Color(0xFFbd2a27),
+                                                color: const Color(0xFFbd2a27),
                                                 fontWeight: FontWeight.bold)),
                                         Text(
-                                          "Shift : " + _kodeShift,
+                                          "Shift : $_kodeShift",
                                           style: TextStyle(
                                               fontSize:
-                                                  this.widget.sess!.width * 4,
+                                                  widget.sess!.width * 4,
                                               color: Theme.of(context)
                                                   .primaryColor,
                                               fontWeight: FontWeight.bold),
@@ -537,20 +749,22 @@ class _dashboardState extends State<Dashboard> {
             ),
             Padding(
               padding: EdgeInsets.only(
-                left: this.widget.sess!.width * 2,
-                right: this.widget.sess!.width * 2,
-                bottom: this.widget.sess!.width * 2,
+                left: widget.sess!.width * 2,
+                right: widget.sess!.width * 2,
+                bottom: widget.sess!.width * 2,
               ),
-              child: Container(
+              child: SizedBox(
                 width: double.infinity,
-                height: this.widget.sess!.hight * 15,
+                height: widget.sess!.hight * 15,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     SizedBox(
-                        width: this.widget.sess!.width * 45,
+                        width: widget.sess!.width * 45,
                         child: Container(
-                          height: this.widget.sess!.hight * 15,
+                          height: widget.sess!.hight * 15,
+                          decoration: const BoxDecoration(
+                              shape: BoxShape.circle, color: Color(0xFFbd2a27)),
                           child: TextButton(
                               onPressed: () async{
                                 if(_inSOS){
@@ -560,13 +774,13 @@ class _dashboardState extends State<Dashboard> {
                                   bool konfirmasi = await messageDialog(context: context, title: "SOS", message: "Kirim Pesan SOS ?");
                                   if(konfirmasi){
                                     // Push Default Content
-                                    String uID = Uuid().v4().toString();
+                                    String uID = const Uuid().v4().toString();
                                     Map oParam(){
                                       return {
                                         "id" : uID,
-                                        'RecordOwnerID' : this.widget.sess!.RecordOwnerID,
-                                        'LocationID' : this.widget.sess!.LocationID.toString(),
-                                        'KodeKaryawan' : this.widget.sess!.KodeUser,
+                                        'RecordOwnerID' : widget.sess!.RecordOwnerID,
+                                        'LocationID' : widget.sess!.LocationID.toString(),
+                                        'KodeKaryawan' : widget.sess!.KodeUser,
                                         'Comment' : "",
                                         'Image1' : "",
                                         'Image2' : "",
@@ -578,8 +792,8 @@ class _dashboardState extends State<Dashboard> {
                                       };
                                     }
 
-                                    var save = Mod_SOS(this.widget.sess, oParam()).create().then((value) {
-                                      Navigator.push(context,MaterialPageRoute(builder: (context) => sosMessage(this.widget.sess!, uID)));
+                                    var save = Mod_SOS(widget.sess, oParam()).create().then((value) {
+                                      Navigator.push(context,MaterialPageRoute(builder: (context) => sosMessage(widget.sess!, uID)));
                                     });
                                     // Navigator.push(context,MaterialPageRoute(builder: (context) => sosMessage(this.widget.sess!, uID)));
                                   }
@@ -590,25 +804,25 @@ class _dashboardState extends State<Dashboard> {
                                 style: TextStyle(
                                     fontFamily: "Arial",
                                     color: Colors.white,
-                                    fontSize: this.widget.sess!.width * 10),
+                                    fontSize: widget.sess!.width * 10),
                               )),
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle, color: Color(0xFFbd2a27)),
                         )),
                     SizedBox(
-                        width: this.widget.sess!.width * 45,
+                        width: widget.sess!.width * 45,
                         child: Container(
-                          height: this.widget.sess!.hight * 15,
+                          height: widget.sess!.hight * 15,
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle, color: Theme.of(context).primaryColor),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Padding(
                                 padding: EdgeInsets.only(
-                                    right: this.widget.sess!.width * 2,
-                                    bottom: this.widget.sess!.hight * 1),
+                                    right: widget.sess!.width * 2,
+                                    bottom: widget.sess!.hight * 1),
                                 child: IconButton(
                                     onPressed: () async{
-                                      Navigator.push(context,MaterialPageRoute(builder: (context) => FormAbsensi(this.widget.sess!, _kodeShift)));
+                                      Navigator.push(context,MaterialPageRoute(builder: (context) => FormAbsensi(widget.sess!, _kodeShift)));
                                       // var validasi = await checkSchadule(this.widget.sess!, context).then((value) => {
                                       //   if(value){
                                       //     Navigator.push(context,MaterialPageRoute(builder: (context) => FormAbsensi(this.widget.sess!, _kodeShift)))
@@ -620,13 +834,13 @@ class _dashboardState extends State<Dashboard> {
                                     },
                                     icon: Icon(
                                       Icons.timer_outlined,
-                                      size: this.widget.sess!.width * 10,
+                                      size: widget.sess!.width * 10,
                                       color: Colors.white,
                                     )),
                               ),
                               Padding(
                                   padding: EdgeInsets.only(
-                                      bottom: this.widget.sess!.hight * 1.2),
+                                      bottom: widget.sess!.hight * 1.2),
                                   child: Center(
                                     child: Text(
                                       "Absensi",
@@ -634,13 +848,11 @@ class _dashboardState extends State<Dashboard> {
                                           fontFamily: "Arial",
                                           color: Colors.white,
                                           fontSize:
-                                              this.widget.sess!.width * 4),
+                                              widget.sess!.width * 4),
                                     ),
                                   ))
                             ],
                           ),
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle, color: Theme.of(context).primaryColor),
                         ))
                   ],
                 ),
@@ -648,16 +860,16 @@ class _dashboardState extends State<Dashboard> {
             ),
             Padding(
               padding: EdgeInsets.only(
-                left: this.widget.sess!.width * 2,
-                right: this.widget.sess!.width * 2,
-                bottom: this.widget.sess!.width * 2,
+                left: widget.sess!.width * 2,
+                right: widget.sess!.width * 2,
+                bottom: widget.sess!.width * 2,
               ),
-              child: Container(
+              child: SizedBox(
                 width: double.infinity,
-                height: this.widget.sess!.hight * 8,
+                height: widget.sess!.hight * 8,
                 // color: Colors.black,
                 child: Card(
-                  shape: RoundedRectangleBorder(
+                  shape: const RoundedRectangleBorder(
                     side: BorderSide(color: Colors.white54, width: 1),
                     borderRadius: BorderRadius.only(
                         bottomLeft: Radius.circular(30),
@@ -666,19 +878,19 @@ class _dashboardState extends State<Dashboard> {
                   elevation: 0,
                   color: Theme.of(context).primaryColor,
                   child: ListTile(
-                    leading: Icon(
+                    leading: const Icon(
                       Icons.access_alarm_sharp,
                       color: Colors.white,
                       size: 32,
                     ),
-                    title: Text("Progres Patroli",
+                    title: const Text("Progres Patroli",
                         style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: Colors.white)),
                     trailing: Text(
                       _penyelesaian,
-                      style: TextStyle(
+                      style: const TextStyle(
                           color: Colors.white,
                           fontSize: 20,
                           fontWeight: FontWeight.bold),
@@ -689,24 +901,23 @@ class _dashboardState extends State<Dashboard> {
             ),
             Padding(
               padding: EdgeInsets.only(
-                left: this.widget.sess!.width * 2,
-                right: this.widget.sess!.width * 2,
-                bottom: this.widget.sess!.width * 2,
+                left: widget.sess!.width * 2,
+                right: widget.sess!.width * 2,
+                bottom: widget.sess!.width * 2,
               ),
-              child: Container(
+              child: SizedBox(
                 width: double.infinity,
-                height: this.widget.sess!.width * 80,
+                height: widget.sess!.width * 80,
                 // color: Colors.black,
                 // child: _listData(_data.length > 0 ? _data["data"] : []),
                 child: FutureBuilder(
-                    future: Mod_Patroli(this.widget.sess, Parameter: oParam())
+                    future: Mod_Patroli(widget.sess, Parameter: oParam())
                         .getPatroliList(),
                     builder: (context, snapshsot) {
                       if (snapshsot.hasData) {
-                        _jumlahCP = snapshsot.data!["data"].length.toString() +
-                            " Check Point";
+                        _jumlahCP = "${snapshsot.data!["data"].length} Check Point";
                         _penyelesaian =
-                            snapshsot.data!["Penyelesaian"].toString() + " %";
+                            "${snapshsot.data!["Penyelesaian"]} %";
 
                         return _listData(snapshsot.data!["data"]);
                       } else {
@@ -721,11 +932,11 @@ class _dashboardState extends State<Dashboard> {
 
   Widget _listData(List list) {
     // print(this.widget.sess!.server);
-    if (list.length == 0) {
+    if (list.isEmpty) {
       return Container();
     } else {
       return Padding(
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10),
           child: RefreshIndicator(
             onRefresh: () => _refreshData(),
             child: ListView.builder(
@@ -739,21 +950,21 @@ class _dashboardState extends State<Dashboard> {
                           Icons.check_box_outlined,
                           color: Theme.of(context).primaryColor,
                         )
-                      : Icon(Icons.check_box_outline_blank_outlined),
+                      : const Icon(Icons.check_box_outline_blank_outlined),
                   title: Text(
                     list[index]["NamaCheckPoint"].toString(),
-                    style: TextStyle(color: this.widget.sess!.textColor),
+                    style: TextStyle(color: widget.sess!.textColor),
                   ),
                   subtitle: Text(
                     list[index]["Keterangan"],
                     style: TextStyle(
-                      color: this.widget.sess!.lightTextColor
+                      color: widget.sess!.lightTextColor
                     ),
                   ),
                   trailing: Chip(
                     label: Text(
                       list[index]["JumlahCheckin"].toString(),
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.white
                       ),
                     ),
@@ -768,8 +979,8 @@ class _dashboardState extends State<Dashboard> {
 
   Future _refreshData() async {
     setState(() {});
-    Completer<Null> completer = Completer<Null>();
-    Future.delayed(Duration(seconds: 1)).then((_) {
+    Completer<void> completer = Completer<void>();
+    Future.delayed(const Duration(seconds: 1)).then((_) {
       completer.complete();
     });
     return completer.future;

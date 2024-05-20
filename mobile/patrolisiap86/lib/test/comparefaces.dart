@@ -7,12 +7,14 @@ import 'package:flutter_face_api/face_api.dart' as Regula;
 import 'package:image_picker/image_picker.dart';
 
 class CompareFaces extends StatefulWidget {
+  const CompareFaces({super.key});
+
   @override
   _MyAppState createState() => _MyAppState();
 }
 class _MyAppState extends State<CompareFaces> {
-  var image1 = new Regula.MatchFacesImage();
-  var image2 = new Regula.MatchFacesImage();
+  var image1 = Regula.MatchFacesImage();
+  var image2 = Regula.MatchFacesImage();
   var img1 = Image.asset('assets/portrait.png');
   var img2 = Image.asset('assets/portrait.png');
   String _similarity = "nil";
@@ -58,10 +60,10 @@ class _MyAppState extends State<CompareFaces> {
   showAlertDialog(BuildContext context, bool first) => showDialog(
       context: context,
       builder: (BuildContext context) =>
-          AlertDialog(title: Text("Select option"), actions: [
+          AlertDialog(title: const Text("Select option"), actions: [
             // ignore: deprecated_member_use
             TextButton(
-                child: Text("Use gallery"),
+                child: const Text("Use gallery"),
                 onPressed: () {
                   Navigator.of(context, rootNavigator: true).pop();
                   ImagePicker()
@@ -75,18 +77,19 @@ class _MyAppState extends State<CompareFaces> {
                 }),
             // ignore: deprecated_member_use
             TextButton(
-                child: Text("Use camera"),
+                child: const Text("Use camera"),
                 onPressed: () {
                   Regula.FaceSDK.presentFaceCaptureActivity().then((result) {
                     var response = Regula.FaceCaptureResponse.fromJson(
                         json.decode(result))!;
                     if (response.image != null &&
-                        response.image!.bitmap != null)
+                        response.image!.bitmap != null) {
                       setImage(
                           first,
                           base64Decode(
                               response.image!.bitmap!.replaceAll("\n", "")),
                           Regula.ImageType.LIVE);
+                    }
                   });
                   Navigator.pop(context);
                 })
@@ -117,8 +120,8 @@ class _MyAppState extends State<CompareFaces> {
       _similarity = "nil";
       _liveness = "nil";
     });
-    image1 = new Regula.MatchFacesImage();
-    image2 = new Regula.MatchFacesImage();
+    image1 = Regula.MatchFacesImage();
+    image2 = Regula.MatchFacesImage();
   }
 
   matchFaces() {
@@ -127,7 +130,7 @@ class _MyAppState extends State<CompareFaces> {
         image2.bitmap == null ||
         image2.bitmap == "") return;
     setState(() => _similarity = "Processing...");
-    var request = new Regula.MatchFacesRequest();
+    var request = Regula.MatchFacesRequest();
     request.images = [image1, image2];
     Regula.FaceSDK.matchFaces(jsonEncode(request)).then((value) {
       var response = Regula.MatchFacesResponse.fromJson(json.decode(value));
@@ -136,9 +139,8 @@ class _MyAppState extends State<CompareFaces> {
           .then((str) {
         var split = Regula.MatchFacesSimilarityThresholdSplit.fromJson(
             json.decode(str));
-        setState(() => _similarity = split!.matchedFaces.length > 0
-            ? ((split.matchedFaces[0]!.similarity! * 100).toStringAsFixed(2) +
-                "%")
+        setState(() => _similarity = split!.matchedFaces.isNotEmpty
+            ? ("${(split.matchedFaces[0]!.similarity! * 100).toStringAsFixed(2)}%")
             : "error");
       });
     });
@@ -155,7 +157,9 @@ class _MyAppState extends State<CompareFaces> {
                 : "unknown");
       });
 
-  Widget createButton(String text, VoidCallback onPress) => Container(
+  Widget createButton(String text, VoidCallback onPress) => SizedBox(
+        // ignore: deprecated_member_use
+        width: 250,
         // ignore: deprecated_member_use
         child: TextButton(
             style: ButtonStyle(
@@ -164,7 +168,6 @@ class _MyAppState extends State<CompareFaces> {
             ),
             onPressed: onPress,
             child: Text(text)),
-        width: 250,
       );
 
   Widget createImage(image, VoidCallback onPress) => Material(
@@ -181,7 +184,7 @@ class _MyAppState extends State<CompareFaces> {
   @override
   Widget build(BuildContext context) => Scaffold(
         body: Container(
-            margin: EdgeInsets.fromLTRB(0, 0, 0, 100),
+            margin: const EdgeInsets.fromLTRB(0, 0, 0, 100),
             width: double.infinity,
             child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -189,20 +192,20 @@ class _MyAppState extends State<CompareFaces> {
                   createImage(img1.image, () => showAlertDialog(context, true)),
                   createImage(
                       img2.image, () => showAlertDialog(context, false)),
-                  Container(margin: EdgeInsets.fromLTRB(0, 0, 0, 15)),
+                  Container(margin: const EdgeInsets.fromLTRB(0, 0, 0, 15)),
                   createButton("Match", () => matchFaces()),
                   createButton("Liveness", () => liveness()),
                   createButton("Clear", () => clearResults()),
                   Container(
-                      margin: EdgeInsets.fromLTRB(0, 15, 0, 0),
+                      margin: const EdgeInsets.fromLTRB(0, 15, 0, 0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text("Similarity: " + _similarity,
-                              style: TextStyle(fontSize: 18)),
-                          Container(margin: EdgeInsets.fromLTRB(20, 0, 0, 0)),
-                          Text("Liveness: " + _liveness,
-                              style: TextStyle(fontSize: 18))
+                          Text("Similarity: $_similarity",
+                              style: const TextStyle(fontSize: 18)),
+                          Container(margin: const EdgeInsets.fromLTRB(20, 0, 0, 0)),
+                          Text("Liveness: $_liveness",
+                              style: const TextStyle(fontSize: 18))
                         ],
                       ))
                 ])),

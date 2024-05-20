@@ -16,9 +16,9 @@ class NotificationService{
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   Future <void> init(session sess,int id, String title, String message, String Payload, BuildContext context) async{
-    final AndroidInitializationSettings androidInitializationSettings = AndroidInitializationSettings('app_icon');
+    const AndroidInitializationSettings androidInitializationSettings = AndroidInitializationSettings('app_icon');
 
-    final InitializationSettings initializationSettings = InitializationSettings(
+    const InitializationSettings initializationSettings = InitializationSettings(
       android: androidInitializationSettings
     );
     await flutterLocalNotificationsPlugin.initialize(

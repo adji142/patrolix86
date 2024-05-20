@@ -9,8 +9,8 @@ class Mod_CompanyDetails {
   Mod_CompanyDetails(this.sess, this.Parameter);
 
   Future<Map> Read() async{
-    var url = Uri.parse(sess!.server+"APIAttRead");
-    final response = await http.post(url,body: this.Parameter);
+    var url = Uri.parse("${sess!.server}APIAttRead");
+    final response = await http.post(url,body: Parameter);
     return json.decode(response.body);
   }
 }
