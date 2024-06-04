@@ -48,12 +48,13 @@
                     // echo $key->NamaShift."<br>";
                     $isGantiHari = $key->GantiHari;
                     $KodeShift = $key->id;
+                    break;
                 }
             }
 
-            if ($isGantiHari == 1) {
-                $Tanggal = date('Y-m-d', strtotime($Tanggal . ' - 1 days'));
-            }
+            // if ($isGantiHari == 1) {
+            //     $Tanggal = date('Y-m-d', strtotime($Tanggal . ' - 1 days'));
+            // }
 
             $where = array(
                 'RecordOwnerID'     => $RecordOwnerID,
@@ -62,6 +63,8 @@
                 'Tanggal'           => date('Y-m-d',strtotime($Tanggal)),
                 'CheckOut'          => '0000-00-00 00:00:00.000000'
             );
+
+            // var_dump($where);
 
             $rs = $this->ModelsExecuteMaster->FindData($where, 'absensi');
 
