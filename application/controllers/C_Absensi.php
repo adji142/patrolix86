@@ -7,6 +7,8 @@
 			parent::__construct();
 			$this->load->model('ModelsExecuteMaster');
 			$this->load->model('GlobalVar');
+
+            date_default_timezone_set('Asia/Jakarta');
 		}
 
         public function ReadNew()
