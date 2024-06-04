@@ -60,7 +60,7 @@
                 'LocationID'        => $KodeLokasi,
                 'KodeKaryawan'      => $KodeKaryawan,
                 'Tanggal'           => date('Y-m-d',strtotime($Tanggal)),
-                'CheckOut'          => NULL
+                'CheckOut'          => '0000-00-00 00:00:00.000000'
             );
 
             $rs = $this->ModelsExecuteMaster->FindData($where, 'absensi');
