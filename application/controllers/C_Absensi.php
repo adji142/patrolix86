@@ -59,7 +59,8 @@
                 'RecordOwnerID'     => $RecordOwnerID,
                 'LocationID'        => $KodeLokasi,
                 'KodeKaryawan'      => $KodeKaryawan,
-                'Tanggal'           => date('Y-m-d',strtotime($Tanggal))
+                'Tanggal'           => date('Y-m-d',strtotime($Tanggal)),
+                'CheckOut'          => NULL
             );
 
             $rs = $this->ModelsExecuteMaster->FindData($where, 'absensi');
