@@ -7,14 +7,13 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:mobilepatrol/general/dialog.dart';
 import 'package:mobilepatrol/general/session.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:mobilepatrol/models/patroli.dart';
 
 class FormCheckIn extends StatefulWidget {
   final session sess;
   final String KodeCheckPoint;
   final String NamaCheckPoint;
-  FormCheckIn(this.sess, this.KodeCheckPoint, this.NamaCheckPoint);
+  const FormCheckIn(this.sess, this.KodeCheckPoint, this.NamaCheckPoint, {super.key});
 
   @override
   _FormCheckInState createState() => _FormCheckInState();
@@ -23,7 +22,7 @@ class FormCheckIn extends StatefulWidget {
 class _FormCheckInState extends State<FormCheckIn> {
   final ImagePicker _picker = ImagePicker();
 
-  final GlobalKey<State> _keyLoader = new GlobalKey<State>();
+  final GlobalKey<State> _keyLoader = GlobalKey<State>();
 
   DateTime? _tanggal;
   File? imageFile;
@@ -32,32 +31,32 @@ class _FormCheckInState extends State<FormCheckIn> {
   String image64 = "";
   Position? _currentPosition;
 
-  bool _isbuttondisable = false;
-  bool _issaving = false;
+  final bool _isbuttondisable = false;
+  final bool _issaving = false;
 
   String _shift = "";
   String _kodeShift = "";
   // Position _posisi = new Position();
-  TextEditingController _catatan = TextEditingController();
+  final TextEditingController _catatan = TextEditingController();
 
   _openCamera(BuildContext context) async {
-    final ImagePicker _picker = ImagePicker();
+    final ImagePicker picker = ImagePicker();
 
-    await _picker
-        .pickImage(source: ImageSource.camera, maxHeight: 600)
-        .then((value) {
-      setState(() {
-        imageFile = File(value!.path);
-        pathext = imageFile!.uri.toString().split("/");
-        extentionPath = pathext![pathext!.length - 1].toString();
+    await picker.pickImage(source: ImageSource.camera, maxHeight: 600).then((value) {
+        if(value != null ){
+          setState(() {
+            imageFile = File(value!.path);
+            pathext = imageFile!.uri.toString().split("/");
+            extentionPath = pathext![pathext!.length - 1].toString();
 
-        if (imageFile != null) {
-          final bites = imageFile!.readAsBytesSync();
-          image64 = base64Encode(bites);
+            if (imageFile != null) {
+              final bites = imageFile!.readAsBytesSync();
+              image64 = base64Encode(bites);
+            }
+          });
+          _setEnableCommand();
+          // Navigator.of(context).pop();
         }
-      });
-      _setEnableCommand();
-      // Navigator.of(context).pop();
     });
   }
 
@@ -114,23 +113,21 @@ class _FormCheckInState extends State<FormCheckIn> {
     String xShift = "";
     int shift = 0;
 
-    if (this.widget.sess.jadwalShift.length > 0) {
+    if (widget.sess.jadwalShift.isNotEmpty) {
       // print(this.widget.sess!.jadwalShift);
-      for (var i = 0; i < this.widget.sess.jadwalShift.length; i++) {
-        var mulai = this
-            .widget
+      for (var i = 0; i < widget.sess.jadwalShift.length; i++) {
+        var mulai = widget
             .sess
             .jadwalShift[i]["MulaiBekerja"]
             .toString()
             .split(":");
-        var selesai = this
-            .widget
+        var selesai = widget
             .sess
             .jadwalShift[i]["SelesaiBekerja"]
             .toString()
             .split(":");
         var isGantiHari =
-            int.parse(this.widget.sess.jadwalShift[i]["GantiHari"]);
+            int.parse(widget.sess.jadwalShift[i]["GantiHari"]);
 
         if (mulai.isNotEmpty) {
           DateTime defTime =
@@ -178,13 +175,12 @@ class _FormCheckInState extends State<FormCheckIn> {
 
           if (now.isAfter(jamMulai.toLocal()) &&
               now.isBefore(jamSelesai.toLocal())) {
-            xShift = this
-                .widget
+            xShift = widget
                 .sess
                 .jadwalShift[i]["NamaShift"]
                 .toString()
                 .toUpperCase();
-            shift = int.parse(this.widget.sess.jadwalShift[i]["id"]);
+            shift = int.parse(widget.sess.jadwalShift[i]["id"]);
           }
 
           // if (DateTime.utc(1900, 1, 1, int.parse(mulai[0]), int.parse(mulai[1]), int.parse(mulai[0].split(".")[0])).hour <= now.hour && DateTime.utc(1900, 1, 1, int.parse(selesai[0]), int.parse(selesai[1]), int.parse(selesai[0].split(".")[0])).hour >= now.hour) {
@@ -261,11 +257,11 @@ class _FormCheckInState extends State<FormCheckIn> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Checkin : " + widget.NamaCheckPoint),
+        title: Text("Checkin : ${widget.NamaCheckPoint}"),
         backgroundColor: Theme.of(context).primaryColor,
       ),
       body: Padding(
-        padding: EdgeInsets.all(this.widget.sess.width * 2),
+        padding: EdgeInsets.all(widget.sess.width * 2),
         child: _tanggal == null
             ? Container()
             : ListView(
@@ -275,7 +271,7 @@ class _FormCheckInState extends State<FormCheckIn> {
                   Card(
                     color: Theme.of(context).primaryColorLight,
                     child: ListTile(
-                      leading: CircleAvatar(
+                      leading: const CircleAvatar(
                         child: Icon(Icons.person),
                       ),
                       title: Text(widget.sess.NamaUser,
@@ -286,18 +282,18 @@ class _FormCheckInState extends State<FormCheckIn> {
                       subtitle: Text(
                           DateFormat("dd/MM/yyyy hh:mm:ss").format(_tanggal!),
                           style:
-                              TextStyle(fontSize: 12, color: Colors.black54)),
+                              const TextStyle(fontSize: 12, color: Colors.black54)),
                     ),
                   ),
                   ListTile(
-                    leading: Icon(Icons.qr_code),
+                    leading: const Icon(Icons.qr_code),
                     title: Text(
                       "Check Point",
                       style: TextStyle(color: Theme.of(context).primaryColor),
                     ),
                     subtitle: Text(
                       widget.NamaCheckPoint,
-                      style: TextStyle(
+                      style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.red),
@@ -305,22 +301,22 @@ class _FormCheckInState extends State<FormCheckIn> {
                   ),
 
                   ListTile(
-                    leading: Icon(Icons.location_pin),
+                    leading: const Icon(Icons.location_pin),
                     title: Text(
                       "Lokasi",
                       style: TextStyle(color: Theme.of(context).primaryColor),
                     ),
                     subtitle: _currentPosition == null
-                        ? Text("Baca Informasi Lokasi...")
+                        ? const Text("Baca Informasi Lokasi...")
                         : Text(
                             "${_currentPosition!.latitude}, ${_currentPosition!.longitude}",
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black),
                           ),
                     trailing: IconButton(
-                      icon: Icon(Icons.refresh),
+                      icon: const Icon(Icons.refresh),
                       onPressed: () {
                         // _currentPosition = Position();
                         setState(() {});
@@ -332,22 +328,22 @@ class _FormCheckInState extends State<FormCheckIn> {
                   ),
 
                   ListTile(
-                    leading: Icon(Icons.photo),
+                    leading: const Icon(Icons.photo),
                     title: Text(
                       "Photo",
                       style: TextStyle(color: Theme.of(context).primaryColor),
                     ),
                     subtitle: imageFile == null
                         ? Container(
-                            child: Text("Ambil Photo"),
+                            child: const Text("Ambil Photo"),
                           )
                         : Card(
                             child: Padding(
-                            padding: EdgeInsets.all(this.widget.sess.width * 2),
+                            padding: EdgeInsets.all(widget.sess.width * 2),
                             child: Image.file(File(imageFile!.path)),
                           )),
                     trailing: IconButton(
-                      icon: Icon(Icons.camera_alt),
+                      icon: const Icon(Icons.camera_alt),
                       onPressed: () {
                         _openCamera(context);
                       },
@@ -355,7 +351,7 @@ class _FormCheckInState extends State<FormCheckIn> {
                   ),
 
                   ListTile(
-                    leading: Icon(Icons.subject),
+                    leading: const Icon(Icons.subject),
                     title: TextField(
                       controller: _catatan,
                       minLines: 4,
@@ -371,12 +367,6 @@ class _FormCheckInState extends State<FormCheckIn> {
                   ),
 
                   ElevatedButton(
-                    child: _issaving == true
-                        ? CircularProgressIndicator()
-                        : Text(
-                            "Proses Data",
-                            style: TextStyle(color: Colors.white),
-                          ),
                     style: ButtonStyle(
                         shape:MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0),
                       // side: BorderSide(color: Colors.red)
@@ -389,12 +379,12 @@ class _FormCheckInState extends State<FormCheckIn> {
                                 info: "Begin Login");
                             Map oParam() {
                               return {
-                                'RecordOwnerID': this.widget.sess.RecordOwnerID,
-                                'KodeCheckPoint': this.widget.KodeCheckPoint,
+                                'RecordOwnerID': widget.sess.RecordOwnerID,
+                                'KodeCheckPoint': widget.KodeCheckPoint,
                                 'LocationID':
-                                    this.widget.sess.LocationID.toString(),
+                                    widget.sess.LocationID.toString(),
                                 'TanggalPatroli': _tanggal.toString(),
-                                'KodeKaryawan': this.widget.sess.KodeUser,
+                                'KodeKaryawan': widget.sess.KodeUser,
                                 'Koordinat':
                                     "${_currentPosition!.latitude},${_currentPosition!.longitude}",
                                 'Image': image64.toString(),
@@ -413,7 +403,7 @@ class _FormCheckInState extends State<FormCheckIn> {
                               return;
                             }
 
-                            var temp = await Mod_Patroli(this.widget.sess,Parameter: oParam()).save().then((value) async {
+                            var temp = await Mod_Patroli(widget.sess,Parameter: oParam()).save().then((value) async {
                               if (value["success"]) {
                                 Navigator.of(context, rootNavigator: true).pop();
                                 Navigator.of(context).pop();
@@ -427,6 +417,12 @@ class _FormCheckInState extends State<FormCheckIn> {
                             });
 
                           },
+                    child: _issaving == true
+                        ? const CircularProgressIndicator()
+                        : const Text(
+                            "Proses Data",
+                            style: TextStyle(color: Colors.white),
+                          ),
                   )
                 ],
               ),

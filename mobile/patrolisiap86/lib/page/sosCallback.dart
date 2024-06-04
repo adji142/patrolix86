@@ -2,11 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:mobilepatrol/general/dialog.dart';
 import 'package:mobilepatrol/general/session.dart';
 import 'package:mobilepatrol/models/sos.dart';
 import 'package:photo_view/photo_view.dart';
@@ -14,14 +12,14 @@ import 'package:photo_view/photo_view.dart';
 class sosCallBack extends StatefulWidget {
   final session? sess;
   final String? uID;
-  sosCallBack(this.sess, this.uID);
+  const sosCallBack(this.sess, this.uID, {super.key});
 
   @override
   _sosCallBackState createState() => _sosCallBackState();
 }
 
 class _sosCallBackState extends State<sosCallBack> {
-  final GlobalKey<State> _keyLoader = new GlobalKey<State>();
+  final GlobalKey<State> _keyLoader = GlobalKey<State>();
 
   Position? _currentPosition;
 
@@ -44,13 +42,13 @@ class _sosCallBackState extends State<sosCallBack> {
   String? extentionPath_2 = "";
   String? extentionPath_3 = "";
 
-  bool _isSaved = false;
+  final bool _isSaved = false;
 
-  TextEditingController _detailPesan = TextEditingController();
+  final TextEditingController _detailPesan = TextEditingController();
   _openCamera_1(BuildContext context) async {
-    final ImagePicker _picker = ImagePicker();
+    final ImagePicker picker = ImagePicker();
 
-    await _picker.pickImage(source: ImageSource.camera, maxHeight: 600).then((value) {
+    await picker.pickImage(source: ImageSource.camera, maxHeight: 600).then((value) {
       setState(() {
         imageFile_1 = File(value!.path);
         pathext = imageFile_1!.uri.toString().split("/");
@@ -67,9 +65,9 @@ class _sosCallBackState extends State<sosCallBack> {
   }
 
   _openCamera_2(BuildContext context) async {
-    final ImagePicker _picker = ImagePicker();
+    final ImagePicker picker = ImagePicker();
 
-    await _picker.pickImage(source: ImageSource.camera, maxHeight: 600).then((value) {
+    await picker.pickImage(source: ImageSource.camera, maxHeight: 600).then((value) {
       setState(() {
         imageFile_2 = File(value!.path);
         pathext = imageFile_2!.uri.toString().split("/");
@@ -85,9 +83,9 @@ class _sosCallBackState extends State<sosCallBack> {
   }
   
   _openCamera_3(BuildContext context) async {
-    final ImagePicker _picker = ImagePicker();
+    final ImagePicker picker = ImagePicker();
 
-    await _picker.pickImage(source: ImageSource.camera, maxHeight: 600).then((value) {
+    await picker.pickImage(source: ImageSource.camera, maxHeight: 600).then((value) {
       setState(() {
         imageFile_3 = File(value!.path);
         pathext = imageFile_3!.uri.toString().split("/");
@@ -157,32 +155,33 @@ class _sosCallBackState extends State<sosCallBack> {
     super.dispose();
   }
 
+  @override
   Widget build(BuildContext context) {
     Map oParam(){
       return {
-        "id"              : this.widget.uID,
-        'RecordOwnerID'   : this.widget.sess!.RecordOwnerID,
-        'KodeLokasi'      : this.widget.sess!.LocationID.toString(),
+        "id"              : widget.uID,
+        'RecordOwnerID'   : widget.sess!.RecordOwnerID,
+        'KodeLokasi'      : widget.sess!.LocationID.toString(),
       };
     }
     return Scaffold(
       body: FutureBuilder(
-        future: Mod_SOS(this.widget.sess, oParam()).read(),
+        future: Mod_SOS(widget.sess, oParam()).read(),
         builder: (context, snapshot){
           if(snapshot.hasData){
             if(snapshot.data!["data"].length > 0){
               List<String> position = snapshot.data!["data"][0]["Koordinat"].toString().split(",");
               _detailPesan.text = snapshot.data!["data"][0]["Comment"];
-              print(this.widget.sess!.server+"Assets/images/SOS/"+snapshot.data!["data"][0]["Image1"]);
-              return Container(
+              print("${widget.sess!.server}Assets/images/SOS/"+snapshot.data!["data"][0]["Image1"]);
+              return SizedBox(
                 width: double.infinity,
-                height: this.widget.sess!.hight * 100,
+                height: widget.sess!.hight * 100,
                 child: ListView(
                   // mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Container(
+                    SizedBox(
                       width: double.infinity,
-                      height: this.widget.sess!.hight * 30,
+                      height: widget.sess!.hight * 30,
                       // color:  Colors.amber,
                       child: _currentPosition != null ? 
                       GoogleMap(
@@ -193,100 +192,100 @@ class _sosCallBackState extends State<sosCallBack> {
                         ),
                         markers: {
                           Marker(
-                            markerId: MarkerId("SOS Value"),
+                            markerId: const MarkerId("SOS Value"),
                             position: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
                           )
                         }
                       ):Container(),
                     ),
-                    Container(
+                    SizedBox(
                       width: double.infinity,
-                      height: this.widget.sess!.hight * 3,
-                      child: Center(
+                      height: widget.sess!.hight * 3,
+                      child: const Center(
                         child: Text("Detail Gambar"),
                       ),
                     ),
-                    Container(
+                    SizedBox(
                       width: double.infinity,
-                      height: this.widget.sess!.hight * 25,
+                      height: widget.sess!.hight * 25,
                       // color: Colors.black,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Padding(
-                            padding: EdgeInsets.all(this.widget.sess!.width * 1),
+                            padding: EdgeInsets.all(widget.sess!.width * 1),
                             child: GestureDetector(
-                              child: SizedBox(
-                                width: this.widget.sess!.width * 30,
-                                height: this.widget.sess!.hight * 25,
-                                child: Card(
-                                  child: snapshot.data!["data"][0]["Image1"] != "" 
-                                    ? Image.network(this.widget.sess!.server+"Assets/images/SOS/"+snapshot.data!["data"][0]["Image1"]) 
-                                    : Center(
-                                        child: Text("No Image"),
-                                      )
-                                ),
-                              ),
                               onTap: snapshot.data!["data"][0]["Image1"] == "" ? null : (){
                                 // _openCamera_1(context);
                                 PhotoView(
-                                  imageProvider: NetworkImage(this.widget.sess!.server+"Assets/images/SOS/"+snapshot.data!["data"][0]["Image1"])
+                                  imageProvider: NetworkImage("${widget.sess!.server}Assets/images/SOS/"+snapshot.data!["data"][0]["Image1"])
                                 );
                               },
+                              child: SizedBox(
+                                width: widget.sess!.width * 30,
+                                height: widget.sess!.hight * 25,
+                                child: Card(
+                                  child: snapshot.data!["data"][0]["Image1"] != "" 
+                                    ? Image.network("${widget.sess!.server}Assets/images/SOS/"+snapshot.data!["data"][0]["Image1"]) 
+                                    : const Center(
+                                        child: Text("No Image"),
+                                      )
+                                ),
+                              ),
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsets.all(this.widget.sess!.width * 1),
+                            padding: EdgeInsets.all(widget.sess!.width * 1),
                             child: GestureDetector(
-                              child: SizedBox(
-                                width: this.widget.sess!.width * 30,
-                                height: this.widget.sess!.hight * 25,
-                                child: Card(
-                                  child: snapshot.data!["data"][0]["Image2"] != "" 
-                                    ? Image.network(this.widget.sess!.server+"Assets/images/SOS/"+snapshot.data!["data"][0]["Image2"]) 
-                                    : Center(
-                                        child: Text("No Image"),
-                                      )
-                                ),
-                              ),
                               onTap: snapshot.data!["data"][0]["Image2"] == "" ? null : (){
                                 // _openCamera_2(context);
                                 PhotoView(
-                                  imageProvider: NetworkImage(this.widget.sess!.server+"Assets/images/SOS/"+snapshot.data!["data"][0]["Image2"])
+                                  imageProvider: NetworkImage("${widget.sess!.server}Assets/images/SOS/"+snapshot.data!["data"][0]["Image2"])
                                 );
                               },
-                            )
-                          ),
-                          Padding(
-                            padding: EdgeInsets.all(this.widget.sess!.width * 1),
-                            child: GestureDetector(
                               child: SizedBox(
-                                width: this.widget.sess!.width * 30,
-                                height: this.widget.sess!.hight * 25,
+                                width: widget.sess!.width * 30,
+                                height: widget.sess!.hight * 25,
                                 child: Card(
-                                  child: snapshot.data!["data"][0]["Image3"] != "" 
-                                    ? Image.network(this.widget.sess!.server+"Assets/images/SOS/"+snapshot.data!["data"][0]["Image3"]) 
-                                    : Center(
+                                  child: snapshot.data!["data"][0]["Image2"] != "" 
+                                    ? Image.network("${widget.sess!.server}Assets/images/SOS/"+snapshot.data!["data"][0]["Image2"]) 
+                                    : const Center(
                                         child: Text("No Image"),
                                       )
                                 ),
                               ),
+                            )
+                          ),
+                          Padding(
+                            padding: EdgeInsets.all(widget.sess!.width * 1),
+                            child: GestureDetector(
                               onTap: snapshot.data!["data"][0]["Image3"] == "" ? null : (){
                                 // _openCamera_3(context);
                                 PhotoView(
-                                  imageProvider: NetworkImage(this.widget.sess!.server+"Assets/images/SOS/"+snapshot.data!["data"][0]["Image3"])
+                                  imageProvider: NetworkImage("${widget.sess!.server}Assets/images/SOS/"+snapshot.data!["data"][0]["Image3"])
                                 );
                               },
+                              child: SizedBox(
+                                width: widget.sess!.width * 30,
+                                height: widget.sess!.hight * 25,
+                                child: Card(
+                                  child: snapshot.data!["data"][0]["Image3"] != "" 
+                                    ? Image.network("${widget.sess!.server}Assets/images/SOS/"+snapshot.data!["data"][0]["Image3"]) 
+                                    : const Center(
+                                        child: Text("No Image"),
+                                      )
+                                ),
+                              ),
                             )
                           )
                         ],
                       ),
                     ),
-                    Container(
+                    SizedBox(
                       width: double.infinity,
-                      height: this.widget.sess!.hight * 15,
+                      height: widget.sess!.hight * 15,
                       child: Padding(
-                        padding: EdgeInsets.all(this.widget.sess!.width * 2),
+                        padding: EdgeInsets.all(widget.sess!.width * 2),
                         child: TextField(
                           // autofocus: true,
                           controller: _detailPesan,

@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
@@ -13,14 +12,14 @@ import 'package:mobilepatrol/models/sos.dart';
 class sosMessage extends StatefulWidget {
   final session? sess;
   final String? uID;
-  sosMessage(this.sess, this.uID);
+  const sosMessage(this.sess, this.uID, {super.key});
 
   @override
   _sosState createState() => _sosState();
 }
 
 class _sosState extends State<sosMessage> {
-  final GlobalKey<State> _keyLoader = new GlobalKey<State>();
+  final GlobalKey<State> _keyLoader = GlobalKey<State>();
 
   Position? _currentPosition;
 
@@ -45,11 +44,11 @@ class _sosState extends State<sosMessage> {
 
   bool _isSaved = false;
 
-  TextEditingController _detailPesan = TextEditingController();
+  final TextEditingController _detailPesan = TextEditingController();
   _openCamera_1(BuildContext context) async {
-    final ImagePicker _picker = ImagePicker();
+    final ImagePicker picker = ImagePicker();
 
-    await _picker.pickImage(source: ImageSource.camera, maxHeight: 600).then((value) {
+    await picker.pickImage(source: ImageSource.camera, maxHeight: 600).then((value) {
       setState(() {
         imageFile_1 = File(value!.path);
         pathext = imageFile_1!.uri.toString().split("/");
@@ -66,9 +65,9 @@ class _sosState extends State<sosMessage> {
   }
 
   _openCamera_2(BuildContext context) async {
-    final ImagePicker _picker = ImagePicker();
+    final ImagePicker picker = ImagePicker();
 
-    await _picker.pickImage(source: ImageSource.camera, maxHeight: 600).then((value) {
+    await picker.pickImage(source: ImageSource.camera, maxHeight: 600).then((value) {
       setState(() {
         imageFile_2 = File(value!.path);
         pathext = imageFile_2!.uri.toString().split("/");
@@ -84,9 +83,9 @@ class _sosState extends State<sosMessage> {
   }
   
   _openCamera_3(BuildContext context) async {
-    final ImagePicker _picker = ImagePicker();
+    final ImagePicker picker = ImagePicker();
 
-    await _picker.pickImage(source: ImageSource.camera, maxHeight: 600).then((value) {
+    await picker.pickImage(source: ImageSource.camera, maxHeight: 600).then((value) {
       setState(() {
         imageFile_3 = File(value!.path);
         pathext = imageFile_3!.uri.toString().split("/");
@@ -156,6 +155,7 @@ class _sosState extends State<sosMessage> {
     super.dispose();
   }
 
+  @override
   Widget build(BuildContext context) {
     return WillPopScope(
       child: Scaffold(
@@ -165,30 +165,30 @@ class _sosState extends State<sosMessage> {
               shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0),)),
               backgroundColor: MaterialStateProperty.all(Colors.red)
             ),
-            child: Text("Simpan"),
+            child: const Text("Simpan"),
             onPressed: () async{
               showLoadingDialog(context, _keyLoader, info: "Saving");
               Map oParam(){
                 return {
-                  "id"              : this.widget.uID,
-                  'RecordOwnerID'   : this.widget.sess!.RecordOwnerID,
-                  'LocationID'      : this.widget.sess!.LocationID.toString(),
-                  'KodeKaryawan'    : this.widget.sess!.KodeUser,
+                  "id"              : widget.uID,
+                  'RecordOwnerID'   : widget.sess!.RecordOwnerID,
+                  'LocationID'      : widget.sess!.LocationID.toString(),
+                  'KodeKaryawan'    : widget.sess!.KodeUser,
                   'Comment'         : _detailPesan.text,
                   'Image1'          : extentionPath_1,
                   'Image2'          : extentionPath_2,
                   'Image3'          : extentionPath_3,
                   'Koordinat'       : "${_currentPosition!.latitude},${_currentPosition!.longitude}",
-                  'Image_Base64_1'  : image64_1 == null ? "" : image64_1,
-                  'Image_Base64_2'  : image64_2 == null ? "" : image64_2,
-                  'Image_Base64_3'  : image64_3 == null ? "" : image64_3,
+                  'Image_Base64_1'  : image64_1 ?? "",
+                  'Image_Base64_2'  : image64_2 ?? "",
+                  'Image_Base64_3'  : image64_3 ?? "",
                   'SubmitDate'      : DateTime.now().toString(),
                   'VoiceNote'       : "",
                   "formMode"        : "edit"
                 };
               }
               print(image64_1);
-              var oSave = await Mod_SOS(this.widget.sess, oParam()).create().then((value) {
+              var oSave = await Mod_SOS(widget.sess, oParam()).create().then((value) {
                 if(value["success"].toString() == "true"){
                   Navigator.of(context, rootNavigator: true).pop();
                   messageBox(context: context, title: "Informasi", message: "Data Berhasil dikirim ke rekan terdekat");
@@ -199,15 +199,15 @@ class _sosState extends State<sosMessage> {
                 }
                 else{
                   Navigator.of(context, rootNavigator: true).pop();
-                  messageBox(context: context, title: "ERROR", message: "Sistem gagal menyimpan data : " + value["message"].toString());
+                  messageBox(context: context, title: "ERROR", message: "Sistem gagal menyimpan data : ${value["message"]}");
                 }
               });
             },
           ),
         ),
-        body: Container(
+        body: SizedBox(
           width: double.infinity,
-          height: this.widget.sess!.hight * 100,
+          height: widget.sess!.hight * 100,
           child: ListView(
             // mainAxisAlignment: MainAxisAlignment.start,
             children: [
@@ -215,7 +215,7 @@ class _sosState extends State<sosMessage> {
               // Text("data2")
               Container(
                 width: double.infinity,
-                height: this.widget.sess!.hight * 30,
+                height: widget.sess!.hight * 30,
                 color: Theme.of(context).primaryColor,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -223,13 +223,13 @@ class _sosState extends State<sosMessage> {
                     Row(
                       children: [
                         Padding(
-                          padding: EdgeInsets.only(top: this.widget.sess!.hight * 1, left: this.widget.sess!.hight * 2),
+                          padding: EdgeInsets.only(top: widget.sess!.hight * 1, left: widget.sess!.hight * 2),
                           child: Text(
                             "Emergency",
                             textAlign: TextAlign.left,
                             style: TextStyle(
                               // fontFamily: "Roboto",
-                              fontSize: this.widget.sess!.hight * 4,
+                              fontSize: widget.sess!.hight * 4,
                               fontWeight: FontWeight.normal,
                               color: Colors.white
                             ),
@@ -240,13 +240,13 @@ class _sosState extends State<sosMessage> {
                     Row(
                       children: [
                         Padding(
-                          padding: EdgeInsets.only(bottom: this.widget.sess!.hight * 1 ,left: this.widget.sess!.hight * 2),
+                          padding: EdgeInsets.only(bottom: widget.sess!.hight * 1 ,left: widget.sess!.hight * 2),
                           child: Text(
                             "Request Send !",
                             textAlign: TextAlign.left,
                             style: TextStyle(
                               // fontFamily: "Roboto",
-                              fontSize: this.widget.sess!.hight * 4,
+                              fontSize: widget.sess!.hight * 4,
                               fontWeight: FontWeight.normal,
                               color: Colors.white
                             ),
@@ -257,13 +257,13 @@ class _sosState extends State<sosMessage> {
                     Row(
                       children: [
                         Padding(
-                          padding: EdgeInsets.only(left: this.widget.sess!.hight * 2 ,top: this.widget.sess!.hight * 2 ,bottom: this.widget.sess!.hight * 1),
+                          padding: EdgeInsets.only(left: widget.sess!.hight * 2 ,top: widget.sess!.hight * 2 ,bottom: widget.sess!.hight * 1),
                           child: Text(
                             "Tetap Tenang!",
                             textAlign: TextAlign.left,
                             style: TextStyle(
                               fontFamily: "Arial",
-                              fontSize: this.widget.sess!.hight * 3,
+                              fontSize: widget.sess!.hight * 3,
                               fontWeight: FontWeight.normal,
                               color: Colors.white
                             ),
@@ -274,13 +274,13 @@ class _sosState extends State<sosMessage> {
                     Row(
                       children: [
                         Padding(
-                          padding: EdgeInsets.only(left: this.widget.sess!.hight * 2 ,bottom: this.widget.sess!.hight * 3),
+                          padding: EdgeInsets.only(left: widget.sess!.hight * 2 ,bottom: widget.sess!.hight * 3),
                           child: Text(
                             "Masukkan Detail Informasi berikut",
                             textAlign: TextAlign.left,
                             style: TextStyle(
                               fontFamily: "Arial",
-                              fontSize: this.widget.sess!.hight * 2,
+                              fontSize: widget.sess!.hight * 2,
                               fontWeight: FontWeight.normal,
                               color: Colors.white
                             ),
@@ -291,9 +291,9 @@ class _sosState extends State<sosMessage> {
                   ],
                 ),
               ),
-              Container(
+              SizedBox(
                 width: double.infinity,
-                height: this.widget.sess!.hight * 20,
+                height: widget.sess!.hight * 20,
                 // color:  Colors.amber,
                 child: _currentPosition != null ? 
                 GoogleMap(
@@ -304,34 +304,34 @@ class _sosState extends State<sosMessage> {
                   ),
                   markers: {
                     Marker(
-                      markerId: MarkerId("SOS Value"),
+                      markerId: const MarkerId("SOS Value"),
                       position: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
                     )
                   }
                 ):Container(),
               ),
-              Container(
+              SizedBox(
                 width: double.infinity,
-                height: this.widget.sess!.hight * 3,
-                child: Center(
+                height: widget.sess!.hight * 3,
+                child: const Center(
                   child: Text("Upload Gambar"),
                 ),
               ),
-              Container(
+              SizedBox(
                 width: double.infinity,
-                height: this.widget.sess!.hight * 25,
+                height: widget.sess!.hight * 25,
                 // color: Colors.black,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Padding(
-                      padding: EdgeInsets.all(this.widget.sess!.width * 1),
+                      padding: EdgeInsets.all(widget.sess!.width * 1),
                       child: GestureDetector(
                         child: SizedBox(
-                          width: this.widget.sess!.width * 30,
-                          height: this.widget.sess!.hight * 25,
+                          width: widget.sess!.width * 30,
+                          height: widget.sess!.hight * 25,
                           child: Card(
-                            child: imageFile_1 == null ? Icon(Icons.image) : Image.file(File(imageFile_1!.path)),
+                            child: imageFile_1 == null ? const Icon(Icons.image) : Image.file(File(imageFile_1!.path)),
                           ),
                         ),
                         onTap: (){
@@ -340,13 +340,13 @@ class _sosState extends State<sosMessage> {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.all(this.widget.sess!.width * 1),
+                      padding: EdgeInsets.all(widget.sess!.width * 1),
                       child: GestureDetector(
                         child: SizedBox(
-                          width: this.widget.sess!.width * 30,
-                          height: this.widget.sess!.hight * 25,
+                          width: widget.sess!.width * 30,
+                          height: widget.sess!.hight * 25,
                           child: Card(
-                            child: imageFile_2 == null ? Icon(Icons.image) : Image.file(File(imageFile_2!.path)),
+                            child: imageFile_2 == null ? const Icon(Icons.image) : Image.file(File(imageFile_2!.path)),
                           ),
                         ),
                         onTap: (){
@@ -355,13 +355,13 @@ class _sosState extends State<sosMessage> {
                       )
                     ),
                     Padding(
-                      padding: EdgeInsets.all(this.widget.sess!.width * 1),
+                      padding: EdgeInsets.all(widget.sess!.width * 1),
                       child: GestureDetector(
                         child: SizedBox(
-                          width: this.widget.sess!.width * 30,
-                          height: this.widget.sess!.hight * 25,
+                          width: widget.sess!.width * 30,
+                          height: widget.sess!.hight * 25,
                           child: Card(
-                            child: imageFile_3 == null ? Icon(Icons.image) : Image.file(File(imageFile_3!.path)),
+                            child: imageFile_3 == null ? const Icon(Icons.image) : Image.file(File(imageFile_3!.path)),
                           ),
                         ),
                         onTap: (){
@@ -372,11 +372,11 @@ class _sosState extends State<sosMessage> {
                   ],
                 ),
               ),
-              Container(
+              SizedBox(
                 width: double.infinity,
-                height: this.widget.sess!.hight * 15,
+                height: widget.sess!.hight * 15,
                 child: Padding(
-                  padding: EdgeInsets.all(this.widget.sess!.width * 2),
+                  padding: EdgeInsets.all(widget.sess!.width * 2),
                   child: TextField(
                     // autofocus: true,
                     controller: _detailPesan,

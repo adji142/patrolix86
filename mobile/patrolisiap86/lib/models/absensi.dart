@@ -10,16 +10,16 @@ class Mod_Absensi {
   Mod_Absensi(this.sess, this.Parameter);
 
   Future<Map> Read() async{
-    var url = Uri.parse(sess!.server+"APIAttRead");
-    final response = await http.post(url,body: this.Parameter);
-    print(this.Parameter);
+    var url = Uri.parse("${sess!.server}APIAttRead");
+    final response = await http.post(url,body: Parameter);
+    print(Parameter);
     return json.decode(response.body);
   }
 
   Future<Map> Create() async{
-    var url = Uri.parse(sess!.server+"APIAttCRUD");
-    final response = await http.post(url,body: this.Parameter);
-    print(this.Parameter);
+    var url = Uri.parse("${sess!.server}APIAttCRUD");
+    final response = await http.post(url,body: Parameter);
+    print(Parameter);
     return json.decode(response.body);
   }
 }

@@ -28,10 +28,10 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
 Future<void> init() async {
-  final AndroidInitializationSettings androidInitializationSettings =
+  const AndroidInitializationSettings androidInitializationSettings =
       AndroidInitializationSettings('app_icon');
 
-  final InitializationSettings initializationSettings =
+  const InitializationSettings initializationSettings =
       InitializationSettings(android: androidInitializationSettings);
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 }
@@ -64,18 +64,20 @@ Future<void> main() async {
   print('User granted permission: ${setting.authorizationStatus}');
 
   
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
   static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();
+
+  const MyApp({super.key});
   @override
   _MainState createState() => _MainState();
 }
 
 class _MainState extends State<MyApp> {
-  session sess = new session();
+  session sess = session();
   var kodeuser = "";
   String _Server = "";
 
@@ -111,22 +113,22 @@ class _MainState extends State<MyApp> {
 
     ThemeData themeData(bool isDarkMode, BuildContext context) {
       return ThemeData(
-        primaryColor: Color(0xFF125389),
-        backgroundColor: isDarkMode ? Colors.black : Color(0xFFF1F5FB),
-        indicatorColor: isDarkMode ? Color(0xFF0E1D36) : Color(0xFF226f54),
-        hintColor: isDarkMode ? Color(0xFF280C0B) : Color(0xff133762),
-        highlightColor: isDarkMode ? Color(0xFF372901) : Color(0xff133762),
-        hoverColor: isDarkMode ? Color(0xFF3A3A3B) : Color(0xff133762),
-        focusColor: isDarkMode ? Color(0xFF0B2512) : Color(0xff133762),
+        primaryColor: const Color(0xFF125389),
+        indicatorColor: isDarkMode ? const Color(0xFF0E1D36) : const Color(0xFF226f54),
+        hintColor: isDarkMode ? const Color(0xFF280C0B) : const Color(0xff133762),
+        highlightColor: isDarkMode ? const Color(0xFF372901) : const Color(0xff133762),
+        hoverColor: isDarkMode ? const Color(0xFF3A3A3B) : const Color(0xff133762),
+        focusColor: isDarkMode ? const Color(0xFF0B2512) : const Color(0xff133762),
         disabledColor: Colors.grey,
-        cardColor: isDarkMode ? Color(0xFF151515) : Colors.white,
+        cardColor: isDarkMode ? const Color(0xFF151515) : Colors.white,
         // canvasColor: Color(0xFF000031),
         brightness: isDarkMode ? Brightness.dark : Brightness.light,
         buttonTheme: Theme.of(context).buttonTheme.copyWith(
-            colorScheme: isDarkMode ? ColorScheme.dark() : ColorScheme.light()),
-        appBarTheme: AppBarTheme(
+            colorScheme: isDarkMode ? const ColorScheme.dark() : const ColorScheme.light()),
+        appBarTheme: const AppBarTheme(
           elevation: 0,
         ),
+        // dividerColor: Colors.transparent, colorScheme: ColorScheme(background: isDarkMode ? Colors.black : const Color(0xFFF1F5FB))
       );
     }
 
@@ -158,7 +160,6 @@ class _MainState extends State<MyApp> {
                   };
                 }
 
-                ;
 
                 var oShfit = Mod_Shift(sess, oParamShift());
 

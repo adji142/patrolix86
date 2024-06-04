@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:mobilepatrol/general/dialog.dart';
 import 'package:mobilepatrol/general/session.dart';
 import 'package:mobilepatrol/models/shift.dart';
 
 Future<bool> checkSchadule(session sess, BuildContext context)async{
-  String nowDate = DateTime.now().year.toString() + "-" + DateTime.now().month.toString() + "-" + DateTime.now().day.toString();
+  String nowDate = "${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}";
     Map oParam(){
       return {
         'TglAwal'       : nowDate ,

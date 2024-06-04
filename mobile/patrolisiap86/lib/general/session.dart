@@ -7,6 +7,8 @@ class session {
   // String server = "http://192.168.10.66:8080/patrolisiap86/"; // Development 3
   // String server = "http://192.168.127.190:8080/patrolisiap86/"; // Development 4
   // String server = "http://192.168.10.222:8080/patrolisiap86/"; // Development 4
+  // String server = "http://192.168.1.2:8080/patrolisiap86/"; // Development 5
+  
   int idUser = -1;
   String KodeUser = "";
   String NamaUser = "";
@@ -25,6 +27,7 @@ class session {
   int isGantiHari = 0;
   List jadwalShift = [];
   String payLoad = "";
-  Color textColor = Color(0xFF000031);
-  Color lightTextColor = Color(0xFF9f8b82);
+  Color textColor = const Color(0xFF000031);
+  Color lightTextColor = const Color(0xFF9f8b82);
+  String appVersion = "1.0.6 B 1";
 }

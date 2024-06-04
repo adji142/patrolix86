@@ -10,13 +10,13 @@ class Mod_SOS {
   Mod_SOS(this.sess, this.Parameter);
 
   Future<Map> create() async {
-    var url = Uri.parse(sess!.server + "APISOSCreate");
-    final response = await http.post(url, body: this.Parameter);
+    var url = Uri.parse("${sess!.server}APISOSCreate");
+    final response = await http.post(url, body: Parameter);
     return json.decode(response.body);
   }
   Future<Map> read() async {
-    var url = Uri.parse(sess!.server + "APISOSRead");
-    final response = await http.post(url, body: this.Parameter);
+    var url = Uri.parse("${sess!.server}APISOSRead");
+    final response = await http.post(url, body: Parameter);
     return json.decode(response.body);
   }
 }

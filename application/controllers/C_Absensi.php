@@ -9,6 +9,67 @@
 			$this->load->model('GlobalVar');
 		}
 
+        public function ReadNew()
+        {
+            $data = array('success' => false ,'message'=>array(),'data'=>array());
+
+            $KodeLokasi = $this->input->post('KodeLokasi');
+            $RecordOwnerID = $this->input->post('RecordOwnerID');
+            $KodeKaryawan = $this->input->post('KodeKaryawan');
+            $Tanggal = $this->input->post('Tanggal');
+
+            $isGantiHari = 0;
+            $KodeShift = -1;
+
+            $oShiftWhere = array(
+                'RecordOwnerID' => $RecordOwnerID,
+                'LocationID'    => $KodeLokasi
+            );
+            $shift = $this->ModelsExecuteMaster->FindData($oShiftWhere,'tshift')->result();
+
+            $currentDate = new DateTime($Tanggal);
+            foreach ($shift as $key) {
+                // var_dump($key);
+                $paramDate = explode(" ", $Tanggal);
+                $datefrom = new DateTime($paramDate[0].' '.$key->MulaiBekerja);
+                $dateTo = new DateTime($paramDate[0].' '.$key->SelesaiBekerja);
+
+                if ($key->GantiHari == 1) {
+                    $dateTo->modify('1 days');
+                }
+                // $date->modify('-10 days');
+
+                if ($currentDate >= $datefrom && $currentDate <= $dateTo) {
+                    // echo $key->NamaShift."<br>";
+                    $isGantiHari = $key->GantiHari;
+                    $KodeShift = $key->id;
+                }
+            }
+
+            if ($isGantiHari == 1) {
+                $Tanggal = date('Y-m-d', strtotime($Tanggal . ' - 1 days'));
+            }
+
+            $where = array(
+                'RecordOwnerID'     => $RecordOwnerID,
+                'LocationID'        => $KodeLokasi,
+                'KodeKaryawan'      => $KodeKaryawan,
+                'Tanggal'           => $Tanggal
+            );
+
+            $rs = $this->ModelsExecuteMaster->FindData($where, 'absensi');
+
+            if($rs->num_rows() > 0){
+                $data['success'] = true;
+                $data['data'] = $rs->result();
+            }
+            else{
+
+            }
+
+            echo json_encode($data);
+        }
+
         public function Read(){
             $data = array('success' => false ,'message'=>array(),'data'=>array());
 
@@ -189,6 +250,33 @@
 
             try {
                 if($formMode == "in"){
+                    // Get Shift
+
+                    $oShiftWhere = array(
+                        'RecordOwnerID' => $RecordOwnerID,
+                        'LocationID'    => $LocationID
+                    );
+                    $shift = $this->ModelsExecuteMaster->FindData($oShiftWhere,'tshift')->result();
+
+                    $currentDate = new DateTime($Tanggal.' '. date('H:i:s'));
+                    foreach ($shift as $key) {
+                        // var_dump($key);
+                        $datefrom = new DateTime($Tanggal.' '.$key->MulaiBekerja);
+                        $dateTo = new DateTime($Tanggal.' '.$key->SelesaiBekerja);
+
+                        if ($key->GantiHari == 1) {
+                            $dateTo->modify('1 days');
+                        }
+                        // $date->modify('-10 days');
+
+                        if ($currentDate >= $datefrom && $currentDate <= $dateTo) {
+                            // echo $key->NamaShift."<br>";
+                            $Shift = $key->id;
+                        }
+                    }
+
+
+
                     $getDate = str_replace(":", "", str_replace("-", "", $Checkin));
                     // 2023-09-06 16:11:38.658465
                     $ImageNameIN = "IN".$KodeKaryawan."-".$RecordOwnerID.substr($getDate, 0,14).".png";
@@ -277,6 +365,38 @@
             }
 
             echo json_encode($data);
+        }
+
+        public function TestGetShift()
+        {
+            $RecordOwnerID = $this->input->post('RecordOwnerID');
+            $LocationID = $this->input->post('LocationID');
+            $Tanggal = $this->input->post('Tanggal');
+
+            $oShiftWhere = array(
+                'RecordOwnerID' => $RecordOwnerID,
+                'LocationID'    => $LocationID
+            );
+            $shift = $this->ModelsExecuteMaster->FindData($oShiftWhere,'tshift')->result();
+
+            $currentDate = new DateTime($Tanggal.' '. date('H:i:s'));
+            echo $currentDate->format('Y-m-d H:i:s')."<br>";
+            foreach ($shift as $key) {
+                // var_dump($key);
+                $datefrom = new DateTime($Tanggal.' '.$key->MulaiBekerja);
+                $dateTo = new DateTime($Tanggal.' '.$key->SelesaiBekerja);
+
+                if ($key->GantiHari == 1) {
+                    $dateTo->modify('1 days');
+                }
+                // $date->modify('-10 days');
+
+                echo "Awal : ". $datefrom->format('Y-m-d H:i:s')." - Akhir : ".$dateTo->format('Y-m-d H:i:s')."<br>";
+
+                if ($currentDate >= $datefrom && $currentDate <= $dateTo) {
+                    echo $key->NamaShift."<br>";
+                }
+            }
         }
 
 

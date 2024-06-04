@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobilepatrol/general/dialog.dart';
@@ -15,17 +14,17 @@ import 'package:flutter_face_api/face_api.dart' as Regula;
 class FormAbsensi extends StatefulWidget {
   final session sess;
   final String shift;
-  FormAbsensi(this.sess, this.shift);
+  const FormAbsensi(this.sess, this.shift, {super.key});
 
   @override
   _FormAbsensi createState() => _FormAbsensi();
 }
 
 class _FormAbsensi extends State<FormAbsensi> {
-  final GlobalKey<State> _keyLoader = new GlobalKey<State>();
+  final GlobalKey<State> _keyLoader = GlobalKey<State>();
 
-  var image1 = new Regula.MatchFacesImage();
-  var image2 = new Regula.MatchFacesImage();
+  var image1 = Regula.MatchFacesImage();
+  var image2 = Regula.MatchFacesImage();
 
   List ? dataJadwal= [];
   List ? dataAbsen = [];
@@ -85,14 +84,14 @@ class _FormAbsensi extends State<FormAbsensi> {
   }
 
   Future<Map>_getJadwal() async{
-    String nowDate = DateTime.now().year.toString() + "-" + DateTime.now().month.toString() + "-" + DateTime.now().day.toString();
+    String nowDate = "${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}";
     Map oParam(){
       return {
-        'TglAwal'   : dataAbsen!.length == 0 ? nowDate : dataAbsen![0]["Checkin"] ,
+        'TglAwal'   : dataAbsen!.isEmpty ? nowDate : dataAbsen![0]["Checkin"] ,
         'TglAkhir'  : nowDate,
         'id'        : '',
-        'RecordOwnerID' : this.widget.sess.RecordOwnerID,
-        'NIK'       : this.widget.sess.KodeUser,
+        'RecordOwnerID' : widget.sess.RecordOwnerID,
+        'NIK'       : widget.sess.KodeUser,
         'source'    : "mobile"
       };
     }
@@ -105,7 +104,7 @@ class _FormAbsensi extends State<FormAbsensi> {
     //   }
     // });
 
-    var temp = await Mod_Shift(this.widget.sess, oParam()).getJadwal();
+    var temp = await Mod_Shift(widget.sess, oParam()).getJadwal();
 
     // print(temp);
     
@@ -120,16 +119,16 @@ class _FormAbsensi extends State<FormAbsensi> {
     int minLength = (DateTime.now().minute.toString()).length;
     int secLength = (DateTime.now().second.toString()).length;
     
-    String nowDate = DateTime.now().year.toString() + "-" +(monthLength == 1 ? "0"+DateTime.now().month.toString() : DateTime.now().month.toString()) + "-" + (dayLength == 1 ? "0"+DateTime.now().day.toString() : DateTime.now().day.toString()) + " " + (hourLength == 1 ? "0"+DateTime.now().hour.toString(): DateTime.now().hour.toString()) +":" + (minLength == 1 ? "0"+DateTime.now().minute.toString():DateTime.now().minute.toString()) +":"+DateTime.now().second.toString();
+    String nowDate = "${DateTime.now().year}-${monthLength == 1 ? "0${DateTime.now().month}" : DateTime.now().month.toString()}-${dayLength == 1 ? "0${DateTime.now().day}" : DateTime.now().day.toString()} ${hourLength == 1 ? "0${DateTime.now().hour}": DateTime.now().hour.toString()}:${minLength == 1 ? "0${DateTime.now().minute}":DateTime.now().minute.toString()}:${DateTime.now().second}";
     Map oParam(){
       return {
-        'KodeLokasi'    : this.widget.sess.LocationID.toString(),
-        'RecordOwnerID' : this.widget.sess.RecordOwnerID,
-        'KodeKaryawan'  : this.widget.sess.KodeUser,
+        'KodeLokasi'    : widget.sess.LocationID.toString(),
+        'RecordOwnerID' : widget.sess.RecordOwnerID,
+        'KodeKaryawan'  : widget.sess.KodeUser,
         'Tanggal'       : nowDate
       };
     }
-    var temp = await Mod_Absensi(this.widget.sess, oParam()).Read();
+    var temp = await Mod_Absensi(widget.sess, oParam()).Read();
     return temp;
   }
   
@@ -168,137 +167,142 @@ class _FormAbsensi extends State<FormAbsensi> {
   }
 
   Future<void> matchFaces(String formType) async {
+    showLoadingDialog(context, _keyLoader, info: "Begin Scaning");
+    _getCurrentPosition();
+
     print("Processing00");
     print(image1.bitmap);
     print(image2.bitmap);
-    if (image1.bitmap == null ||
-        image1.bitmap == "" ||
-        image2.bitmap == null ||
-        image2.bitmap == ""){};
-    // setState(() => _similarity = "Processing...");
-    var request = new Regula.MatchFacesRequest();
-    request.images = [image1, image2];
-    Regula.FaceSDK.matchFaces(jsonEncode(request)).then((value) {
-      var response = Regula.MatchFacesResponse.fromJson(json.decode(value));
-      print(response);
-      Regula.FaceSDK.matchFacesSimilarityThresholdSplit(jsonEncode(response!.results), 0.9).then((str) async {
-        var split = Regula.MatchFacesSimilarityThresholdSplit.fromJson(json.decode(str));
-        print("printing "+ (split!.matchedFaces[0]!.similarity! * 100 > 95).toString());
-        if(split.matchedFaces.length > 0){
-          if(split.matchedFaces[0]!.similarity! * 100 > 95){
-            // return true;
-            // isMatch = true;
 
-            if(formType == "in"){
-              Map dataParam(){
-                return {
-                  "RecordOwnerID" : this.widget.sess.RecordOwnerID,
-                  "LocationID"    : this.widget.sess.LocationID.toString(),
-                  "KodeKaryawan"  : this.widget.sess.KodeUser,
-                  "KoordinatIN"   : _currentPosition == null ? "" : "${_currentPosition!.latitude},${_currentPosition!.longitude}",
-                  "ImageIN"       : image2.bitmap,
-                  "Tanggal"       : DateTime.now().year.toString() + "-"+ DateTime.now().month.toString() + "-" + DateTime.now().day.toString(),
-                  "Shift"         : dataJadwal![0]["ShiftID"],
-                  "Checkin"       : DateTime.now().toString(),
-                  "CreatedOn"     : DateTime.now().toString(),
-                  "formMode"      : formType
-                };
-              }
-              print(dataParam);
+    if(formType == "in"){
+        Map dataParam(){
+          return {
+            "RecordOwnerID" : widget.sess.RecordOwnerID,
+            "LocationID"    : widget.sess.LocationID.toString(),
+            "KodeKaryawan"  : widget.sess.KodeUser,
+            "KoordinatIN"   : _currentPosition == null ? "" : "${_currentPosition!.latitude},${_currentPosition!.longitude}",
+            "ImageIN"       : image2.bitmap,
+            "Tanggal"       : "${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}",
+            "Shift"         : dataJadwal![0]["ShiftID"],
+            "Checkin"       : DateTime.now().toString(),
+            "CreatedOn"     : DateTime.now().toString(),
+            "formMode"      : formType
+          };
+        }
+        print(dataParam);
 
-              await Mod_Absensi(this.widget.sess, dataParam()).Create().then((value) async{
-                if(value["success"]){
-                  Navigator.of(context, rootNavigator: true).pop();
-                  await messageBox(
-                    context: context, 
-                    title: "Infomasi", 
-                    message: "Berhasil Checkin"
-                  );
-                  Navigator.of(context).pop();
-                }
-                else{
-                  Navigator.of(context, rootNavigator: true).pop();
-                  await messageBox(
-                    context: context, 
-                    title: "Infomasi", 
-                    message: value["message"]
-                  );
-                }
-              });
-            }
-            else if(formType == "out"){
-              print(image2.bitmap);
-              Map dataParam(){
-                return {
-                  "id"            : dataAbsen![0]["id"].toString(),
-                  "RecordOwnerID" : this.widget.sess.RecordOwnerID,
-                  "LocationID"    : this.widget.sess.LocationID.toString(),
-                  "KodeKaryawan"  : this.widget.sess.KodeUser,
-                  "KoordinatOUT"  : _currentPosition == null ? "" : "${_currentPosition!.latitude},${_currentPosition!.longitude}",
-                  "ImageOUT"      : image2.bitmap,
-                  "Shift"         : dataJadwal![0]["NamaShift"],
-                  "CheckOut"      : DateTime.now().toString(),
-                  "UpdatedOn"     : DateTime.now().toString(),
-                  "formMode"      : formType
-                };
-              }
-
-              print(dataParam());
-
-              await Mod_Absensi(this.widget.sess, dataParam()).Create().then((value) async{
-                if(value["success"]){
-                  Navigator.of(context, rootNavigator: true).pop();
-                  await messageBox(
-                    context: context, 
-                    title: "Infomasi", 
-                    message: "Berhasil Checkout"
-                  );
-                  Navigator.of(context).pop();
-                }
-                else{
-                  Navigator.of(context, rootNavigator: true).pop();
-                  await messageBox(
-                    context: context, 
-                    title: "Infomasi", 
-                    message: value["message"]
-                  );
-                }
-              });
-            }
-            else{
-                Navigator.of(context, rootNavigator: true).pop();
-                messageBox(context: context, title: "info", message: "Invalid Form Type");
-            }
-
-            
+        await Mod_Absensi(widget.sess, dataParam()).Create().then((value) async{
+          if(value["success"]){
+            Navigator.of(context, rootNavigator: true).pop();
+            await messageBox(
+              context: context, 
+              title: "Infomasi", 
+              message: "Berhasil Checkin"
+            );
+            Navigator.of(context).pop();
           }
           else{
             Navigator.of(context, rootNavigator: true).pop();
             await messageBox(
               context: context, 
               title: "Infomasi", 
-              message: "Face not Match"
+              message: value["message"]
             );
           }
+        });
+      }
+      else if(formType == "out"){
+        print(image2.bitmap);
+        Map dataParam(){
+          return {
+            "id"            : dataAbsen![0]["id"].toString(),
+            "RecordOwnerID" : widget.sess.RecordOwnerID,
+            "LocationID"    : widget.sess.LocationID.toString(),
+            "KodeKaryawan"  : widget.sess.KodeUser,
+            "KoordinatOUT"  : _currentPosition == null ? "" : "${_currentPosition!.latitude},${_currentPosition!.longitude}",
+            "ImageOUT"      : image2.bitmap,
+            "Shift"         : dataJadwal![0]["NamaShift"],
+            "CheckOut"      : DateTime.now().toString(),
+            "UpdatedOn"     : DateTime.now().toString(),
+            "formMode"      : formType
+          };
         }
-        else{
+
+        print(dataParam());
+
+        await Mod_Absensi(widget.sess, dataParam()).Create().then((value) async{
+          if(value["success"]){
+            Navigator.of(context, rootNavigator: true).pop();
+            await messageBox(
+              context: context, 
+              title: "Infomasi", 
+              message: "Berhasil Checkout"
+            );
+            Navigator.of(context).pop();
+          }
+          else{
+            Navigator.of(context, rootNavigator: true).pop();
+            await messageBox(
+              context: context, 
+              title: "Infomasi", 
+              message: value["message"]
+            );
+          }
+        });
+      }
+      else{
           Navigator.of(context, rootNavigator: true).pop();
-          await messageBox(
-            context: context, 
-            title: "Infomasi", 
-            message: "Face not Found"
-          );
-        }
-      }).onError((error, stackTrace) async{
-        print("ini ada error : " + error.toString());
-        Navigator.of(context, rootNavigator: true).pop();
-        await messageBox(
-            context: context, 
-            title: "Infomasi", 
-            message: "Wajah tidak ada disistem"
-          );
-      });
-    });
+          messageBox(context: context, title: "info", message: "Invalid Form Type");
+      }
+    // if (image1.bitmap == null ||
+    //     image1.bitmap == "" ||
+    //     image2.bitmap == null ||
+    //     image2.bitmap == ""){};
+    // setState(() => _similarity = "Processing...");
+    // var request = new Regula.MatchFacesRequest();
+    // request.images = [image1, image2];
+    // Regula.FaceSDK.matchFaces(jsonEncode(request)).then((value) {
+    //   var response = Regula.MatchFacesResponse.fromJson(json.decode(value));
+    //   print(response);
+    //   Regula.FaceSDK.matchFacesSimilarityThresholdSplit(jsonEncode(response!.results), 0.9).then((str) async {
+    //     var split = Regula.MatchFacesSimilarityThresholdSplit.fromJson(json.decode(str));
+    //     print("printing "+ (split!.matchedFaces[0]!.similarity! * 100 > 95).toString());
+    //     if(split.matchedFaces.length > 0){
+    //       if(split.matchedFaces[0]!.similarity! * 100 > 95){
+    //         // return true;
+    //         // isMatch = true;
+
+            
+
+            
+    //       }
+    //       else{
+    //         Navigator.of(context, rootNavigator: true).pop();
+    //         await messageBox(
+    //           context: context, 
+    //           title: "Infomasi", 
+    //           message: "Face not Match"
+    //         );
+    //       }
+    //     }
+    //     else{
+    //       Navigator.of(context, rootNavigator: true).pop();
+    //       await messageBox(
+    //         context: context, 
+    //         title: "Infomasi", 
+    //         message: "Face not Found"
+    //       );
+    //     }
+    //   }).onError((error, stackTrace) async{
+    //     print("ini ada error : " + error.toString());
+    //     Navigator.of(context, rootNavigator: true).pop();
+    //     await messageBox(
+    //         context: context, 
+    //         title: "Infomasi", 
+    //         message: "Wajah tidak ada disistem"
+    //       );
+    //   });
+    // });
   }
 
   @override
@@ -338,7 +342,7 @@ class _FormAbsensi extends State<FormAbsensi> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
-        title: Text(
+        title: const Text(
           "Absensi",
           style: TextStyle(
             color: Colors.white
@@ -346,10 +350,10 @@ class _FormAbsensi extends State<FormAbsensi> {
         ),
         actions: [
           Padding(
-            padding: EdgeInsets.all(5),
+            padding: const EdgeInsets.all(5),
             child: Text(
-              "V 1.0.15",
-              style: TextStyle(
+              "V ${widget.sess.appVersion}",
+              style: const TextStyle(
                 color: Colors.white
               ),
             ),
@@ -357,47 +361,45 @@ class _FormAbsensi extends State<FormAbsensi> {
         ],
       ),
       bottomNavigationBar: BottomAppBar(
-        child: dataJadwal!.length > 0 ? Row(
+        child: dataJadwal!.isNotEmpty ? Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Padding(
-              padding: EdgeInsets.fromLTRB(this.widget.sess.width * 2,
-                  this.widget.sess.width * 2, 0, this.widget.sess.width * 2),
-              child: Container(
-                width: this.widget.sess.width * 40,
+              padding: EdgeInsets.fromLTRB(widget.sess.width * 2,
+                  widget.sess.width * 2, 0, widget.sess.width * 2),
+              child: SizedBox(
+                width: widget.sess.width * 40,
                 child: ElevatedButton(
-                  child: Text("Check In"),
                   style: ButtonStyle(
                       shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(18.0),
                       )),
                       backgroundColor: MaterialStateProperty.all(Colors.green)),
-                  onPressed: dataAbsen!.length > 0 ? null :() async{
-                    showLoadingDialog(context, _keyLoader, info: "Begin Scaning");
-                    _getCurrentPosition();
-                    final ImagePicker _picker = ImagePicker();
+                  onPressed: dataAbsen!.isNotEmpty ? null :() async{
+                    final ImagePicker picker = ImagePicker();
 
-                    await _picker.pickImage(
+                    await picker.pickImage(
                       source: ImageSource.camera, 
                       maxHeight: 600,
                       preferredCameraDevice: CameraDevice.front
                     ).then((value) {
-                      var tempImage1 = base64Decode(dataJadwal![0]["Image"].toString().replaceAll("data:image/jpeg;base64,", ""));
-                      // var tempImage2 = base64Decode(File(value!.path).readAsStringSync());
-                      File? imageFile;
-                      imageFile = File(value!.path);
-                      if (imageFile != null) {
+                      // print(value);
+                      if(value != null) {
+                        var tempImage1 = base64Decode(dataJadwal![0]["Image"].toString().replaceAll("data:image/jpeg;base64,", ""));
+                        // var tempImage2 = base64Decode(File(value!.path).readAsStringSync());
+                        File? imageFile;
+                        imageFile = File(value!.path);
                         final bites = imageFile.readAsBytesSync();
                         image2.bitmap = base64Encode(bites);
                         image2.imageType = Regula.ImageType.PRINTED;
-                      }
-
-                      image1.bitmap = base64Encode(tempImage1);
-                      image1.imageType = Regula.ImageType.PRINTED;
                       
+                        image1.bitmap = base64Encode(tempImage1);
+                        image1.imageType = Regula.ImageType.PRINTED;
+                        
 
-                      matchFaces("in");
+                        matchFaces("in");
+                      }
                   });
                     // Regula.FaceSDK.presentFaceCaptureActivity().then((result) async {
                     //   var response = Regula.FaceCaptureResponse.fromJson(json.decode(result))!;
@@ -432,52 +434,49 @@ class _FormAbsensi extends State<FormAbsensi> {
                     //   print("emty object");
                     // }
                   },
+                  child: const Text("Check In"),
                 ),
               ),
             ),
             Padding(
               padding: EdgeInsets.fromLTRB(
-                  this.widget.sess.width * 2,
-                  this.widget.sess.width * 2,
-                  this.widget.sess.width * 2,
-                  this.widget.sess.width * 2),
-              child: Container(
-                width: this.widget.sess.width * 40,
+                  widget.sess.width * 2,
+                  widget.sess.width * 2,
+                  widget.sess.width * 2,
+                  widget.sess.width * 2),
+              child: SizedBox(
+                width: widget.sess.width * 40,
                 child: ElevatedButton(
-                  child: Text("Check Out"),
                   style: ButtonStyle(
                       shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(18.0),
                       )),
                       backgroundColor: MaterialStateProperty.all(Colors.red)),
-                  onPressed: dataAbsen!.length == 0 ? null : dataAbsen![0]["ImageOUT"] != "" ? null : () async{
-                    showLoadingDialog(context, _keyLoader, info: "Begin Scaning");
-                    _getCurrentPosition();
-                    final ImagePicker _picker = ImagePicker();
+                  onPressed: dataAbsen!.isEmpty ? null : dataAbsen![0]["ImageOUT"] != "" ? null : () async{
+                    final ImagePicker picker = ImagePicker();
 
-                    await _picker.pickImage(
+                    await picker.pickImage(
                       source: ImageSource.camera, 
                       maxHeight: 600,
                       preferredCameraDevice: CameraDevice.front
                     ).then((value) {
                       // showLoadingDialog(context, _keyLoader, info: "Begin Scaning");
-
-                      var tempImage1 = base64Decode(dataJadwal![0]["Image"].toString().replaceAll("data:image/jpeg;base64,", ""));
-                      // var tempImage2 = base64Decode(File(value!.path).readAsStringSync());
-                      File? imageFile;
-                      imageFile = File(value!.path);
-                      if (imageFile != null) {
+                      if(value != null ){
+                        var tempImage1 = base64Decode(dataJadwal![0]["Image"].toString().replaceAll("data:image/jpeg;base64,", ""));
+                        // var tempImage2 = base64Decode(File(value!.path).readAsStringSync());
+                        File? imageFile;
+                        imageFile = File(value!.path);
                         final bites = imageFile.readAsBytesSync();
                         image2.bitmap = base64Encode(bites);
                         image2.imageType = Regula.ImageType.PRINTED;
-                      }
-
-                      image1.bitmap = base64Encode(tempImage1);
-                      image1.imageType = Regula.ImageType.PRINTED;
                       
+                        image1.bitmap = base64Encode(tempImage1);
+                        image1.imageType = Regula.ImageType.PRINTED;
+                        
 
-                      matchFaces("out");
+                        matchFaces("out");
+                      }
                   });
                     // Regula.FaceSDK.presentFaceCaptureActivity().then((result) async {
                     //   var response = Regula.FaceCaptureResponse.fromJson(json.decode(result))!;
@@ -502,54 +501,55 @@ class _FormAbsensi extends State<FormAbsensi> {
                     //   }
                     // });
                   },
+                  child: const Text("Check Out"),
                 ),
               ),
             )
           ],
         ) : Container(
-          child: Align(
+          child: const Align(
             alignment: Alignment.center,
             child: Text("Karyawan Tidak ada jadwal"),
           ),
         ),
       ),
-      body: dataJadwal!.length > 0 ? Column(
+      body: dataJadwal!.isNotEmpty ? Column(
         children: [
           Padding(
-            padding: EdgeInsets.all(this.widget.sess.width * 2),
-            child: Container(
+            padding: EdgeInsets.all(widget.sess.width * 2),
+            child: SizedBox(
               width: double.infinity,
-              height: this.widget.sess.hight * 11,
+              height: widget.sess.hight * 11,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      SizedBox(height: 1),
+                      const SizedBox(height: 1),
                       Container(
-                          width: this.widget.sess.width * 30,
-                          height: this.widget.sess.hight * 10,
+                          width: widget.sess.width * 30,
+                          height: widget.sess.hight * 10,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10.0),
+                            color: Theme.of(context).primaryColor,
+                          ),
                           child: Center(
                             child: Text(
-                              dataJadwal!.length == 0 ? "" : "Shift : " + dataJadwal![0]["NamaShift"].toString().toUpperCase(),
+                              dataJadwal!.isEmpty ? "" : "Shift : ${dataJadwal![0]["NamaShift"].toString().toUpperCase()}",
                               style: TextStyle(
-                                  fontSize: this.widget.sess.width * 4,
+                                  fontSize: widget.sess.width * 4,
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold),
                             ),
-                          ),
-                          decoration: new BoxDecoration(
-                            borderRadius: new BorderRadius.circular(10.0),
-                            color: Theme.of(context).primaryColor,
                           )),
                     ],
                   ),
                   Padding(
-                      padding: EdgeInsets.all(this.widget.sess.width * 2),
+                      padding: EdgeInsets.all(widget.sess.width * 2),
                       child: Container(
-                        width: this.widget.sess.width * 50,
-                        height: this.widget.sess.hight * 10,
+                        width: widget.sess.width * 50,
+                        height: widget.sess.hight * 10,
                         alignment: Alignment.topLeft,
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -557,20 +557,20 @@ class _FormAbsensi extends State<FormAbsensi> {
                             Align(
                               alignment: Alignment.topLeft,
                               child: Text(
-                                this.widget.sess.KodeUser,
+                                widget.sess.KodeUser,
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: this.widget.sess.width * 4,
+                                    fontSize: widget.sess.width * 4,
                                     color: Theme.of(context).primaryColor),
                               ),
                             ),
                             Align(
                               alignment: Alignment.topLeft,
                               child: Text(
-                                this.widget.sess.NamaUser,
+                                widget.sess.NamaUser,
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: this.widget.sess.width * 5,
+                                    fontSize: widget.sess.width * 5,
                                     color: Theme.of(context).primaryColor),
                               ),
                             ),
@@ -582,36 +582,36 @@ class _FormAbsensi extends State<FormAbsensi> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.all(this.widget.sess.width * 2),
-            child: Container(
+            padding: EdgeInsets.all(widget.sess.width * 2),
+            child: SizedBox(
               width: double.infinity,
-              height: this.widget.sess.hight * 30,
+              height: widget.sess.hight * 30,
               // color: Colors.amber,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Container(
-                    width: this.widget.sess.width * 40,
-                    height: this.widget.sess.hight * 30,
+                  SizedBox(
+                    width: widget.sess.width * 40,
+                    height: widget.sess.hight * 30,
                     // color: Colors.black,
-                    child: dataAbsen!.length > 0 ? dataAbsen![0]["ImageIN"] == "" ? Image.asset("assets/portrait.png") : Image.network(this.widget.sess.server + "Assets/images/Absensi/" + dataAbsen![0]["ImageIN"]) : Image.asset("assets/portrait.png"),
+                    child: dataAbsen!.isNotEmpty ? dataAbsen![0]["ImageIN"] == "" ? Image.asset("assets/portrait.png") : Image.network("${widget.sess.server}Assets/images/Absensi/" + dataAbsen![0]["ImageIN"]) : Image.asset("assets/portrait.png"),
                     // child: dataAbsen!.length == 0 ? Image.asset("assets/portrait.png") : Image.memory(jsonDecode(image1.bitmap.toString())),
                   ),
                   Padding(
                     padding: EdgeInsets.only(
-                        left: this.widget.sess.width * 2,
-                        right: this.widget.sess.width * 2),
-                    child: Container(
-                        width: this.widget.sess.width * 50,
-                        height: this.widget.sess.hight * 30,
+                        left: widget.sess.width * 2,
+                        right: widget.sess.width * 2),
+                    child: SizedBox(
+                        width: widget.sess.width * 50,
+                        height: widget.sess.hight * 30,
                         // color: Colors.blue,
                         child: Column(
                           children: [
                             Table(
                               columnWidths: {
-                                0: FlexColumnWidth(this.widget.sess.width * 25),
-                                1: FlexColumnWidth(this.widget.sess.width * 2),
-                                2: FlexColumnWidth(this.widget.sess.width * 35)
+                                0: FlexColumnWidth(widget.sess.width * 25),
+                                1: FlexColumnWidth(widget.sess.width * 2),
+                                2: FlexColumnWidth(widget.sess.width * 35)
                               },
                               // border: TableBorder.all(color: Colors.green, width: 1.5),
                               children: [
@@ -619,12 +619,12 @@ class _FormAbsensi extends State<FormAbsensi> {
                                   children: [
                                     Text(
                                       "NIK",
-                                      style: TextStyle( fontSize: this.widget.sess.width * 4),
+                                      style: TextStyle( fontSize: widget.sess.width * 4),
                                     ),
                                     Text(":",
-                                      style: TextStyle( fontSize:this.widget.sess.width * 4)
+                                      style: TextStyle( fontSize:widget.sess.width * 4)
                                     ),
-                                    Text(this.widget.sess.KodeUser,style: TextStyle(fontSize: this.widget.sess.width * 4)
+                                    Text(widget.sess.KodeUser,style: TextStyle(fontSize: widget.sess.width * 4)
                                     )
                                   ]
                                 ),
@@ -632,58 +632,58 @@ class _FormAbsensi extends State<FormAbsensi> {
                                   Text("Nama",
                                       style: TextStyle(
                                           fontSize:
-                                              this.widget.sess.width * 4)),
+                                              widget.sess.width * 4)),
                                   Text(":",
                                       style: TextStyle(
                                           fontSize:
-                                              this.widget.sess.width * 4)),
-                                  Text(this.widget.sess.NamaUser,
+                                              widget.sess.width * 4)),
+                                  Text(widget.sess.NamaUser,
                                       style: TextStyle(
-                                          fontSize: this.widget.sess.width * 4))
+                                          fontSize: widget.sess.width * 4))
                                 ]),
                                 TableRow(children: [
                                   Text("Tanggal",
                                       style: TextStyle(
                                           fontSize:
-                                              this.widget.sess.width * 4)),
+                                              widget.sess.width * 4)),
                                   Text(":",
                                       style: TextStyle(
                                           fontSize:
-                                              this.widget.sess.width * 4)),
-                                  Text(dataAbsen!.length == 0 ? "" : dataAbsen![0]["Checkin"].toString().split(" ")[0],
+                                              widget.sess.width * 4)),
+                                  Text(dataAbsen!.isEmpty ? "" : dataAbsen![0]["Checkin"].toString().split(" ")[0],
                                       style: TextStyle(
-                                          fontSize: this.widget.sess.width * 4))
+                                          fontSize: widget.sess.width * 4))
                                 ]),
                                 TableRow(children: [
                                   Text("Jam",
                                       style: TextStyle(
                                           fontSize:
-                                              this.widget.sess.width * 4)),
+                                              widget.sess.width * 4)),
                                   Text(":",
                                       style: TextStyle(
                                           fontSize:
-                                              this.widget.sess.width * 4)),
-                                  Text(dataAbsen!.length == 0 ? "" : dataAbsen![0]["Checkin"].toString().split(" ")[1].split(".")[0],
+                                              widget.sess.width * 4)),
+                                  Text(dataAbsen!.isEmpty ? "" : dataAbsen![0]["Checkin"].toString().split(" ")[1].split(".")[0],
                                       style: TextStyle(
-                                          fontSize: this.widget.sess.width * 4))
+                                          fontSize: widget.sess.width * 4))
                                 ])
                               ],
                             ),
                             Padding(
                               padding: EdgeInsets.only(
-                                left: this.widget.sess.width * 2,
-                                right: this.widget.sess.width * 2,
-                                top: this.widget.sess.width * 2,
+                                left: widget.sess.width * 2,
+                                right: widget.sess.width * 2,
+                                top: widget.sess.width * 2,
                               ),
-                              child: Container(
-                                width: this.widget.sess.width * 55,
-                                height: this.widget.sess.hight * 10,
+                              child: SizedBox(
+                                width: widget.sess.width * 55,
+                                height: widget.sess.hight * 10,
                                 // color: Colors.black,
                                 child: Center(
                                   child: Text(
-                                    dataAbsen!.length > 0 ? "CHECKIN" : "",
+                                    dataAbsen!.isNotEmpty ? "CHECKIN" : "",
                                     style: TextStyle(
-                                        fontSize: this.widget.sess.width * 8,
+                                        fontSize: widget.sess.width * 8,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.green),
                                   ),
@@ -698,35 +698,35 @@ class _FormAbsensi extends State<FormAbsensi> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.all(this.widget.sess.width * 2),
-            child: Container(
+            padding: EdgeInsets.all(widget.sess.width * 2),
+            child: SizedBox(
               width: double.infinity,
-              height: this.widget.sess.hight * 30,
+              height: widget.sess.hight * 30,
               // color: Colors.amber,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Container(
-                    width: this.widget.sess.width * 40,
-                    height: this.widget.sess.hight * 30,
+                  SizedBox(
+                    width: widget.sess.width * 40,
+                    height: widget.sess.hight * 30,
                     // color: Colors.black,
-                    child: dataAbsen!.length > 0 ? dataAbsen![0]["ImageOUT"] == "" ? Image.asset("assets/portrait.png") : Image.network(this.widget.sess.server + "Assets/images/Absensi/" + dataAbsen![0]["ImageOUT"]):Image.asset("assets/portrait.png") ,
+                    child: dataAbsen!.isNotEmpty ? dataAbsen![0]["ImageOUT"] == "" ? Image.asset("assets/portrait.png") : Image.network("${widget.sess.server}Assets/images/Absensi/" + dataAbsen![0]["ImageOUT"]):Image.asset("assets/portrait.png") ,
                   ),
                   Padding(
                     padding: EdgeInsets.only(
-                        left: this.widget.sess.width * 2,
-                        right: this.widget.sess.width * 2),
-                    child: Container(
-                        width: this.widget.sess.width * 50,
-                        height: this.widget.sess.hight * 30,
+                        left: widget.sess.width * 2,
+                        right: widget.sess.width * 2),
+                    child: SizedBox(
+                        width: widget.sess.width * 50,
+                        height: widget.sess.hight * 30,
                         // color: Colors.blue,
                         child: Column(
                           children: [
                             Table(
                               columnWidths: {
-                                0: FlexColumnWidth(this.widget.sess.width * 25),
-                                1: FlexColumnWidth(this.widget.sess.width * 2),
-                                2: FlexColumnWidth(this.widget.sess.width * 35)
+                                0: FlexColumnWidth(widget.sess.width * 25),
+                                1: FlexColumnWidth(widget.sess.width * 2),
+                                2: FlexColumnWidth(widget.sess.width * 35)
                               },
                               // border: TableBorder.all(color: Colors.green, width: 1.5),
                               children: [
@@ -734,72 +734,72 @@ class _FormAbsensi extends State<FormAbsensi> {
                                   Text(
                                     "NIK",
                                     style: TextStyle(
-                                        fontSize: this.widget.sess.width * 4),
+                                        fontSize: widget.sess.width * 4),
                                   ),
                                   Text(":",
                                       style: TextStyle(
                                           fontSize:
-                                              this.widget.sess.width * 4)),
-                                  Text(this.widget.sess.KodeUser,
+                                              widget.sess.width * 4)),
+                                  Text(widget.sess.KodeUser,
                                       style: TextStyle(
-                                          fontSize: this.widget.sess.width * 4))
+                                          fontSize: widget.sess.width * 4))
                                 ]),
                                 TableRow(children: [
                                   Text("Nama",
                                       style: TextStyle(
                                           fontSize:
-                                              this.widget.sess.width * 4)),
+                                              widget.sess.width * 4)),
                                   Text(":",
                                       style: TextStyle(
                                           fontSize:
-                                              this.widget.sess.width * 4)),
-                                  Text(this.widget.sess.NamaUser,
+                                              widget.sess.width * 4)),
+                                  Text(widget.sess.NamaUser,
                                       style: TextStyle(
-                                          fontSize: this.widget.sess.width * 4))
+                                          fontSize: widget.sess.width * 4))
                                 ]),
                                 TableRow(children: [
                                   Text("Tanggal",
                                       style: TextStyle(
                                           fontSize:
-                                              this.widget.sess.width * 4)),
+                                              widget.sess.width * 4)),
                                   Text(":",
                                       style: TextStyle(
                                           fontSize:
-                                              this.widget.sess.width * 4)),
-                                  Text(dataAbsen!.length > 0 ? dataAbsen![0]["CheckOut"].toString() == "0000-00-00 00:00:00.000000" ? "" : dataAbsen![0]["CheckOut"].toString().split(" ")[0] :"",
+                                              widget.sess.width * 4)),
+                                  Text(dataAbsen!.isNotEmpty ? dataAbsen![0]["CheckOut"].toString() == "0000-00-00 00:00:00.000000" ? "" : dataAbsen![0]["CheckOut"].toString().split(" ")[0] :"",
                                       style: TextStyle(
-                                          fontSize: this.widget.sess.width * 4))
+                                          fontSize: widget.sess.width * 4))
                                 ]),
                                 TableRow(children: [
                                   Text("Jam",
                                       style: TextStyle(
                                           fontSize:
-                                              this.widget.sess.width * 4)),
+                                              widget.sess.width * 4)),
                                   Text(":",
                                       style: TextStyle(
                                           fontSize:
-                                              this.widget.sess.width * 4)),
-                                  Text(dataAbsen!.length > 0 ? dataAbsen![0]["CheckOut"].toString() == "0000-00-00 00:00:00.000000" ? "" : dataAbsen![0]["CheckOut"].toString().split(" ")[1].split(".")[0]:"",
+                                              widget.sess.width * 4)),
+                                  Text(dataAbsen!.isNotEmpty ? dataAbsen![0]["CheckOut"].toString() == "0000-00-00 00:00:00.000000" ? "" : dataAbsen![0]["CheckOut"].toString().split(" ")[1].split(".")[0]:"",
                                       style: TextStyle(
-                                          fontSize: this.widget.sess.width * 4))
+                                          fontSize: widget.sess.width * 4))
                                 ])
                               ],
                             ),
                             Padding(
                               padding: EdgeInsets.only(
-                                left: this.widget.sess.width * 2,
-                                right: this.widget.sess.width * 2,
-                                top: this.widget.sess.width * 2,
+                                left: widget.sess.width * 2,
+                                right: widget.sess.width * 2,
+                                top: widget.sess.width * 2,
                               ),
-                              child: Container(
-                                width: this.widget.sess.width * 55,
-                                height: this.widget.sess.hight * 10,
+                              child: SizedBox(
+                                width: widget.sess.width * 55,
+                                height: widget.sess.hight * 10,
                                 // color: Colors.black,
                                 child: Center(
                                   child: Text(
-                                    dataAbsen!.length > 0 ?dataAbsen![0]["CheckOut"].toString() != "0000-00-00 00:00:00.000000" ? "CHECKOUT" : "" : "",
+                                    dataAbsen!.isNotEmpty ?dataAbsen![0]["CheckOut"].toString() != "0000-00-00 00:00:00.000000" ? "CHECKOUT" : "" : "",
                                     style: TextStyle(
-                                        fontSize: this.widget.sess.width * 8,
+                                        fontSize: widget.sess.width * 8,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.red),
                                   ),
@@ -815,7 +815,7 @@ class _FormAbsensi extends State<FormAbsensi> {
           )
         ],
       ) : Container(
-        child: Align(
+        child: const Align(
           alignment: Alignment.center,
           child: Text("Karyawan Tidak ada jadwal"),
         ),

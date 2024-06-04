@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mobilepatrol/general/lookup.dart';
@@ -8,23 +7,23 @@ import 'package:mobilepatrol/models/paymentmethod.dart';
 
 class RegisterMobilePotrait extends StatefulWidget {
   final session? sess;
-  RegisterMobilePotrait(this.sess);
+  const RegisterMobilePotrait(this.sess, {super.key});
 
   @override
   _RegisterMobilePotraitState createState() => _RegisterMobilePotraitState();
 }
 
 class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
-  TextEditingController _PartnerName = TextEditingController();
-  TextEditingController _AlamatTagihan = TextEditingController();
-  TextEditingController _NoHPPIC = TextEditingController();
-  TextEditingController _EmailPIC = TextEditingController();
-  TextEditingController _NIKPic = TextEditingController();
-  TextEditingController _NamaPIC = TextEditingController();
-  TextEditingController _Password = TextEditingController();
-  TextEditingController _RePassword = TextEditingController();
+  final TextEditingController _PartnerName = TextEditingController();
+  final TextEditingController _AlamatTagihan = TextEditingController();
+  final TextEditingController _NoHPPIC = TextEditingController();
+  final TextEditingController _EmailPIC = TextEditingController();
+  final TextEditingController _NIKPic = TextEditingController();
+  final TextEditingController _NamaPIC = TextEditingController();
+  final TextEditingController _Password = TextEditingController();
+  final TextEditingController _RePassword = TextEditingController();
 
-  final GlobalKey<State> _keyLoader = new GlobalKey<State>();
+  final GlobalKey<State> _keyLoader = GlobalKey<State>();
 
   bool _obscured = false;
   bool _obscured_re = false;
@@ -40,7 +39,7 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
   double ? _adminfeePerc = 0.0;
   double ? _totalAdminfee = 0.0;
 
-  final f = new NumberFormat("#,###.00");
+  final f = NumberFormat("#,###.00");
   
   Future<Map>_getPayment(int id) async{
     Map oParam(){
@@ -48,7 +47,7 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
         'id'       : id.toString(),
       };
     }
-    var temp = await Mod_Auth(this.widget.sess, Parameter:  oParam()).getPaymentMethod();
+    var temp = await Mod_Auth(widget.sess, Parameter:  oParam()).getPaymentMethod();
     return temp;
   }
 
@@ -80,23 +79,23 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
           Align(
             alignment: Alignment.topLeft,
             child: Padding(
-              padding: EdgeInsets.only(left: this.widget.sess!.hight * 5),
+              padding: EdgeInsets.only(left: widget.sess!.hight * 5),
               child: Image.asset(
                 "assets/logo.gif",
-                width: this.widget.sess!.width * 40,
-                height: this.widget.sess!.hight * 35,
+                width: widget.sess!.width * 40,
+                height: widget.sess!.hight * 35,
               ),
             ),
           ),
           Align(
             alignment: Alignment.topLeft,
             child: Padding(
-              padding: EdgeInsets.only(left: this.widget.sess!.hight * 5),
+              padding: EdgeInsets.only(left: widget.sess!.hight * 5),
               child: Text(
                 "Daftar Untuk Jadi",
                 style: TextStyle(
                   fontFamily: "Montserrat",
-                  fontSize: this.widget.sess!.hight * 3,
+                  fontSize: widget.sess!.hight * 3,
                   fontWeight: FontWeight.bold,
                 ),
                 textAlign: TextAlign.left,
@@ -106,12 +105,12 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
           Align(
               alignment: Alignment.topLeft,
               child: Padding(
-                padding: EdgeInsets.only(left: this.widget.sess!.hight * 5),
+                padding: EdgeInsets.only(left: widget.sess!.hight * 5),
                 child: Text(
                   "Member Kami",
                   style: TextStyle(
                       fontFamily: "Montserrat",
-                      fontSize: this.widget.sess!.hight * 3,
+                      fontSize: widget.sess!.hight * 3,
                       fontWeight: FontWeight.bold),
                 ),
               )),
@@ -119,11 +118,11 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
               alignment: Alignment.topLeft,
               child: Padding(
                 padding: EdgeInsets.only(
-                    left: this.widget.sess!.hight * 5,
-                    top: this.widget.sess!.hight * 2),
+                    left: widget.sess!.hight * 5,
+                    top: widget.sess!.hight * 2),
                 child: SizedBox(
-                  height: this.widget.sess!.hight * 0.5,
-                  width: this.widget.sess!.width * 20,
+                  height: widget.sess!.hight * 0.5,
+                  width: widget.sess!.width * 20,
                   child: Container(
                     color: Theme.of(context).primaryColor,
                   ),
@@ -133,24 +132,24 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
             alignment: Alignment.topLeft,
             child: Padding(
               padding: EdgeInsets.only(
-                  left: this.widget.sess!.hight * 5,
-                  top: this.widget.sess!.hight * 2),
-              child: Container(
-                width: this.widget.sess!.width * 72,
+                  left: widget.sess!.hight * 5,
+                  top: widget.sess!.hight * 2),
+              child: SizedBox(
+                width: widget.sess!.width * 72,
                 child: Center(
                   child: Padding(
                     padding:
-                        EdgeInsets.only(bottom: this.widget.sess!.hight * 0.5),
+                        EdgeInsets.only(bottom: widget.sess!.hight * 0.5),
                     child: TextField(
                       controller: _PartnerName,
                       decoration: InputDecoration(
                           icon: Icon(Icons.person,
-                              size: this.widget.sess!.hight * 4,
+                              size: widget.sess!.hight * 4,
                               color: Theme.of(context).primaryColor),
                           labelText: "Nama Perusahaan",
                           labelStyle: TextStyle(
                             color: Theme.of(context).primaryColor,
-                            fontSize: this.widget.sess!.hight * 2,
+                            fontSize: widget.sess!.hight * 2,
                           )),
                     ),
                   ),
@@ -162,24 +161,24 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
             alignment: Alignment.topLeft,
             child: Padding(
               padding: EdgeInsets.only(
-                  left: this.widget.sess!.hight * 5,
-                  top: this.widget.sess!.hight * 0.5),
-              child: Container(
-                width: this.widget.sess!.width * 72,
+                  left: widget.sess!.hight * 5,
+                  top: widget.sess!.hight * 0.5),
+              child: SizedBox(
+                width: widget.sess!.width * 72,
                 child: Center(
                   child: Padding(
                     padding:
-                        EdgeInsets.only(bottom: this.widget.sess!.hight * 2),
+                        EdgeInsets.only(bottom: widget.sess!.hight * 2),
                     child: TextField(
                       controller: _AlamatTagihan,
                       decoration: InputDecoration(
                           icon: Icon(Icons.person,
-                              size: this.widget.sess!.hight * 4,
+                              size: widget.sess!.hight * 4,
                               color: Theme.of(context).primaryColor),
                           labelText: "Alamat",
                           labelStyle: TextStyle(
                             color: Theme.of(context).primaryColor,
-                            fontSize: this.widget.sess!.hight * 2,
+                            fontSize: widget.sess!.hight * 2,
                           )),
                       maxLines: 3,
                     ),
@@ -192,24 +191,24 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
             alignment: Alignment.topLeft,
             child: Padding(
               padding: EdgeInsets.only(
-                  left: this.widget.sess!.hight * 5,
-                  top: this.widget.sess!.hight * 0.5),
-              child: Container(
-                width: this.widget.sess!.width * 72,
+                  left: widget.sess!.hight * 5,
+                  top: widget.sess!.hight * 0.5),
+              child: SizedBox(
+                width: widget.sess!.width * 72,
                 child: Center(
                   child: Padding(
                     padding:
-                        EdgeInsets.only(bottom: this.widget.sess!.hight * 2),
+                        EdgeInsets.only(bottom: widget.sess!.hight * 2),
                     child: TextField(
                       controller: _NoHPPIC,
                       decoration: InputDecoration(
                           icon: Icon(Icons.person,
-                              size: this.widget.sess!.hight * 4,
+                              size: widget.sess!.hight * 4,
                               color: Theme.of(context).primaryColor),
                           labelText: "No. Tlp",
                           labelStyle: TextStyle(
                             color: Theme.of(context).primaryColor,
-                            fontSize: this.widget.sess!.hight * 2,
+                            fontSize: widget.sess!.hight * 2,
                           )),
                     ),
                   ),
@@ -221,24 +220,24 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
             alignment: Alignment.topLeft,
             child: Padding(
               padding: EdgeInsets.only(
-                  left: this.widget.sess!.hight * 5,
-                  top: this.widget.sess!.hight * 0.5),
-              child: Container(
-                width: this.widget.sess!.width * 72,
+                  left: widget.sess!.hight * 5,
+                  top: widget.sess!.hight * 0.5),
+              child: SizedBox(
+                width: widget.sess!.width * 72,
                 child: Center(
                   child: Padding(
                     padding:
-                        EdgeInsets.only(bottom: this.widget.sess!.hight * 2),
+                        EdgeInsets.only(bottom: widget.sess!.hight * 2),
                     child: TextField(
                       controller: _NIKPic,
                       decoration: InputDecoration(
                           icon: Icon(Icons.person,
-                              size: this.widget.sess!.hight * 4,
+                              size: widget.sess!.hight * 4,
                               color: Theme.of(context).primaryColor),
                           labelText: "No. Induk Penduduk",
                           labelStyle: TextStyle(
                             color: Theme.of(context).primaryColor,
-                            fontSize: this.widget.sess!.hight * 2,
+                            fontSize: widget.sess!.hight * 2,
                           )),
                     ),
                   ),
@@ -250,29 +249,29 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
             alignment: Alignment.topLeft,
             child: Padding(
                 padding: EdgeInsets.only(
-                    left: this.widget.sess!.hight * 5,
-                    top: this.widget.sess!.hight * 2),
-                child: Container(
-                    width: this.widget.sess!.width * 90,
+                    left: widget.sess!.hight * 5,
+                    top: widget.sess!.hight * 2),
+                child: SizedBox(
+                    width: widget.sess!.width * 90,
                     child: Row(
                       children: [
-                        Container(
-                          width: this.widget.sess!.width * 72,
+                        SizedBox(
+                          width: widget.sess!.width * 72,
                           child: Center(
                             child: Padding(
                               padding: EdgeInsets.only(
-                                  bottom: this.widget.sess!.hight * 2),
+                                  bottom: widget.sess!.hight * 2),
                               child: TextField(
                                 controller: _Password,
                                 obscureText: !_obscured,
                                 decoration: InputDecoration(
                                     icon: Icon(Icons.key,
-                                        size: this.widget.sess!.hight * 4,
+                                        size: widget.sess!.hight * 4,
                                         color: Theme.of(context).primaryColor),
                                     labelText: "Password",
                                     labelStyle: TextStyle(
                                       color: Theme.of(context).primaryColor,
-                                      fontSize: this.widget.sess!.hight * 2,
+                                      fontSize: widget.sess!.hight * 2,
                                     )),
 
                                 // onTap: () {
@@ -290,7 +289,7 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                               _obscured
                                   ? Icons.visibility_rounded
                                   : Icons.visibility_off_rounded,
-                              size: this.widget.sess!.hight * 3,
+                              size: widget.sess!.hight * 3,
                               color: Theme.of(context).primaryColor),
                           onTap: () {
                             setState(() {
@@ -306,29 +305,29 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
             alignment: Alignment.topLeft,
             child: Padding(
                 padding: EdgeInsets.only(
-                    left: this.widget.sess!.hight * 5,
-                    top: this.widget.sess!.hight * 2),
-                child: Container(
-                    width: this.widget.sess!.width * 90,
+                    left: widget.sess!.hight * 5,
+                    top: widget.sess!.hight * 2),
+                child: SizedBox(
+                    width: widget.sess!.width * 90,
                     child: Row(
                       children: [
-                        Container(
-                          width: this.widget.sess!.width * 72,
+                        SizedBox(
+                          width: widget.sess!.width * 72,
                           child: Center(
                             child: Padding(
                               padding: EdgeInsets.only(
-                                  bottom: this.widget.sess!.hight * 2),
+                                  bottom: widget.sess!.hight * 2),
                               child: TextField(
                                 controller: _RePassword,
                                 obscureText: !_obscured_re,
                                 decoration: InputDecoration(
                                     icon: Icon(Icons.key,
-                                        size: this.widget.sess!.hight * 4,
+                                        size: widget.sess!.hight * 4,
                                         color: Theme.of(context).primaryColor),
                                     labelText: "Tulis Ulang Password",
                                     labelStyle: TextStyle(
                                       color: Theme.of(context).primaryColor,
-                                      fontSize: this.widget.sess!.hight * 2,
+                                      fontSize: widget.sess!.hight * 2,
                                     )),
 
                                 // onTap: () {
@@ -346,7 +345,7 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                               _obscured_re
                                   ? Icons.visibility_rounded
                                   : Icons.visibility_off_rounded,
-                              size: this.widget.sess!.hight * 3,
+                              size: widget.sess!.hight * 3,
                               color: Theme.of(context).primaryColor),
                           onTap: () {
                             setState(() {
@@ -362,23 +361,23 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
             alignment: Alignment.topLeft,
             child: Padding(
               padding: EdgeInsets.only(
-                left: this.widget.sess!.hight * 5,
-                top: this.widget.sess!.hight * 0.5,
-                right: this.widget.sess!.hight * 5,
+                left: widget.sess!.hight * 5,
+                top: widget.sess!.hight * 0.5,
+                right: widget.sess!.hight * 5,
               ),
-              child: Container(
+              child: SizedBox(
                 width: double.infinity,
-                height: this.widget.sess!.hight * 63,
+                height: widget.sess!.hight * 63,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   children: [
                     _Basic(),
                     SizedBox(
-                      width: this.widget.sess!.width * 2,
+                      width: widget.sess!.width * 2,
                     ),
                     _PaketLengkap(),
                     SizedBox(
-                      width: this.widget.sess!.width * 2,
+                      width: widget.sess!.width * 2,
                     ),
                     _PaketHitunganBulan()
                   ],
@@ -391,13 +390,13 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
             alignment: Alignment.topLeft,
             child: Padding(
               padding: EdgeInsets.only(
-                left: this.widget.sess!.hight * 5,
-                top: this.widget.sess!.hight * 0.5,
-                right: this.widget.sess!.hight * 5,
+                left: widget.sess!.hight * 5,
+                top: widget.sess!.hight * 0.5,
+                right: widget.sess!.hight * 5,
               ),
-              child: Container(
+              child: SizedBox(
                 width: double.infinity,
-                height: this.widget.sess!.hight * 10,
+                height: widget.sess!.hight * 10,
                 // color: Colors.black,
                 child: Card(
                   child: ListTile(
@@ -419,7 +418,7 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                             'id' : ''
                           };
                         }
-                        var result = await Navigator.push(context, MaterialPageRoute(builder: (context) => Lookup(title: "Daftar Media Pembayaran", datamodel: new Mod_Payment(this.widget.sess, ),parameter: oParam(), )));
+                        var result = await Navigator.push(context, MaterialPageRoute(builder: (context) => Lookup(title: "Daftar Media Pembayaran", datamodel: Mod_Payment(widget.sess, ),parameter: oParam(), )));
                         if(result != null) {
                           idPayment = int.parse(result["ID"]);
                           namePayment= result["Title"];
@@ -446,7 +445,7 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                         });
                       },
                     ),
-                    subtitle: namePayment == "" ? Text("<tab untuk memilih metode pembayaran>") : Text("-"),
+                    subtitle: namePayment == "" ? const Text("<tab untuk memilih metode pembayaran>") : const Text("-"),
                   ),
                 ),
               ),
@@ -457,33 +456,33 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
             alignment: Alignment.topLeft,
             child: Padding(
               padding: EdgeInsets.only(
-                left: this.widget.sess!.hight * 5,
-                top: this.widget.sess!.hight * 2,
-                right: this.widget.sess!.hight * 5,
+                left: widget.sess!.hight * 5,
+                top: widget.sess!.hight * 2,
+                right: widget.sess!.hight * 5,
                 // bottom: this.widget.sess!.hight * 2,
               ),
               child: Column(
                 children: [
-                  Text("Detail Transaksi Pembayaran"),
+                  const Text("Detail Transaksi Pembayaran"),
                   // SizedBox(
                   //   height: this.widget.sess!.hight * 2,
                   // ),
                   ListTile(
-                    visualDensity: VisualDensity(horizontal: 0, vertical: -4),
-                    title: Text("Plan dipilih "),
-                    subtitle: _planName == "" ? Text("-") : Text(_planName.toString()),
-                    trailing: _planAmt == 0 ? Text("Rp. 0") : Text(f.format(_planAmt)),
+                    visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                    title: const Text("Plan dipilih "),
+                    subtitle: _planName == "" ? const Text("-") : Text(_planName.toString()),
+                    trailing: _planAmt == 0 ? const Text("Rp. 0") : Text(f.format(_planAmt)),
                   ),
                   ListTile(
-                    visualDensity: VisualDensity(horizontal: 0, vertical: -4),
-                    title: Text("Biaya Admin "),
-                    subtitle: _totalAdminfee == 0 ? Text("-") : Text("Biaya Layanan"),
-                    trailing: _totalAdminfee == 0 ? Text("Rp. 0") : Text(f.format(_totalAdminfee)),
+                    visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                    title: const Text("Biaya Admin "),
+                    subtitle: _totalAdminfee == 0 ? const Text("-") : const Text("Biaya Layanan"),
+                    trailing: _totalAdminfee == 0 ? const Text("Rp. 0") : Text(f.format(_totalAdminfee)),
                   ),
                   ListTile(
-                    visualDensity: VisualDensity(horizontal: 0, vertical: -4),
-                    title: Text("Total "),
-                    trailing: double.parse(_totalAdminfee.toString()) + double.parse(_planAmt.toString()) == 0 ? Text("Rp. 0") : Text(f.format(double.parse(_totalAdminfee.toString()) + double.parse(_planAmt.toString())).toString()),
+                    visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                    title: const Text("Total "),
+                    trailing: double.parse(_totalAdminfee.toString()) + double.parse(_planAmt.toString()) == 0 ? const Text("Rp. 0") : Text(f.format(double.parse(_totalAdminfee.toString()) + double.parse(_planAmt.toString())).toString()),
                   )
                 ],
               ),
@@ -494,21 +493,14 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
             alignment: Alignment.topLeft,
             child: Padding(
               padding: EdgeInsets.only(
-                left: this.widget.sess!.hight * 5,
-                top: this.widget.sess!.hight * 2,
-                right: this.widget.sess!.hight * 5,
+                left: widget.sess!.hight * 5,
+                top: widget.sess!.hight * 2,
+                right: widget.sess!.hight * 5,
                 // bottom: this.widget.sess!.hight * 2,
               ),
-              child: Container(
+              child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  child: Text(
-                    "Daftar Sekarang",
-                    style: TextStyle(
-                        fontFamily: "Montserrat",
-                        fontSize: this.widget.sess!.hight * 2,
-                        color: Colors.white),
-                  ),
                   style: ButtonStyle(
                     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                       RoundedRectangleBorder(
@@ -521,6 +513,13 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                   onPressed: () {
                     
                   },
+                  child: Text(
+                    "Daftar Sekarang",
+                    style: TextStyle(
+                        fontFamily: "Montserrat",
+                        fontSize: widget.sess!.hight * 2,
+                        color: Colors.white),
+                  ),
                 ),
               )
             ),
@@ -532,70 +531,63 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
 
   Widget _Basic() {
     return GestureDetector(
-      child: Container(
-        width: this.widget.sess!.width * 50,
-        height: this.widget.sess!.hight * 40,
+      child: SizedBox(
+        width: widget.sess!.width * 50,
+        height: widget.sess!.hight * 40,
         child: Card(
           color: Theme.of(context).primaryColorLight,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Padding(
-                padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                 child: Container(
                     decoration: BoxDecoration(
                       // borderRadius: BorderRadius.circular(10),
                       color: Colors.blue[300],
                     ),
                     width: double.infinity,
-                    height: this.widget.sess!.hight * 5,
+                    height: widget.sess!.hight * 5,
                     child: Center(
                       child: Text(
                         "BASIC",
                         style: TextStyle(
                             fontFamily: "Arial",
-                            fontSize: this.widget.sess!.width * 5,
+                            fontSize: widget.sess!.width * 5,
                             fontWeight: FontWeight.bold,
                             color: Colors.white),
                       ),
                     )),
               ),
               SizedBox(
-                height: this.widget.sess!.hight * 2,
+                height: widget.sess!.hight * 2,
               ),
               Container(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Align(
+                    const Align(
                       alignment: Alignment.bottomRight,
                       child: Text("Rp "),
                     ),
                     Text(
                       "300.000",
                       style: TextStyle(
-                          fontSize: this.widget.sess!.width * 7,
+                          fontSize: widget.sess!.width * 7,
                           fontWeight: FontWeight.bold),
                     ),
-                    Align(
+                    const Align(
                       alignment: Alignment.topCenter,
                       child: Text(" / bln"),
                     ),
                   ],
                 ),
               ),
-              Text("Unlimited User"),
+              const Text("Unlimited User"),
               SizedBox(
-                height: this.widget.sess!.hight * 2,
+                height: widget.sess!.hight * 2,
               ),
               ElevatedButton(
-                child: Text(
-                  "Pilih Layanan",
-                  style: TextStyle(
-                      fontFamily: "Montserrat",
-                      fontSize: this.widget.sess!.hight * 2,
-                      color: Colors.white),
-                ),
                 style: ButtonStyle(
                   shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                     RoundedRectangleBorder(
@@ -612,13 +604,20 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                     _planAmt = 300000;
                   });
                 },
+                child: Text(
+                  "Pilih Layanan",
+                  style: TextStyle(
+                      fontFamily: "Montserrat",
+                      fontSize: widget.sess!.hight * 2,
+                      color: Colors.white),
+                ),
               ),
               SizedBox(
-                height: this.widget.sess!.hight * 2,
+                height: widget.sess!.hight * 2,
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(this.widget.sess!.width * 2, 0,
-                    this.widget.sess!.width * 2, 0),
+                padding: EdgeInsets.fromLTRB(widget.sess!.width * 2, 0,
+                    widget.sess!.width * 2, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -626,13 +625,13 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                       Icons.check,
                       color: Theme.of(context).primaryColor,
                     ),
-                    Text(" Akses Web Admin")
+                    const Text(" Akses Web Admin")
                   ],
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(this.widget.sess!.width * 2, 0,
-                    this.widget.sess!.width * 2, 0),
+                padding: EdgeInsets.fromLTRB(widget.sess!.width * 2, 0,
+                    widget.sess!.width * 2, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -640,13 +639,13 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                       Icons.check,
                       color: Theme.of(context).primaryColor,
                     ),
-                    Text(" Akses Review Patroli")
+                    const Text(" Akses Review Patroli")
                   ],
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(this.widget.sess!.width * 2, 0,
-                    this.widget.sess!.width * 2, 0),
+                padding: EdgeInsets.fromLTRB(widget.sess!.width * 2, 0,
+                    widget.sess!.width * 2, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -654,13 +653,13 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                       Icons.check,
                       color: Theme.of(context).primaryColor,
                     ),
-                    Text(" Multi Site")
+                    const Text(" Multi Site")
                   ],
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(this.widget.sess!.width * 2, 0,
-                    this.widget.sess!.width * 2, 0),
+                padding: EdgeInsets.fromLTRB(widget.sess!.width * 2, 0,
+                    widget.sess!.width * 2, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -668,13 +667,13 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                       Icons.check,
                       color: Theme.of(context).primaryColor,
                     ),
-                    Text(" Free Maintain")
+                    const Text(" Free Maintain")
                   ],
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(this.widget.sess!.width * 2, 0,
-                    this.widget.sess!.width * 2, 0),
+                padding: EdgeInsets.fromLTRB(widget.sess!.width * 2, 0,
+                    widget.sess!.width * 2, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -682,13 +681,13 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                       Icons.check,
                       color: Theme.of(context).primaryColor,
                     ),
-                    Text(" Unlimited User")
+                    const Text(" Unlimited User")
                   ],
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(this.widget.sess!.width * 2, 0,
-                    this.widget.sess!.width * 2, 0),
+                padding: EdgeInsets.fromLTRB(widget.sess!.width * 2, 0,
+                    widget.sess!.width * 2, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -696,14 +695,14 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                       Icons.check,
                       color: Theme.of(context).primaryColor,
                     ),
-                    Text(" Unlimited Checkpoint")
+                    const Text(" Unlimited Checkpoint")
                   ],
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(this.widget.sess!.width * 2, 0,
-                    this.widget.sess!.width * 2, 0),
-                child: Row(
+                padding: EdgeInsets.fromLTRB(widget.sess!.width * 2, 0,
+                    widget.sess!.width * 2, 0),
+                child: const Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Icon(
@@ -715,15 +714,15 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(this.widget.sess!.width * 2, 0,
-                    this.widget.sess!.width * 2, 0),
+                padding: EdgeInsets.fromLTRB(widget.sess!.width * 2, 0,
+                    widget.sess!.width * 2, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     SizedBox(
-                      width: this.widget.sess!.width * 6,
+                      width: widget.sess!.width * 6,
                     ),
-                    Text(" Face Recognition")
+                    const Text(" Face Recognition")
                   ],
                 ),
               )
@@ -736,70 +735,63 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
 
   Widget _PaketLengkap() {
     return GestureDetector(
-      child: Container(
-        width: this.widget.sess!.width * 50,
-        height: this.widget.sess!.hight * 40,
+      child: SizedBox(
+        width: widget.sess!.width * 50,
+        height: widget.sess!.hight * 40,
         child: Card(
           color: Theme.of(context).primaryColorLight,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Padding(
-                padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                 child: Container(
                     decoration: BoxDecoration(
                       // borderRadius: BorderRadius.circular(10),
                       color: Colors.blue[300],
                     ),
                     width: double.infinity,
-                    height: this.widget.sess!.hight * 5,
+                    height: widget.sess!.hight * 5,
                     child: Center(
                       child: Text(
                         "PAKET LENGKAP",
                         style: TextStyle(
                             fontFamily: "Arial",
-                            fontSize: this.widget.sess!.width * 5,
+                            fontSize: widget.sess!.width * 5,
                             fontWeight: FontWeight.bold,
                             color: Colors.white),
                       ),
                     )),
               ),
               SizedBox(
-                height: this.widget.sess!.hight * 2,
+                height: widget.sess!.hight * 2,
               ),
               Container(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Align(
+                    const Align(
                       alignment: Alignment.bottomRight,
                       child: Text("Rp "),
                     ),
                     Text(
                       "450.000",
                       style: TextStyle(
-                          fontSize: this.widget.sess!.width * 7,
+                          fontSize: widget.sess!.width * 7,
                           fontWeight: FontWeight.bold),
                     ),
-                    Align(
+                    const Align(
                       alignment: Alignment.topCenter,
                       child: Text(" / bln"),
                     ),
                   ],
                 ),
               ),
-              Text("Unlimited User"),
+              const Text("Unlimited User"),
               SizedBox(
-                height: this.widget.sess!.hight * 2,
+                height: widget.sess!.hight * 2,
               ),
               ElevatedButton(
-                child: Text(
-                  "Pilih Layanan",
-                  style: TextStyle(
-                      fontFamily: "Montserrat",
-                      fontSize: this.widget.sess!.hight * 2,
-                      color: Colors.white),
-                ),
                 style: ButtonStyle(
                   shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                     RoundedRectangleBorder(
@@ -816,13 +808,20 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                     _planAmt = 450000;
                   });
                 },
+                child: Text(
+                  "Pilih Layanan",
+                  style: TextStyle(
+                      fontFamily: "Montserrat",
+                      fontSize: widget.sess!.hight * 2,
+                      color: Colors.white),
+                ),
               ),
               SizedBox(
-                height: this.widget.sess!.hight * 2,
+                height: widget.sess!.hight * 2,
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(this.widget.sess!.width * 2, 0,
-                    this.widget.sess!.width * 2, 0),
+                padding: EdgeInsets.fromLTRB(widget.sess!.width * 2, 0,
+                    widget.sess!.width * 2, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -830,13 +829,13 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                       Icons.check,
                       color: Theme.of(context).primaryColor,
                     ),
-                    Text(" Akses Web Admin")
+                    const Text(" Akses Web Admin")
                   ],
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(this.widget.sess!.width * 2, 0,
-                    this.widget.sess!.width * 2, 0),
+                padding: EdgeInsets.fromLTRB(widget.sess!.width * 2, 0,
+                    widget.sess!.width * 2, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -844,13 +843,13 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                       Icons.check,
                       color: Theme.of(context).primaryColor,
                     ),
-                    Text(" Akses Review Patroli")
+                    const Text(" Akses Review Patroli")
                   ],
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(this.widget.sess!.width * 2, 0,
-                    this.widget.sess!.width * 2, 0),
+                padding: EdgeInsets.fromLTRB(widget.sess!.width * 2, 0,
+                    widget.sess!.width * 2, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -858,13 +857,13 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                       Icons.check,
                       color: Theme.of(context).primaryColor,
                     ),
-                    Text(" Multi Site")
+                    const Text(" Multi Site")
                   ],
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(this.widget.sess!.width * 2, 0,
-                    this.widget.sess!.width * 2, 0),
+                padding: EdgeInsets.fromLTRB(widget.sess!.width * 2, 0,
+                    widget.sess!.width * 2, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -872,13 +871,13 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                       Icons.check,
                       color: Theme.of(context).primaryColor,
                     ),
-                    Text(" Free Maintain")
+                    const Text(" Free Maintain")
                   ],
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(this.widget.sess!.width * 2, 0,
-                    this.widget.sess!.width * 2, 0),
+                padding: EdgeInsets.fromLTRB(widget.sess!.width * 2, 0,
+                    widget.sess!.width * 2, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -886,13 +885,13 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                       Icons.check,
                       color: Theme.of(context).primaryColor,
                     ),
-                    Text(" Unlimited User")
+                    const Text(" Unlimited User")
                   ],
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(this.widget.sess!.width * 2, 0,
-                    this.widget.sess!.width * 2, 0),
+                padding: EdgeInsets.fromLTRB(widget.sess!.width * 2, 0,
+                    widget.sess!.width * 2, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -900,13 +899,13 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                       Icons.check,
                       color: Theme.of(context).primaryColor,
                     ),
-                    Text(" Unlimited Checkpoint")
+                    const Text(" Unlimited Checkpoint")
                   ],
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(this.widget.sess!.width * 2, 0,
-                    this.widget.sess!.width * 2, 0),
+                padding: EdgeInsets.fromLTRB(widget.sess!.width * 2, 0,
+                    widget.sess!.width * 2, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -914,26 +913,26 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                       Icons.check,
                       color: Theme.of(context).primaryColor,
                     ),
-                    Text(" Integrasi Absensi")
+                    const Text(" Integrasi Absensi")
                   ],
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(this.widget.sess!.width * 2, 0,
-                    this.widget.sess!.width * 2, 0),
+                padding: EdgeInsets.fromLTRB(widget.sess!.width * 2, 0,
+                    widget.sess!.width * 2, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     SizedBox(
-                      width: this.widget.sess!.width * 6,
+                      width: widget.sess!.width * 6,
                     ),
-                    Text(" Face Recognition")
+                    const Text(" Face Recognition")
                   ],
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(this.widget.sess!.width * 2, 0,
-                    this.widget.sess!.width * 2, 0),
+                padding: EdgeInsets.fromLTRB(widget.sess!.width * 2, 0,
+                    widget.sess!.width * 2, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -941,7 +940,7 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                       Icons.check,
                       color: Theme.of(context).primaryColor,
                     ),
-                    Text(" Akses Laporan Absensi")
+                    const Text(" Akses Laporan Absensi")
                   ],
                 ),
               ),
@@ -954,36 +953,36 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
 
   Widget _PaketHitunganBulan() {
     return GestureDetector(
-      child: Container(
-        width: this.widget.sess!.width * 50,
-        height: this.widget.sess!.hight * 40,
+      child: SizedBox(
+        width: widget.sess!.width * 50,
+        height: widget.sess!.hight * 40,
         child: Card(
           color: Theme.of(context).primaryColorLight,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Padding(
-                padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                 child: Container(
                     decoration: BoxDecoration(
                       // borderRadius: BorderRadius.circular(10),
                       color: Colors.blue[300],
                     ),
                     width: double.infinity,
-                    height: this.widget.sess!.hight * 5,
+                    height: widget.sess!.hight * 5,
                     child: Center(
                       child: Text(
                         "TERLARIS",
                         style: TextStyle(
                             fontFamily: "Arial",
-                            fontSize: this.widget.sess!.width * 5,
+                            fontSize: widget.sess!.width * 5,
                             fontWeight: FontWeight.bold,
                             color: Colors.red),
                       ),
                     )),
               ),
               SizedBox(
-                height: this.widget.sess!.hight * 1,
+                height: widget.sess!.hight * 1,
               ),
               Container(
                 child: Row(
@@ -991,26 +990,26 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                   children: [
                     Padding(
                       padding:
-                          EdgeInsets.only(left: this.widget.sess!.width * 2),
+                          EdgeInsets.only(left: widget.sess!.width * 2),
                       child: Text(
                         "Rp. 450.000",
                         style: TextStyle(
                             fontFamily: "Roboto",
-                            fontSize: this.widget.sess!.width * 4,
+                            fontSize: widget.sess!.width * 4,
                             decoration: TextDecoration.lineThrough),
                       ),
                     ),
                     Padding(
                         padding:
-                            EdgeInsets.only(right: this.widget.sess!.width * 2),
+                            EdgeInsets.only(right: widget.sess!.width * 2),
                         child: Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
                             color: Colors.deepPurpleAccent,
                           ),
-                          width: this.widget.sess!.width * 20,
-                          height: this.widget.sess!.hight * 5,
-                          child: Center(
+                          width: widget.sess!.width * 20,
+                          height: widget.sess!.hight * 5,
+                          child: const Center(
                             child: Text(
                               "SAVE 30%",
                               style: TextStyle(
@@ -1026,17 +1025,17 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Align(
+                    const Align(
                       alignment: Alignment.bottomRight,
                       child: Text("Rp "),
                     ),
                     Text(
                       "315.000",
                       style: TextStyle(
-                          fontSize: this.widget.sess!.width * 5,
+                          fontSize: widget.sess!.width * 5,
                           fontWeight: FontWeight.bold),
                     ),
-                    Align(
+                    const Align(
                       alignment: Alignment.topCenter,
                       child: Text(" / bln"),
                     ),
@@ -1044,21 +1043,14 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                 ),
               ),
               SizedBox(
-                height: this.widget.sess!.hight * 1,
+                height: widget.sess!.hight * 1,
               ),
-              Text("Unlimited User,"),
-              Text("Minimal Subscribe 12 Bulan"),
+              const Text("Unlimited User,"),
+              const Text("Minimal Subscribe 12 Bulan"),
               SizedBox(
-                height: this.widget.sess!.hight * 1,
+                height: widget.sess!.hight * 1,
               ),
               ElevatedButton(
-                child: Text(
-                  "Pilih Layanan",
-                  style: TextStyle(
-                      fontFamily: "Montserrat",
-                      fontSize: this.widget.sess!.hight * 2,
-                      color: Colors.white),
-                ),
                 style: ButtonStyle(
                   shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                     RoundedRectangleBorder(
@@ -1075,13 +1067,20 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                     _planAmt = 315000;
                   });
                 },
+                child: Text(
+                  "Pilih Layanan",
+                  style: TextStyle(
+                      fontFamily: "Montserrat",
+                      fontSize: widget.sess!.hight * 2,
+                      color: Colors.white),
+                ),
               ),
               SizedBox(
-                height: this.widget.sess!.hight * 1,
+                height: widget.sess!.hight * 1,
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(this.widget.sess!.width * 2, 0,
-                    this.widget.sess!.width * 2, 0),
+                padding: EdgeInsets.fromLTRB(widget.sess!.width * 2, 0,
+                    widget.sess!.width * 2, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -1089,13 +1088,13 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                       Icons.check,
                       color: Theme.of(context).primaryColor,
                     ),
-                    Text(" Akses Web Admin")
+                    const Text(" Akses Web Admin")
                   ],
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(this.widget.sess!.width * 2, 0,
-                    this.widget.sess!.width * 2, 0),
+                padding: EdgeInsets.fromLTRB(widget.sess!.width * 2, 0,
+                    widget.sess!.width * 2, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -1103,13 +1102,13 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                       Icons.check,
                       color: Theme.of(context).primaryColor,
                     ),
-                    Text(" Akses Review Patroli")
+                    const Text(" Akses Review Patroli")
                   ],
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(this.widget.sess!.width * 2, 0,
-                    this.widget.sess!.width * 2, 0),
+                padding: EdgeInsets.fromLTRB(widget.sess!.width * 2, 0,
+                    widget.sess!.width * 2, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -1117,13 +1116,13 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                       Icons.check,
                       color: Theme.of(context).primaryColor,
                     ),
-                    Text(" Multi Site")
+                    const Text(" Multi Site")
                   ],
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(this.widget.sess!.width * 2, 0,
-                    this.widget.sess!.width * 2, 0),
+                padding: EdgeInsets.fromLTRB(widget.sess!.width * 2, 0,
+                    widget.sess!.width * 2, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -1131,13 +1130,13 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                       Icons.check,
                       color: Theme.of(context).primaryColor,
                     ),
-                    Text(" Free Maintain")
+                    const Text(" Free Maintain")
                   ],
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(this.widget.sess!.width * 2, 0,
-                    this.widget.sess!.width * 2, 0),
+                padding: EdgeInsets.fromLTRB(widget.sess!.width * 2, 0,
+                    widget.sess!.width * 2, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -1145,13 +1144,13 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                       Icons.check,
                       color: Theme.of(context).primaryColor,
                     ),
-                    Text(" Unlimited User")
+                    const Text(" Unlimited User")
                   ],
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(this.widget.sess!.width * 2, 0,
-                    this.widget.sess!.width * 2, 0),
+                padding: EdgeInsets.fromLTRB(widget.sess!.width * 2, 0,
+                    widget.sess!.width * 2, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -1159,13 +1158,13 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                       Icons.check,
                       color: Theme.of(context).primaryColor,
                     ),
-                    Text(" Unlimited Checkpoint")
+                    const Text(" Unlimited Checkpoint")
                   ],
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(this.widget.sess!.width * 2, 0,
-                    this.widget.sess!.width * 2, 0),
+                padding: EdgeInsets.fromLTRB(widget.sess!.width * 2, 0,
+                    widget.sess!.width * 2, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -1173,26 +1172,26 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                       Icons.check,
                       color: Theme.of(context).primaryColor,
                     ),
-                    Text(" Integrasi Absensi")
+                    const Text(" Integrasi Absensi")
                   ],
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(this.widget.sess!.width * 2, 0,
-                    this.widget.sess!.width * 2, 0),
+                padding: EdgeInsets.fromLTRB(widget.sess!.width * 2, 0,
+                    widget.sess!.width * 2, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     SizedBox(
-                      width: this.widget.sess!.width * 6,
+                      width: widget.sess!.width * 6,
                     ),
-                    Text(" Face Recognition")
+                    const Text(" Face Recognition")
                   ],
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(this.widget.sess!.width * 2, 0,
-                    this.widget.sess!.width * 2, 0),
+                padding: EdgeInsets.fromLTRB(widget.sess!.width * 2, 0,
+                    widget.sess!.width * 2, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -1200,7 +1199,7 @@ class _RegisterMobilePotraitState extends State<RegisterMobilePotrait> {
                       Icons.check,
                       color: Theme.of(context).primaryColor,
                     ),
-                    Text(" Akses Laporan Absensi")
+                    const Text(" Akses Laporan Absensi")
                   ],
                 ),
               ),

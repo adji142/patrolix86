@@ -9,7 +9,7 @@ class Mod_Payment {
   Mod_Payment(this.sess);
 
   Future<Map> getLookup(Map Parameter) async {
-    var url = Uri.parse(sess!.server+"APIGetLookupPayment");
+    var url = Uri.parse("${sess!.server}APIGetLookupPayment");
     final response = await http.post(url,body: Parameter);
     return json.decode(response.body);
   }
