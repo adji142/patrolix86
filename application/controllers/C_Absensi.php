@@ -24,6 +24,9 @@
             $isGantiHari = 0;
             $KodeShift = -1;
 
+            $datefrom = '';
+            $dateTo = '';
+
             $oShiftWhere = array(
                 'RecordOwnerID' => $RecordOwnerID,
                 'LocationID'    => $KodeLokasi
@@ -42,7 +45,7 @@
                 if ($key->GantiHari == 1) {
                     $dateTo->modify('1 days');
                 }
-                // $date->modify('-10 days');
+                $dateTo->modify('-30 minutes');
 
                 if ($currentDate >= $datefrom && $currentDate <= $dateTo) {
                     // echo $key->NamaShift."<br>";
@@ -64,16 +67,27 @@
                 'CheckOut'          => '0000-00-00 00:00:00.000000'
             );
 
+            // var_dump($datefrom->format("Y-m-d H:i:s"));
+            $sql = "SELECT a.* FROM absensi a ";
+            $sql .= " LEFT JOIN tshift b on a.LocationID = b.LocationID and a.RecordOwnerID = b.RecordOwnerID and a.Shift = b.id ";
+            $sql .= " WHERE a.RecordOwnerID = '".$RecordOwnerID."'";
+            $sql .= " AND a.LocationID = ".$KodeLokasi;
+            $sql .= " AND a.KodeKaryawan ='".$KodeKaryawan."'";
+            
+            $sql .= " AND ('".$Tanggal."' BETWEEN '".$datefrom->format("Y-m-d H:i:s")."' AND '".$dateTo->format("Y-m-d H:i:s")."' OR a.CheckOut = '0000-00-00 00:00:00.000000') ";
+            $sql .= " AND a.Tanggal = CASE WHEN b.GantiHari = 1 THEN DATE_ADD('".date('Y-m-d',strtotime($Tanggal))."', INTERVAL -1 DAY) ELSE '".date('Y-m-d',strtotime($Tanggal))."' END ";
+            $sql .= " ORDER BY CreatedOn DESC LIMIT 1 ";
+
+            // var_dump($sql);
+            $rs = $this->db->query($sql);
+
             // var_dump($where);
 
-            $rs = $this->ModelsExecuteMaster->FindData($where, 'absensi');
+            // $rs = $this->ModelsExecuteMaster->FindData($where, 'absensi');
 
             if($rs->num_rows() > 0){
                 $data['success'] = true;
                 $data['data'] = $rs->result();
-            }
-            else{
-
             }
 
             echo json_encode($data);
@@ -273,6 +287,14 @@
                         $datefrom = new DateTime($Tanggal.' '.$key->MulaiBekerja);
                         $dateTo = new DateTime($Tanggal.' '.$key->SelesaiBekerja);
 
+                        if ($key->MulaiAbsen != NULL) {
+                            $datefrom = new DateTime($Tanggal.' '.$key->MulaiAbsen);
+                        }
+
+                        if ($key->MaxAbsen != NULL) {
+                            $dateTo = new DateTime($Tanggal.' '.$key->MaxAbsen);
+                        }
+
                         if ($key->GantiHari == 1) {
                             $dateTo->modify('1 days');
                         }
@@ -282,6 +304,12 @@
                             // echo $key->NamaShift."<br>";
                             $Shift = $key->id;
                         }
+                    }
+
+                    if ($Shift == "") {
+                        $data['success'] = false;
+                        $data['message'] = "Shift Belum dimulai";
+                        goto jump;
                     }
 
 
@@ -430,10 +458,20 @@
             foreach ($shift as $key) {
                 // var_dump($key);
                 $paramDate = explode(" ", $Tanggal);
-                echo $paramDate;
+                // echo $paramDate;
                 $datefrom = new DateTime($paramDate[0].' '.$key->MulaiBekerja);
                 $dateTo = new DateTime($paramDate[0].' '.$key->SelesaiBekerja);
 
+                if ($key->MulaiAbsen != NULL) {
+                    $datefrom = new DateTime($paramDate[0].' '.$key->MulaiAbsen);
+                    // var_dump($datefrom->format("Y-m-d H:i:s"));
+                }
+
+                if ($key->MaxAbsen != NULL) {
+                    $dateTo = new DateTime($paramDate[0].' '.$key->MaxAbsen);
+                    // var_dump($dateTo->format("Y-m-d H:i:s"));
+                }
+                // var_dump($key->MulaiAbsen);
                 if ($key->GantiHari == 1) {
                     $dateTo->modify('1 days');
                 }
@@ -445,6 +483,8 @@
                     $KodeShift = $key->id;
                 }
             }
+
+            // echo $currentDate->format("Y-m-d H:i:s") . "<br>".$datefrom->format("Y-m-d H:i:s")."<br>".$dateTo->format("Y-m-d H:i:s");
 
             if ($isGantiHari == 1) {
                 $Tanggal = date('Y-m-d', strtotime($Tanggal . ' - 1 days'));
