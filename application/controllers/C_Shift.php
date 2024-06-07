@@ -55,6 +55,8 @@
 			$RecordOwnerID = $this->input->post('RecordOwnerID');
 			$LocationID = $this->input->post('LocationID');
 			$GantiHari = $this->input->post('GantiHari');
+			$MulaiAbsen = $this->input->post('MulaiAbsen');
+			$MaxAbsen = $this->input->post('MaxAbsen');
 
 			$formtype = $this->input->post('formtype');
 
@@ -67,7 +69,9 @@
 				'Toleransi' => $Toleransi,
 				'RecordOwnerID' => $RecordOwnerID,
 				'LocationID' => $LocationID,
-				'GantiHari' => $GantiHari
+				'GantiHari' => $GantiHari,
+				'MulaiAbsen' => $MulaiAbsen,
+				'MaxAbsen' => $MaxAbsen
 			);
 
 			$rs;
