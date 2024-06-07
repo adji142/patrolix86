@@ -75,6 +75,23 @@
             </div>
 
             <div class="item form-group">
+              <label class="col-form-label col-md-3 col-sm-3 label-align" for="first-name">Mulai Absen Masuk <span class="required">*</span>
+              </label>
+              <div class="col-md-6 col-sm-6 ">
+                <input type="time" name="MulaiAbsen" id="MulaiAbsen" required="" placeholder="Mulai Patroli" class="form-control ">
+              </div>
+            </div>
+
+            <div class="item form-group">
+              <label class="col-form-label col-md-3 col-sm-3 label-align" for="first-name">Maximal Absen Keluar <span class="required">*</span>
+              </label>
+              <div class="col-md-6 col-sm-6 ">
+                <input type="time" name="MaxAbsen" id="MaxAbsen" required="" placeholder="Selesai Patroli" class="form-control ">
+              </div>
+            </div>
+
+
+            <div class="item form-group">
               <label class="col-form-label col-md-3 col-sm-3 label-align" for="first-name">Interval <span class="required">*</span>
               </label>
               <div class="col-md-3 col-sm-3  form-group">
@@ -212,6 +229,14 @@
             $('#NamaShift').val(v.NamaShift);
             $('#MulaiBekerja').val(v.MulaiBekerja.split(".")[0]);
             $('#SelesaiBekerja').val(v.SelesaiBekerja.split(".")[0]);
+            if (v.MaxAbsen != null) {
+              $('#MaxAbsen').val(v.MaxAbsen.split(".")[0]);
+            }
+            if (v.MulaiAbsen != null) {
+              $('#MulaiAbsen').val(v.MulaiAbsen.split(".")[0]);
+            }
+            
+            
             $('#IntervalPatroli').val(v.IntervalPatroli);
             $('#IntervalType').val(v.IntervalType).change();
             $('#Toleransi').val(v.Toleransi);
@@ -284,6 +309,16 @@
                 },
                 {
                     dataField: "SelesaiBekerja",
+                    caption: "Selesai",
+                    allowEditing:false
+                },
+                {
+                    dataField: "MulaiAbsen",
+                    caption: "Mulai",
+                    allowEditing:false
+                },
+                {
+                    dataField: "MaxAbsen",
                     caption: "Selesai",
                     allowEditing:false
                 },
