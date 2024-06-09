@@ -519,6 +519,7 @@
 
  if ($isGantiHari == 1) {
                  $sql .= " AND a.Tanggal = CASE WHEN b.GantiHari = 1 THEN DATE_ADD('".date('Y-m-d',strtotime($Tanggal))."', INTERVAL -1 DAY) ELSE '".date('Y-m-d',strtotime($Tanggal))."' END ";
+}
              else{
                  $sql .= "'".date('Y-m-d',strtotime($Tanggal))."'";
 }
