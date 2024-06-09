@@ -32,7 +32,7 @@
                 'LocationID'    => $KodeLokasi
             );
 	    
-	    $sql = "select * from tshift where RecordOwnerID = '".$RecordOwnerID." AND LocationID =".$KodeLokasi." Order By MulaiBekerja ";
+	    $sql = "select * from tshift where RecordOwnerID = '".$RecordOwnerID."' AND LocationID =".$KodeLokasi." Order By MulaiBekerja ";
 		$rs = $this->db->query($sql);
             $shift = $this->ModelsExecuteMaster->FindData($oShiftWhere,'tshift')->result();
 		$shift = $rs->result();
@@ -284,7 +284,10 @@
                         'RecordOwnerID' => $RecordOwnerID,
                         'LocationID'    => $LocationID
                     );
+			$sql = "select * from tshift where RecordOwnerID = '".$RecordOwnerID."' AND LocationID =".$KodeLokasi." Order By MulaiBekerja ";
+			$rs = $this->db->query($sql);
                     $shift = $this->ModelsExecuteMaster->FindData($oShiftWhere,'tshift')->result();
+			$shift = $rs->result();
 
                     $currentDate = new DateTime($Tanggal.' '. date('H:i:s'));
                     foreach ($shift as $key) {
