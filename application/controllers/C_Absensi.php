@@ -456,8 +456,8 @@
 
             $KodeLokasi = 58;
             $RecordOwnerID = 'CL0006';
-            $KodeKaryawan = 'CL0006.016';
-            $Tanggal = '2024-06-09 14:19:00';
+            $KodeKaryawan = 'CL0006.TBS2022';
+            $Tanggal = '2024-06-10 06:19:00';
 
 
             $isGantiHari = 0;
