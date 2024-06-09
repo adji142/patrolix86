@@ -485,9 +485,9 @@
                     $dateTo->modify('1 days');
                 }
                 $dateTo->modify('-30 minutes');
-		echo "CurentDate: ".$currentDate ."<br>";
-		    echo "Tgl Awal: ".$datefrom ."<br>";
-		    echo "Tgl Akhir: ".$dateTo ."<br>";
+		echo "CurentDate: ".$currentDate->format("Y-m-d H:i:s") ."<br>";
+		    echo "Tgl Awal: ".$datefrom->format("Y-m-d H:i:s") ."<br>";
+		    echo "Tgl Akhir: ".$dateTo->format("Y-m-d H:i:s") ."<br>";
                 if ($currentDate >= $datefrom && $currentDate <= $dateTo) {
                     // echo $key->NamaShift."<br>";
                     $isGantiHari = $key->GantiHari;
