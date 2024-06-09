@@ -56,7 +56,7 @@
                     // echo $key->NamaShift."<br>";
                     $isGantiHari = $key->GantiHari;
                     $KodeShift = $key->id;
-                    break;
+                    // break;
                 }
             }
 
