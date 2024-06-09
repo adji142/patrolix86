@@ -31,6 +31,8 @@
                 'RecordOwnerID' => $RecordOwnerID,
                 'LocationID'    => $KodeLokasi
             );
+
+	    
             $shift = $this->ModelsExecuteMaster->FindData($oShiftWhere,'tshift')->result();
 
             // var_dump($oShiftWhere);
@@ -51,7 +53,7 @@
                     // echo $key->NamaShift."<br>";
                     $isGantiHari = $key->GantiHari;
                     $KodeShift = $key->id;
-                    break;
+                    // break;
                 }
             }
 
