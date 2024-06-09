@@ -487,7 +487,7 @@
                 $dateTo = new DateTime($paramDate[0].' '.$key->SelesaiBekerja);
 
                 if ($key->GantiHari == 1) {
-                    $dateFrom->modify('-1 days');
+                    $datefrom->modify('-1 days');
                 }
                 $dateTo->modify('-30 minutes');
 		echo "CurentDate: ".$currentDate->format("Y-m-d H:i:s") ."<br>";
