@@ -31,9 +31,12 @@
                 'RecordOwnerID' => $RecordOwnerID,
                 'LocationID'    => $KodeLokasi
             );
-
 	    
+	    $sql = "select * from tshift where RecordOwnerID = '".$RecordOwnerID." AND LocationID =".$KodeLokasi." Order By MulaiBekerja ";
+		$rs = $this->db->query($sql);
             $shift = $this->ModelsExecuteMaster->FindData($oShiftWhere,'tshift')->result();
+		$shift = $rs->result();
+		
 
             // var_dump($oShiftWhere);
             $currentDate = new DateTime($Tanggal);
@@ -53,7 +56,7 @@
                     // echo $key->NamaShift."<br>";
                     $isGantiHari = $key->GantiHari;
                     $KodeShift = $key->id;
-                    // break;
+                    break;
                 }
             }
 
@@ -305,6 +308,7 @@
                         if ($currentDate >= $datefrom && $currentDate <= $dateTo) {
                             // echo $key->NamaShift."<br>";
                             $Shift = $key->id;
+				break;
                         }
                     }
 
