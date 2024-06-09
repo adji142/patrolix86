@@ -485,7 +485,7 @@
                     $dateTo->modify('1 days');
                 }
                 $dateTo->modify('-30 minutes');
-		echo "CurentDate: ".$curentDate ."<br>";
+		echo "CurentDate: ".$currentDate ."<br>";
 		    echo "Tgl Awal: ".$datefrom ."<br>";
 		    echo "Tgl Akhir: ".$dateTo ."<br>";
                 if ($currentDate >= $datefrom && $currentDate <= $dateTo) {
