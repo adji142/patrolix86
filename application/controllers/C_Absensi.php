@@ -451,7 +451,7 @@
 
             $KodeLokasi = 58;
             $RecordOwnerID = 'CL0006';
-            $KodeKaryawan = 'CL0006.011';
+            $KodeKaryawan = 'CL0006.016';
             $Tanggal = '2024-06-09 11:45:00';
 
 
