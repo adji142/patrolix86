@@ -489,7 +489,7 @@
 		    echo "Tgl Awal: ".$datefrom->format("Y-m-d H:i:s") ."<br>";
 		    echo "Tgl Akhir: ".$dateTo->format("Y-m-d H:i:s") ."<br>";
                 if ($currentDate >= $datefrom && $currentDate <= $dateTo) {
-                    // echo $key->NamaShift."<br>";
+                    echo $key->NamaShift."<br>";
                     $isGantiHari = $key->GantiHari;
                     $KodeShift = $key->id;
                     break;
