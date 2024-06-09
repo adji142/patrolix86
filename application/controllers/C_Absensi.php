@@ -80,7 +80,12 @@
             $sql .= " AND a.KodeKaryawan ='".$KodeKaryawan."'";
             
             $sql .= " AND ('".$Tanggal."' BETWEEN '".$datefrom->format("Y-m-d H:i:s")."' AND '".$dateTo->format("Y-m-d H:i:s")."' OR a.CheckOut = '0000-00-00 00:00:00.000000') ";
-            $sql .= " AND a.Tanggal = CASE WHEN b.GantiHari = 1 THEN DATE_ADD('".date('Y-m-d',strtotime($Tanggal))."', INTERVAL -1 DAY) ELSE '".date('Y-m-d',strtotime($Tanggal))."' END ";
+            if ($isGantiHari == 1) {
+                 $sql .= " AND a.Tanggal = CASE WHEN b.GantiHari = 1 THEN DATE_ADD('".date('Y-m-d',strtotime($Tanggal))."', INTERVAL -1 DAY) ELSE '".date('Y-m-d',strtotime($Tanggal))."' END ";
+}
+             else{
+                 $sql .= "and a.Tanggal = '".date('Y-m-d',strtotime($Tanggal))."'";
+}
             $sql .= " ORDER BY CreatedOn DESC LIMIT 1 ";
 
             // var_dump($sql);
