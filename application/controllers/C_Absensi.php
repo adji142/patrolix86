@@ -32,7 +32,7 @@
                 'LocationID'    => $KodeLokasi
             );
 	    
-	    $sql = "select * from tshift where RecordOwnerID = '".$RecordOwnerID."' AND LocationID =".$KodeLokasi." Order By MulaiBekerja ";
+	    $sql = "select * from tshift where RecordOwnerID = '".$RecordOwnerID."' AND LocationID =".$KodeLokasi." Order By MulaiBekerja DESC ";
 		$rs = $this->db->query($sql);
             $shift = $this->ModelsExecuteMaster->FindData($oShiftWhere,'tshift')->result();
 		$shift = $rs->result();
