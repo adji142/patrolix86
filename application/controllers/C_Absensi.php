@@ -520,7 +520,7 @@
  if ($isGantiHari == 1) {
                  $sql .= " AND a.Tanggal = CASE WHEN b.GantiHari = 1 THEN DATE_ADD('".date('Y-m-d',strtotime($Tanggal))."', INTERVAL -1 DAY) ELSE '".date('Y-m-d',strtotime($Tanggal))."' END ";
              else{
-$sql .= " AND a.Tanggal = '".date('Y-m-d',strtotime($Tanggal)),'";
+                 $sql .= "'".date('Y-m-d',strtotime($Tanggal))."'";
 }
             
             $sql .= " ORDER BY CreatedOn DESC LIMIT 1 ";
