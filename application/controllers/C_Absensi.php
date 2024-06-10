@@ -430,7 +430,7 @@
 
                     $oShiftWhere = array(
                         'RecordOwnerID' => 'CL0006',
-                        'LocationID'    => 58
+                        'LocationID'    => $LocationID
                     );
                     
                     $oShift = [];
