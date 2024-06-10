@@ -437,7 +437,7 @@
                     $shifts = $this->ModelsExecuteMaster->FindData($oShiftWhere,'tshift')->result();
                     
                     // Validasi
-                    $oSQLValidation = "SELECT * FROM tshift where RecordOwnerID = '".$RecordOwnerID."' AND LocationID = ".$LocationID." AND '".$current_time_only."' BETWEEN MulaiAbsen and MulaiBekerja ";
+                    $oSQLValidation = "SELECT * FROM tshift where RecordOwnerID = '".$RecordOwnerID."' AND LocationID = ".$LocationID." AND '".$current_time_only."' BETWEEN MulaiAbsen and DATE_ADD(MulaiBekerja,INTERVAL 1 HOUR) ";
 
                     $oValidation = $this->db->query($oSQLValidation);
 
