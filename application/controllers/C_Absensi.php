@@ -27,29 +27,163 @@
             $datefrom = '';
             $dateTo = '';
 
+            // $opreffAbs = $this->db->select("*")
+            //                 ->from('absensi')
+            //                 ->where("CheckOut",'0000-00-00 00:00:00.000000')
+            //                 ->where("LocationID",$KodeLokasi)
+            //                 ->where("RecordOwnerID",$RecordOwnerID)
+            //                 ->where("KodeKaryawan",$KodeKaryawan)
+            //                 ->order_By('Tanggal, CreatedOn', 'DESC')
+            //                 ->limit(1)->get();
+
+            // // var_dump($opreffAbs->result());
+            // echo json_encode($opreffAbs->result());
+
+            // if ($opreffAbs->num_rows() > 0) {
+            //     $oAbsRow = $opreffAbs->row();
+
+            //     $oShiftWhere = array(
+            //         'RecordOwnerID' => $RecordOwnerID,
+            //         'LocationID'    => $KodeLokasi,
+            //         'id'            => $oAbsRow->Shift
+            //     );
+            
+            //     $oShift = $this->ModelsExecuteMaster->FindData($oShiftWhere,'tshift')->result();
+            
+
+            //     // var_dump($oShiftWhere);
+            //     $currentDate = new DateTime($Tanggal);
+            //     foreach ($oShift as $key) {
+            //         // var_dump($key);
+            //         // echo json_encode($key);
+            //         $paramDate = explode(" ", $Tanggal);
+            //         // var_dump($paramDate);
+            //         $datefrom = new DateTime($paramDate[0].' '.$key->MulaiBekerja);
+            //         $dateTo = new DateTime($paramDate[0].' '.$key->SelesaiBekerja);
+
+            //         if ($key->GantiHari == 1) {
+            //             $datefrom->modify('-1 days');
+            //         }
+            //         $dateTo->modify('-30 minutes');
+
+            //         if ($currentDate >= $datefrom && $currentDate <= $dateTo) {
+            //             echo $key->NamaShift."<br>";
+            //             $isGantiHari = $key->GantiHari;
+            //             $KodeShift = $key->id;
+            //             break;
+            //         }
+            //     }
+
+            //     // if ($isGantiHari == 1) {
+            //     //     $Tanggal = date('Y-m-d', strtotime($Tanggal . ' - 1 days'));
+            //     // }
+
+            //     $where = array(
+            //         'RecordOwnerID'     => $RecordOwnerID,
+            //         'LocationID'        => $KodeLokasi,
+            //         'KodeKaryawan'      => $KodeKaryawan,
+            //         'Tanggal'           => date('Y-m-d',strtotime($Tanggal)),
+            //         'CheckOut'          => '0000-00-00 00:00:00.000000'
+            //     );
+
+            //     // var_dump($datefrom->format("Y-m-d H:i:s"));
+            //     $sql = "SELECT a.* FROM absensi a ";
+            //     $sql .= " LEFT JOIN tshift b on a.LocationID = b.LocationID and a.RecordOwnerID = b.RecordOwnerID and a.Shift = b.id ";
+            //     $sql .= " WHERE a.RecordOwnerID = '".$RecordOwnerID."'";
+            //     $sql .= " AND a.LocationID = ".$KodeLokasi;
+            //     $sql .= " AND a.KodeKaryawan ='".$KodeKaryawan."'";
+                
+            //     $sql .= " AND ('".$Tanggal."' BETWEEN '".$datefrom->format("Y-m-d H:i:s")."' AND '".$dateTo->format("Y-m-d H:i:s")."' OR a.CheckOut = '0000-00-00 00:00:00.000000') ";
+            //     $sql .= " AND a.id = ".$oAbsRow->id;
+            //     // if ($isGantiHari == 1) {
+            //     //      $sql .= " AND a.Tanggal = DATE_ADD('".date('Y-m-d',strtotime($Tanggal))."' ";
+            //     // }
+            //     //  else{
+            //     //      $sql .= " and a.Tanggal = '".date('Y-m-d',strtotime($Tanggal))."'";
+            //     // }
+            //     $sql .= " ORDER BY CreatedOn DESC LIMIT 1 ";
+
+            //     // var_dump($sql);
+            //     $rs = $this->db->query($sql);
+
+            //     // var_dump($where);
+
+            //     // $rs = $this->ModelsExecuteMaster->FindData($where, 'absensi');
+
+            //     if($rs->num_rows() > 0){
+            //         $data['success'] = true;
+            //         $data['data'] = $rs->result();
+            //     }
+            // }
+
+            $current_datetime = new DateTime($Tanggal);
+            $current_time_only = $current_datetime->format('H:i:s');
+            $midnight = new DateTime('23:59:59');
+
+            $oShiftWhere = array(
+                'RecordOwnerID' => 'CL0006',
+                'LocationID'    => 58
+            );
+            
+            $oShift = [];
+            $shifts = $this->ModelsExecuteMaster->FindData($oShiftWhere,'tshift')->result();
+
+            // echo json_encode($oDataShift);
+
+
+            // end Validasi
+            foreach ($shifts as $key) {
+                $absenstart = $key->MulaiAbsen;
+                $absenend = $key->MaxAbsen;
+
+                $shiftstart = $key->MulaiBekerja;
+                $shiftend = $key->SelesaiBekerja;
+
+                // $absenstart > $absenend
+
+                if ($key->GantiHari == 1) {
+                    if ($current_time_only >= $absenstart || $current_time_only <= $absenend) {
+                        $Shift = $key->id;
+                    }
+                } else {
+                    if ($current_time_only >= $absenstart && $current_time_only <= $absenend) {
+                        $Shift = $key->id;
+                        
+                    }
+                }
+            }
+
             $oShiftWhere = array(
                 'RecordOwnerID' => $RecordOwnerID,
-                'LocationID'    => $KodeLokasi
+                'LocationID'    => $KodeLokasi,
+                'id'            => $Shift
             );
-	    
-	    $sql = "select * from tshift where RecordOwnerID = '".$RecordOwnerID."' AND LocationID =".$KodeLokasi." Order By MulaiBekerja ";
-		$rs = $this->db->query($sql);
-            $shift = $this->ModelsExecuteMaster->FindData($oShiftWhere,'tshift')->result();
-		$shift = $rs->result();
-		
+        
+            $oShift = $this->ModelsExecuteMaster->FindData($oShiftWhere,'tshift')->result();
+        
 
             // var_dump($oShiftWhere);
             $currentDate = new DateTime($Tanggal);
-            foreach ($shift as $key) {
+            foreach ($oShift as $key) {
                 // var_dump($key);
+                // echo json_encode($key);
                 $paramDate = explode(" ", $Tanggal);
                 // var_dump($paramDate);
                 $datefrom = new DateTime($paramDate[0].' '.$key->MulaiBekerja);
                 $dateTo = new DateTime($paramDate[0].' '.$key->SelesaiBekerja);
 
-                if ($key->GantiHari == 1) {
+
+
+                if ($current_datetime > $midnight) {
                     $datefrom->modify('-1 days');
                 }
+                else{
+                    $dateTo->modify('1 days');   
+                }
+
+                // if ($key->GantiHari == 1) {
+                //     $datefrom->modify('-1 days');
+                // }
                 $dateTo->modify('-30 minutes');
 
                 if ($currentDate >= $datefrom && $currentDate <= $dateTo) {
@@ -79,13 +213,16 @@
             $sql .= " AND a.LocationID = ".$KodeLokasi;
             $sql .= " AND a.KodeKaryawan ='".$KodeKaryawan."'";
             
-            $sql .= " AND ('".$Tanggal."' BETWEEN '".$datefrom->format("Y-m-d H:i:s")."' AND '".$dateTo->format("Y-m-d H:i:s")."' OR a.CheckOut = '0000-00-00 00:00:00.000000') ";
-            if ($isGantiHari == 1) {
-                 $sql .= " AND a.Tanggal = CASE WHEN b.GantiHari = 1 THEN DATE_ADD('".date('Y-m-d',strtotime($Tanggal))."', INTERVAL -1 DAY) ELSE '".date('Y-m-d',strtotime($Tanggal))."' END ";
-}
-             else{
-                 $sql .= "and a.Tanggal = '".date('Y-m-d',strtotime($Tanggal))."'";
-}
+            // $sql .= " AND ('".$Tanggal."' BETWEEN '".$datefrom->format("Y-m-d H:i:s")."' AND '".$dateTo->format("Y-m-d H:i:s")."' OR a.CheckOut = '0000-00-00 00:00:00.000000') ";
+            $sql .= " AND (a.Checkin BETWEEN '".$datefrom->format("Y-m-d H:i:s")."' AND '".$dateTo->format("Y-m-d H:i:s")."' OR a.CheckOut = '0000-00-00 00:00:00.000000') ";
+            $sql .= " AND a.Shift = ".$Shift;
+            // $sql .= " AND a.CheckOut = '0000-00-00 00:00:00.000000' ";
+            // if ($isGantiHari == 1) {
+            //      $sql .= " AND a.Tanggal = DATE_ADD('".date('Y-m-d',strtotime($Tanggal))."' ";
+            // }
+            //  else{
+            //      $sql .= " and a.Tanggal = '".date('Y-m-d',strtotime($Tanggal))."'";
+            // }
             $sql .= " ORDER BY CreatedOn DESC LIMIT 1 ";
 
             // var_dump($sql);
@@ -99,6 +236,8 @@
                 $data['success'] = true;
                 $data['data'] = $rs->result();
             }
+
+
 
             echo json_encode($data);
         }
@@ -285,49 +424,55 @@
                 if($formMode == "in"){
                     // Get Shift
 
+                    // $current_time = '2024-06-10 19:22:00';
+                    $current_datetime = new DateTime($Checkin);
+                    $current_time_only = $current_datetime->format('H:i:s');
+
                     $oShiftWhere = array(
-                        'RecordOwnerID' => $RecordOwnerID,
-                        'LocationID'    => $LocationID
+                        'RecordOwnerID' => 'CL0006',
+                        'LocationID'    => 58
                     );
-			// $sql = "select * from tshift where RecordOwnerID = '".$RecordOwnerID."' AND LocationID =".$KodeLokasi." Order By MulaiBekerja ";
-			// $rs = $this->db->query($sql);
-                    $shift = $this->ModelsExecuteMaster->FindData($oShiftWhere,'tshift')->result();
-			// $shift = $rs->result();
+                    
+                    $oShift = [];
+                    $shifts = $this->ModelsExecuteMaster->FindData($oShiftWhere,'tshift')->result();
+                    
+                    // Validasi
+                    $oSQLValidation = "SELECT * FROM tshift where RecordOwnerID = '".$RecordOwnerID."' AND LocationID = ".$LocationID." AND '".$current_time_only."' BETWEEN MulaiAbsen and MulaiBekerja ";
 
-                    $currentDate = new DateTime($Tanggal.' '. date('H:i:s'));
-                    foreach ($shift as $key) {
-                        // var_dump($key);
-                        $datefrom = new DateTime($Tanggal.' '.$key->MulaiBekerja);
-                        $dateTo = new DateTime($Tanggal.' '.$key->SelesaiBekerja);
+                    $oValidation = $this->db->query($oSQLValidation);
 
-                        if ($key->MulaiAbsen != NULL) {
-                            $datefrom = new DateTime($Tanggal.' '.$key->MulaiAbsen);
-                        }
-
-                        if ($key->MaxAbsen != NULL) {
-                            $dateTo = new DateTime($Tanggal.' '.$key->MaxAbsen);
-                        }
-
-                        if ($key->GantiHari == 1) {
-                            $dateTo->modify('1 days');
-                        }
-                        // $date->modify('-10 days');
-
-                        if ($currentDate >= $datefrom && $currentDate <= $dateTo) {
-                            // echo $key->NamaShift."<br>";
-                            $Shift = $key->id;
-				break;
-                        }
-                    }
-
-                    if ($Shift == "") {
-                        $data['success'] = false;
-                        $data['message'] = "Shift Belum dimulai";
+                    if ($oValidation->num_rows() == 0) {
+                        $data['message'] = "Absensi Shift Belum dimulai";
                         goto jump;
                     }
 
+                    // echo json_encode($oDataShift);
 
 
+                    // end Validasi
+                    foreach ($shifts as $key) {
+                        $absenstart = $key->MulaiAbsen;
+                        $absenend = $key->MaxAbsen;
+
+                        $shiftstart = $key->MulaiBekerja;
+                        $shiftend = $key->SelesaiBekerja;
+
+                        // $absenstart > $absenend
+
+                        if ($key->GantiHari == 1) {
+                            if ($current_time_only >= $absenstart || $current_time_only <= $absenend) {
+                                $Shift = $key->id;
+                            }
+                        } else {
+                            if ($current_time_only >= $absenstart && $current_time_only <= $absenend) {
+                                $Shift = $key->id;
+                                
+                            }
+                        }
+                    }
+
+
+                    // echo $Shift;
                     $getDate = str_replace(":", "", str_replace("-", "", $Checkin));
                     // 2023-09-06 16:11:38.658465
                     $ImageNameIN = "IN".$KodeKaryawan."-".$RecordOwnerID.substr($getDate, 0,14).".png";
@@ -456,8 +601,8 @@
 
             $KodeLokasi = 58;
             $RecordOwnerID = 'CL0006';
-            $KodeKaryawan = 'CL0006.019Rev';
-            $Tanggal = '2024-06-10 06:19:00';
+            $KodeKaryawan = 'CL0006.TBS2022';
+            $Tanggal = '2024-06-10 08:46:00';
 
 
             $isGantiHari = 0;
@@ -545,6 +690,78 @@
 
             echo json_encode($data);
         }
+
+        public function is_current_shift($shift, $current_time_only){
+            var_dump($shift);
+            $shift_start = new DateTime($shift['MulaiBekerja']);
+            $shift_end = new DateTime($shift['SelesaiBekerja']);
+
+            if ($shift_start > $shift_end) {
+                var_dump("lewat tenah malam");
+                $midnight = new DateTime('00:00:00');
+                $end_of_day = new DateTime('23:59:59');
+
+                if (($current_time_only >= $shift['MulaiBekerja'] && $current_time_only <= $end_of_day->format('H:i:s')) ||
+                    ($current_time_only >= $midnight->format('H:i:s') && $current_time_only <= $shift['SelesaiBekerja'])) {
+                    return true;
+                }
+            }
+            else{
+                if ($current_time_only >= $shift['MulaiBekerja'] && $current_time_only <= $shift['SelesaiBekerja']) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function checkShift() {
+            $overlaps = [];
+
+            $current_time = '2024-06-10 19:22:00';
+            $current_datetime = new DateTime($current_time);
+            $current_time_only = $current_datetime->format('H:i:s');
+
+            $oShiftWhere = array(
+                'RecordOwnerID' => 'CL0006',
+                'LocationID'    => 58
+            );
+            
+            $oShift = [];
+            $shifts = $this->ModelsExecuteMaster->FindData($oShiftWhere,'tshift')->result();
+            
+            foreach ($shifts as $key) {
+                // $oshift[] = $key;
+                $shift_start = $key->MulaiAbsen;
+                $shift_end = $key->MaxAbsen;
+
+                if ($current_time_only <= $shift_start) {
+                    echo "Belum Mulai";
+                    goto jump;
+                }
+
+                if ($shift_start > $shift_end) {
+                    // Shift spans midnight
+                    // var_dump("Masuk 1");
+                    echo "Masuk 1 <br>";
+                    if ($current_time_only >= $shift_start || $current_time_only <= $shift_end) {
+                        echo json_encode($key);
+                        // echo json_encode($key);
+                    }
+                } else {
+                    echo "Masuk 2 <br>";
+                    if ($current_time_only >= $shift_start && $current_time_only <= $shift_end) {
+                        echo json_encode($key);
+                    }
+                }
+            }
+
+            jump:
+
+
+            // echo json_encode($overlaps);
+        }
+
+
 
 
     }

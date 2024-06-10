@@ -83,7 +83,7 @@
             </div>
 
             <div class="item form-group">
-              <label class="col-form-label col-md-3 col-sm-3 label-align" for="first-name">Maximal Absen Keluar <span class="required">*</span>
+              <label class="col-form-label col-md-3 col-sm-3 label-align" for="first-name">Mulai Absen Keluar <span class="required">*</span>
               </label>
               <div class="col-md-6 col-sm-6 ">
                 <input type="time" name="MaxAbsen" id="MaxAbsen" required="" placeholder="Selesai Patroli" class="form-control ">
@@ -314,12 +314,12 @@
                 },
                 {
                     dataField: "MulaiAbsen",
-                    caption: "Mulai",
+                    caption: "Mulai CheckIn",
                     allowEditing:false
                 },
                 {
                     dataField: "MaxAbsen",
-                    caption: "Selesai",
+                    caption: "Mulai CheckOut",
                     allowEditing:false
                 },
             ],
