@@ -19,7 +19,7 @@ class Mod_Absensi {
   Future<Map> Create() async{
     var url = Uri.parse("${sess!.server}APIAttCRUD");
     final response = await http.post(url,body: Parameter);
-    print(Parameter);
+    print(response.body.toString());
     return json.decode(response.body);
   }
 }

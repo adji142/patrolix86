@@ -183,7 +183,7 @@ class _FormAbsensi extends State<FormAbsensi> {
             "KoordinatIN"   : _currentPosition == null ? "" : "${_currentPosition!.latitude},${_currentPosition!.longitude}",
             "ImageIN"       : image2.bitmap,
             "Tanggal"       : "${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}",
-            "Shift"         : dataJadwal![0]["ShiftID"],
+            "Shift"         : "",
             "Checkin"       : DateTime.now().toString(),
             "CreatedOn"     : DateTime.now().toString(),
             "formMode"      : formType
@@ -221,14 +221,14 @@ class _FormAbsensi extends State<FormAbsensi> {
             "KodeKaryawan"  : widget.sess.KodeUser,
             "KoordinatOUT"  : _currentPosition == null ? "" : "${_currentPosition!.latitude},${_currentPosition!.longitude}",
             "ImageOUT"      : image2.bitmap,
-            "Shift"         : dataJadwal![0]["NamaShift"],
+            "Shift"         : "",
             "CheckOut"      : DateTime.now().toString(),
             "UpdatedOn"     : DateTime.now().toString(),
             "formMode"      : formType
           };
         }
 
-        print(dataParam());
+        print("id: " + dataAbsen![0]["id"].toString() + ", type :" + formType);
 
         await Mod_Absensi(widget.sess, dataParam()).Create().then((value) async{
           if(value["success"]){
@@ -361,7 +361,7 @@ class _FormAbsensi extends State<FormAbsensi> {
         ],
       ),
       bottomNavigationBar: BottomAppBar(
-        child: dataJadwal!.isNotEmpty ? Row(
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Padding(
@@ -386,7 +386,7 @@ class _FormAbsensi extends State<FormAbsensi> {
                     ).then((value) {
                       // print(value);
                       if(value != null) {
-                        var tempImage1 = base64Decode(dataJadwal![0]["Image"].toString().replaceAll("data:image/jpeg;base64,", ""));
+                        // var tempImage1 = base64Decode(dataJadwal![0]["Image"].toString().replaceAll("data:image/jpeg;base64,", ""));
                         // var tempImage2 = base64Decode(File(value!.path).readAsStringSync());
                         File? imageFile;
                         imageFile = File(value!.path);
@@ -394,7 +394,7 @@ class _FormAbsensi extends State<FormAbsensi> {
                         image2.bitmap = base64Encode(bites);
                         image2.imageType = Regula.ImageType.PRINTED;
                       
-                        image1.bitmap = base64Encode(tempImage1);
+                        image1.bitmap = base64Encode(bites);
                         image1.imageType = Regula.ImageType.PRINTED;
                         
 
@@ -463,7 +463,7 @@ class _FormAbsensi extends State<FormAbsensi> {
                     ).then((value) {
                       // showLoadingDialog(context, _keyLoader, info: "Begin Scaning");
                       if(value != null ){
-                        var tempImage1 = base64Decode(dataJadwal![0]["Image"].toString().replaceAll("data:image/jpeg;base64,", ""));
+                        // var tempImage1 = base64Decode(dataJadwal![0]["Image"].toString().replaceAll("data:image/jpeg;base64,", ""));
                         // var tempImage2 = base64Decode(File(value!.path).readAsStringSync());
                         File? imageFile;
                         imageFile = File(value!.path);
@@ -471,7 +471,7 @@ class _FormAbsensi extends State<FormAbsensi> {
                         image2.bitmap = base64Encode(bites);
                         image2.imageType = Regula.ImageType.PRINTED;
                       
-                        image1.bitmap = base64Encode(tempImage1);
+                        image1.bitmap = base64Encode(bites);
                         image1.imageType = Regula.ImageType.PRINTED;
                         
 
@@ -506,14 +506,9 @@ class _FormAbsensi extends State<FormAbsensi> {
               ),
             )
           ],
-        ) : Container(
-          child: const Align(
-            alignment: Alignment.center,
-            child: Text("Karyawan Tidak ada jadwal"),
-          ),
-        ),
+        )
       ),
-      body: dataJadwal!.isNotEmpty ? Column(
+      body: Column(
         children: [
           Padding(
             padding: EdgeInsets.all(widget.sess.width * 2),
@@ -814,11 +809,6 @@ class _FormAbsensi extends State<FormAbsensi> {
             ),
           )
         ],
-      ) : Container(
-        child: const Align(
-          alignment: Alignment.center,
-          child: Text("Karyawan Tidak ada jadwal"),
-        ),
       )
     );
   }
