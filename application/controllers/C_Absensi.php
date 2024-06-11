@@ -134,7 +134,8 @@
             // end Validasi
             foreach ($shifts as $key) {
                 $absenstart = $key->MulaiAbsen;
-                $absenend = $key->MaxAbsen;
+                $absenend = date("H:i:s", strtotime($key->MaxAbsen." +2 hours"));
+                // var_dump($absenend);
 
                 $shiftstart = $key->MulaiBekerja;
                 $shiftend = $key->SelesaiBekerja;
@@ -158,6 +159,8 @@
                 'LocationID'    => $KodeLokasi,
                 'id'            => $Shift
             );
+
+            // var_dump($oShiftWhere);
         
             $oShift = $this->ModelsExecuteMaster->FindData($oShiftWhere,'tshift')->result();
         
