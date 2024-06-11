@@ -122,13 +122,13 @@
 
             $oShiftWhere = array(
                 'RecordOwnerID' => 'CL0006',
-                'LocationID'    => 58
+                'LocationID'    => $KodeLokasi
             );
             
             $oShift = [];
             $shifts = $this->ModelsExecuteMaster->FindData($oShiftWhere,'tshift')->result();
 
-            // echo json_encode($oDataShift);
+            // echo json_encode($shifts);
 
 
             // end Validasi
@@ -142,14 +142,20 @@
 
                 // $absenstart > $absenend
 
+                // var_dump($current_time_only);
+                // var_dump($midnight);
                 if ($key->GantiHari == 1) {
+                    if ($current_time_only ) {
+                        # code...
+                    }
                     if ($current_time_only >= $absenstart || $current_time_only <= $absenend) {
+                        
                         $Shift = $key->id;
                     }
                 } else {
                     if ($current_time_only >= $absenstart && $current_time_only <= $absenend) {
                         $Shift = $key->id;
-                        
+                        // echo $current_time_only." > ".$absenstart." < ".$absenend."<br>";
                     }
                 }
             }
@@ -218,7 +224,7 @@
             
             // $sql .= " AND ('".$Tanggal."' BETWEEN '".$datefrom->format("Y-m-d H:i:s")."' AND '".$dateTo->format("Y-m-d H:i:s")."' OR a.CheckOut = '0000-00-00 00:00:00.000000') ";
             $sql .= " AND (a.Checkin BETWEEN '".$datefrom->format("Y-m-d H:i:s")."' AND '".$dateTo->format("Y-m-d H:i:s")."' OR a.CheckOut = '0000-00-00 00:00:00.000000') ";
-            $sql .= " AND a.Shift = ".$Shift;
+            // $sql .= " AND a.Shift = ".$Shift;
             // $sql .= " AND a.CheckOut = '0000-00-00 00:00:00.000000' ";
             // if ($isGantiHari == 1) {
             //      $sql .= " AND a.Tanggal = DATE_ADD('".date('Y-m-d',strtotime($Tanggal))."' ";
