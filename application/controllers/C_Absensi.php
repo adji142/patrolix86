@@ -438,7 +438,7 @@
                     $current_time_only = $current_datetime->format('H:i:s');
 
                     $oShiftWhere = array(
-                        'RecordOwnerID' => 'CL0006',
+                        'RecordOwnerID' => $RecordOwnerID,
                         'LocationID'    => $LocationID
                     );
                     
