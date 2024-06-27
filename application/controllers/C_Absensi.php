@@ -121,7 +121,7 @@
             $midnight = new DateTime('23:59:59');
 
             $oShiftWhere = array(
-                'RecordOwnerID' => 'CL0006',
+                'RecordOwnerID' => $RecordOwnerID,
                 'LocationID'    => $KodeLokasi
             );
             
