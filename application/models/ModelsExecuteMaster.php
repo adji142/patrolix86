@@ -15,6 +15,8 @@ class ModelsExecuteMaster extends CI_Model
         require APPPATH.'libraries/phpmailer/src/PHPMailer.php';
         require APPPATH.'libraries/phpmailer/src/SMTP.php';
 	}
+
+	
 	function WriteLog($RecordOwnerID,$Event,$retValue)
 	{
 		$ip = '';

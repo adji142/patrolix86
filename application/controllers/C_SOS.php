@@ -25,6 +25,42 @@
 
             $rs = $this->ModelsExecuteMaster->FindData($where, 'sos');
 
+            $this->ModelsExecuteMaster->ExecUpdate(array('isRead' => "1"),array('id'=>$id,'RecordOwnerID'=>$RecordOwnerID),'sos');
+
+            if($rs){
+                $data['success'] = true;
+                $data['data'] = $rs->result();
+            }
+            else{
+                $data['success'] = false;
+                $data['message'] = 'No Data Found';
+            }
+
+            echo json_encode($data);
+        }
+
+        public function getSoSData()
+        {
+            $data = array('success' => false ,'message'=>array(),'data'=>array(),'Penyelesaian'=> 0);
+            $KodeLokasi = $this->input->post('KodeLokasi');
+            $RecordOwnerID = $this->input->post('RecordOwnerID');
+            $isRead = $this->input->post('isRead');
+
+            // $rs = $this->ModelsExecuteMaster->FindData($where, 'sos');
+            $this->db->select("sos.*, tsecurity.NamaSecurity, tlokasipatroli.NamaArea ");
+            $this->db->from("sos");
+            $this->db->join("tsecurity","sos.KodeKaryawan = tsecurity.NIK and sos.RecordOwnerID = tsecurity.RecordOwnerID", 'left');
+            $this->db->join("tlokasipatroli", "sos.LocationID = tlokasipatroli.id and sos.RecordOwnerID = tlokasipatroli.RecordOwnerID",'left');
+            $this->db->where('sos.LocationID', $KodeLokasi);
+            $this->db->where('sos.RecordOwnerID', $RecordOwnerID);
+
+            if ($isRead != "") {
+                $this->db->where('sos.isRead', $isRead);
+            }
+            
+            $rs = $this->db->get();
+
+
             if($rs){
                 $data['success'] = true;
                 $data['data'] = $rs->result();

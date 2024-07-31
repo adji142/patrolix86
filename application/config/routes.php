@@ -72,6 +72,7 @@ $route['APIAddPatroli'] = 'C_Patroli/CRUD';
 $route['APIShiftRead'] = 'C_Shift/Read';
 $route['APISOSCreate'] = 'C_SOS/Create';
 $route['APISOSRead'] = 'C_SOS/Read';
+$route['APISOSGetData'] = 'C_SOS/getSoSData';
 $route['APIAttRead'] = 'C_Absensi/ReadNew';
 $route['APIAttCRUD'] = 'C_Absensi/CRUD';
 $route['APIGetJadwal'] = 'C_Jadwal/Read';

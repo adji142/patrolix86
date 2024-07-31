@@ -19,7 +19,9 @@ import 'package:mobilepatrol/page/absensi.dart';
 import 'package:mobilepatrol/page/dailyactivity.dart';
 import 'package:mobilepatrol/page/guestlog.dart';
 import 'package:mobilepatrol/page/sos.dart';
+import 'package:mobilepatrol/page/sosList.dart';
 import 'package:mobilepatrol/shared/sharedprefrence.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:uuid/uuid.dart';
 
 class Dashboard extends StatefulWidget {
@@ -58,6 +60,8 @@ class _dashboardState extends State<Dashboard> {
   bool _offlineMode = false;
   // Notifikasi
   late final FirebaseMessaging _messaging;
+  int _notificationCount = 15;
+
   //Time Change
   //---------------------------------------------------------------------------
   DateTime? _timeChange(DateTime now) {
@@ -202,6 +206,29 @@ class _dashboardState extends State<Dashboard> {
     await FirebaseMessaging.instance.subscribeToTopic("SOSTopic${widget.sess!.LocationID}");
   }
 
+  Future<void> _requestPermission() async{
+    var oLocation = await Permission.location.status;
+    var oCamera = await Permission.camera.status;
+
+    if (oLocation.isDenied) {
+      if (await Permission.location.request().isGranted) {
+        print("Location granted");
+      }
+      else if(await Permission.location.isPermanentlyDenied){
+        openAppSettings();
+      }
+    }
+
+    if (oCamera.isDenied) {
+      if (await Permission.camera.request().isGranted) {
+        print("Camera granted");
+      }
+      else if(await Permission.camera.isPermanentlyDenied){
+        openAppSettings();
+      }
+    }
+  }
+
   @override
   void initState() {
     // Timer.periodic(Duration(seconds: 1), (Timer t) => _timeChange());
@@ -224,6 +251,7 @@ class _dashboardState extends State<Dashboard> {
       NotificationService().init(widget.sess!,rng.nextInt(100), title, body, payload.toString(), context);
     });
     super.initState();
+    _requestPermission();
   }
 
   @override
@@ -449,7 +477,36 @@ class _dashboardState extends State<Dashboard> {
                     },
                   ),
                 ),
-              )
+              ),
+              Padding(
+                padding: EdgeInsets.only(
+                  top: widget.sess!.width * 2,
+                  left: widget.sess!.width * 2,
+                  right: widget.sess!.width * 2
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: widget.sess!.hight * 5,
+                  child: GestureDetector(
+                    child: const Card(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(Icons.logout),
+                          Text(
+                            "Logout"
+                          ),
+                          Icon(Icons.arrow_forward_rounded),
+                        ],
+                      ),
+                    ),
+                    onTap: (){
+                      SharedPreference().removeKey("accountInfo");
+                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MyApp()));
+                    },
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -490,63 +547,104 @@ class _dashboardState extends State<Dashboard> {
           //   ],
           // ),
           actions: [
-            Padding(
-              padding: EdgeInsets.only(right: widget.sess!.width * 5),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  GestureDetector(
-                    child: Text(
-                      "Logout",
-                      style: TextStyle(
-                          fontSize: widget.sess!.width * 4,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: "Arial",
-                          color: Colors.white),
+            Stack(
+              children: [
+                IconButton(
+                  icon: Icon(Icons.notifications, color: Colors.white,size: 32,),
+                  onPressed: (){
+                    Navigator.push(context,MaterialPageRoute(builder: (context) => SOSList(widget.sess!)));
+                  }, 
+                ),
+                Positioned(
+                  right: 10,
+                  top: 11,
+                  child: Container(
+                    padding: EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: Colors.red,borderRadius: BorderRadius.circular(6)
                     ),
-                    onTap: () async {
-                      // print("data tabed");
-                      // await awesomeNotification;
-                      SharedPreference().removeKey("accountInfo");
-                      Navigator.pushReplacement(context,
-                          MaterialPageRoute(builder: (context) => const MyApp()));
-                    },
+                    constraints: BoxConstraints(
+                      minWidth: 14,
+                      minHeight: 14
+                    ),
+                    child: FutureBuilder(
+                      future: Mod_SOS(this.widget.sess, {"RecordOwnerID": this.widget.sess!.RecordOwnerID, "KodeLokasi":this.widget.sess!.LocationID.toString(), "isRead" :"0"}).getData(), 
+                      builder: (context, snapshot){
+                        if (snapshot.hasData) {
+                          if (snapshot.data!["data"].length > 0) {
+                            return Text(
+                              snapshot.data!["data"].length > 99 ? "99+" : snapshot.data!["data"].length.toString(),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12
+                              ),
+                              textAlign: TextAlign.center,
+                            );
+                          }
+                          else{
+                            return Text(
+                              "0",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12
+                              ),
+                              textAlign: TextAlign.center,
+                            );
+                          }
+                        }
+                        else{
+                          return Text(
+                            "0",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12
+                            ),
+                            textAlign: TextAlign.center,
+                          );
+                        }
+                      }
+                    ) ,
                   )
-                ],
-              ),
+                )
+              ],
             )
           ],
         ),
         floatingActionButton: FloatingActionButton(
           backgroundColor: Theme.of(context).primaryColor,
           onPressed: () async {
-            // Handle Notification
-            var data = await barcodeScan().then((value) async {
-              Map oParamx() {
-                return {
-                  "KodeCheckPoint": value,
-                  "KodeLokasi": widget.sess!.LocationID.toString(),
-                  "RecordOwnerID": widget.sess!.RecordOwnerID,
-                  "TanggalPatroli": _tanggal.toString(),
-                  "KodeKaryawan": widget.sess!.KodeUser
-                };
-              }
-
-              var xData = await Mod_Patroli(widget.sess, Parameter: oParamx()).getPatroliList().then((valueData) {
-                if (valueData["data"].length > 0) {
-                  Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => FormCheckIn(
-                                  widget.sess!,
-                                  value,
-                                  valueData["data"][0]["NamaCheckPoint"])))
-                      .then((value) {
-                    setState(() {});
-                  });
+            if (await Permission.location.isGranted) {
+              var data = await barcodeScan().then((value) async {
+                Map oParamx() {
+                  return {
+                    "KodeCheckPoint": value,
+                    "KodeLokasi": widget.sess!.LocationID.toString(),
+                    "RecordOwnerID": widget.sess!.RecordOwnerID,
+                    "TanggalPatroli": _tanggal.toString(),
+                    "KodeKaryawan": widget.sess!.KodeUser
+                  };
                 }
+
+                var xData = await Mod_Patroli(widget.sess, Parameter: oParamx()).getPatroliList().then((valueData) {
+                  if (valueData["data"].length > 0) {
+                    Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => FormCheckIn(
+                                    widget.sess!,
+                                    value,
+                                    valueData["data"][0]["NamaCheckPoint"])))
+                        .then((value) {
+                      setState(() {});
+                    });
+                  }
+                });
               });
-            });
+            }
+            else{
+              await messageBox(context: context, title: "Permission Error", message: "Akses ke Lokasi GPS dibutuhkan");
+            }
+            // Handle Notification
           },
           child: const Icon(
             Icons.add,
@@ -822,7 +920,12 @@ class _dashboardState extends State<Dashboard> {
                                     bottom: widget.sess!.hight * 1),
                                 child: IconButton(
                                     onPressed: () async{
-                                      Navigator.push(context,MaterialPageRoute(builder: (context) => FormAbsensi(widget.sess!, _kodeShift)));
+                                      if (await Permission.location.isGranted) {
+                                        Navigator.push(context,MaterialPageRoute(builder: (context) => FormAbsensi(widget.sess!, _kodeShift))); 
+                                      }
+                                      else{
+                                        await messageBox(context: context, title: "Permission Error", message: "Akses ke Lokasi GPS dibutuhkan");
+                                      }
                                       // var validasi = await checkSchadule(this.widget.sess!, context).then((value) => {
                                       //   if(value){
                                       //     Navigator.push(context,MaterialPageRoute(builder: (context) => FormAbsensi(this.widget.sess!, _kodeShift)))

@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mobilepatrol/general/session.dart';
 import 'package:mobilepatrol/models/sos.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class sosCallBack extends StatefulWidget {
   final session? sess;
@@ -143,6 +144,14 @@ class _sosCallBackState extends State<sosCallBack> {
       debugPrint(e);
     });
   }
+  void _launchMapsUrl(double lat, double lon) async {
+    final url = 'https://www.google.com/maps/search/?api=1&query=$lat,$lon';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
 
   @override
   void initState() {
@@ -165,12 +174,23 @@ class _sosCallBackState extends State<sosCallBack> {
       };
     }
     return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "data",
+        ),
+        backgroundColor: Theme.of(context).primaryColor,
+        foregroundColor: Colors.white,
+      ),
       body: FutureBuilder(
         future: Mod_SOS(widget.sess, oParam()).read(),
         builder: (context, snapshot){
           if(snapshot.hasData){
             if(snapshot.data!["data"].length > 0){
-              List<String> position = snapshot.data!["data"][0]["Koordinat"].toString().split(",");
+              String _Koordinat = "-7.4949969,110.8285801";
+              if (snapshot.data!["data"][0]["Koordinat"] != "") {
+                _Koordinat = snapshot.data!["data"][0]["Koordinat"];
+              }
+              List<String> position = _Koordinat.toString().split(",");
               _detailPesan.text = snapshot.data!["data"][0]["Comment"];
               print("${widget.sess!.server}Assets/images/SOS/"+snapshot.data!["data"][0]["Image1"]);
               return SizedBox(
@@ -193,7 +213,14 @@ class _sosCallBackState extends State<sosCallBack> {
                         markers: {
                           Marker(
                             markerId: const MarkerId("SOS Value"),
-                            position: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+                            position: LatLng(double.parse(position[0]), double.parse(position[1])),
+                            infoWindow: InfoWindow(
+                              title: "SOS",
+                              snippet: "Klik untuk membuka di Google Maps",
+                              onTap: (){
+                                _launchMapsUrl(double.parse(position[0]), double.parse(position[1]));
+                              }
+                            )
                           )
                         }
                       ):Container(),

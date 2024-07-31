@@ -95,6 +95,10 @@
                     <div class="col-md-6 col-sm-6 ">
                       <input type="Password" name="pass" id="pass" required="" placeholder="Password" class="form-control ">
                     </div>
+                    <button type="button" class="btn btn-default" id="TampilkanPassword">Tampilkan</button>
+                    <div id="tooltip" style="display:none; position:absolute; background-color:#333; color:#fff; padding:5px; border-radius:5px;">
+                        This is a tooltip!
+                    </div>
                   </div>
                   <div class="item form-group">
                     <label class="col-form-label col-md-3 col-sm-3 label-align" for="first-name">Role <span class="required">*</span>
@@ -165,6 +169,10 @@
               bindGrid(response.data);
             }
           });
+        });
+
+        $('#TampilkanPassword').click(function () {
+          $("#pass").attr("type", "text");
         });
         $('#filter_').click(function () {
           var kriteria = '';

@@ -19,4 +19,9 @@ class Mod_SOS {
     final response = await http.post(url, body: Parameter);
     return json.decode(response.body);
   }
+  Future<Map> getData() async {
+    var url = Uri.parse("${sess!.server}APISOSGetData");
+    final response = await http.post(url, body: Parameter);
+    return json.decode(response.body);
+  }
 }
