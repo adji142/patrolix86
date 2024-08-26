@@ -168,7 +168,7 @@
         dataType: "json",
         success: function (response) {
           // bindGrid(response.data);
-          var linkurl = "<?php echo base_url() ?>Assets/doc/"+RecordOwnerID+".pdf";
+          var linkurl = "<?php echo base_url() ?>Assets/doc/"+response.filename+".pdf";
 
           window.open(linkurl, '_blank');
         }
