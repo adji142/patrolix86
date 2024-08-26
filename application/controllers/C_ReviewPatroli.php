@@ -83,9 +83,9 @@
 			// $LocationID = '';
 
 			// Set up your PDF content
-
+			$DateCreateion = date("Ymdhis");
 			try {
-				$baseDir = FCPATH.'Assets/doc/'.$RecordOwnerID.'.pdf';
+				$baseDir = FCPATH.'Assets/doc/'.$RecordOwnerID.$DateCreateion.'.pdf';
 		        $this->pdf_generator->AddPage();
 		        $this->pdf_generator->SetTitle("Laporan Patroli" ,true);
 		        $this->pdf_generator->SetFont('Arial','B',16);
