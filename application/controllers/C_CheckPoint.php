@@ -124,7 +124,7 @@
 
 			$RecordOwnerID = $this->session->userdata('RecordOwnerID');
 			$LocationID = $this->input->post('LocationID');
-			$DateCreateion = date("Ymd h:i:s");
+			$DateCreateion = date("Ymdhis");
 
 			// var_dump($DateCreateion);
 
@@ -157,7 +157,7 @@
 				}
 
 				// Append to zip
-				$filename = $RecordOwnerID.'.zip';
+				$filename = $RecordOwnerID.$DateCreateion.'.zip';
 				// var_dump($baseDir.$filename);
 				// $this->zip->read_dir($baseDir.$RecordOwnerID);
 				$rs = $this->zip->archive($baseDir.'/'.$RecordOwnerID.'/'.$filename);
@@ -165,7 +165,7 @@
 				// $this->zip->download($baseDir.'/'.$RecordOwnerID.'/'.$filename);	
 				if ($rs) {
 					$data['success'] = true;
-					$data['DownloadLink'] = base_url().'Assets/images/QRCode/'.$RecordOwnerID.'/'.$RecordOwnerID.'.zip';
+					$data['DownloadLink'] = base_url().'Assets/images/QRCode/'.$RecordOwnerID.'/'.$RecordOwnerID.$DateCreateion.'.zip';
 				}
 			} catch (Exception $e) {
 				$data['success'] =false;
