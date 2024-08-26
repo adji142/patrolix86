@@ -65,7 +65,7 @@
 		public function generatePDF()
 		{
 
-			$data = array('success' => false ,'message'=>array(),'data'=>array());
+			$retdata = array('success' => false ,'message'=>array(),'data'=>array(), 'filename' => '');
 
 			$TglAwal = $this->input->post('TglAwal');
 			$TglAkhir = $this->input->post('TglAkhir');
@@ -223,13 +223,14 @@
 		        // Output the PDF
 		        $this->pdf_generator->Output('F',$baseDir);	
 
-		        $data['success'] = true;
+		        $retdata['success'] = true;
+		        $retdata['filename'] = $RecordOwnerID.$DateCreateion;
 			} catch (Exception $e) {
-				$data['success'] = false;
-				$data['message'] = $e->getMessage();
+				$retdata['success'] = false;
+				$retdata['message'] = $e->getMessage();
 			}
 
-			echo json_encode($data);
+			echo json_encode($retdata);
 		}
 	}
 ?>
