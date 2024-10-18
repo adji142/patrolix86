@@ -29,7 +29,7 @@
             	$where['LocationID'] = $KodeLokasi;
             }
 
-            $rs = $this->ModelsExecuteMaster->FindData($where, 'guestlog');
+            $rs = $this->ModelsExecuteMaster->FindDataWithOrder($where, 'guestlog', 'Tanggal', 'DESC');
 
             if($rs->num_rows() > 0){
                 $data['success'] = true;

@@ -70,6 +70,11 @@ class ModelsExecuteMaster extends CI_Model
 		$this->db->like($where,'both');
 		return $this->db->get($table);
 	}
+	function FindDataWithOrder($where,$table, $orderColumn, $OrderCondition){
+		$this->db->where($where);
+		$this->db->order_by($orderColumn, $OrderCondition);
+		return $this->db->get($table);
+	}
 	function GetData($table)
 	{
 		return $this->db->get($table);

@@ -33,7 +33,7 @@
             	$where['KodeKaryawan'] = $KodeKaryawan;
             }
 
-            $rs = $this->ModelsExecuteMaster->FindData($where, $this->table);
+            $rs = $this->ModelsExecuteMaster->FindDataWithOrder($where, $this->table, 'Tanggal', 'DESC');
 
             if($rs->num_rows() > 0){
                 $data['success'] = true;
