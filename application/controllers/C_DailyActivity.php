@@ -127,7 +127,7 @@
 
 				// var_dump($oParam);
 
-				$oKaryawan = $this->ModelsExecuteMaster->FindData(array('NIK'=>$KodeKaryawan), 'tsecurity');
+				$oKaryawan = $this->ModelsExecuteMaster->FindData(array('NIK'=>$KodeKaryawan, 'RecordOwnerID'=>$RecordOwnerID), 'tsecurity');
 
 				if ($oKaryawan->num_rows() > 0) {
 					$oParam['NamaKaryawan'] = $oKaryawan->row()->NamaSecurity;
