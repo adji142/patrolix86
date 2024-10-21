@@ -122,6 +122,16 @@
 				$max = $this->db->query($xSQL);
 				$Rank = $max->num_rows();
 
+				// Get Shift
+
+				$queryShift = "SELECT * FROM tshift a WHERE RecordOwnerID = '".$RecordOwnerID."' 
+				and a.LocationID =".$LocationID."
+				and NOW() BETWEEN MulaiBekerja and SelesaiBekerja";
+
+				$oShift = $this->db->query($queryShift);
+				$oShiftRow = $oShift->row();
+				$Shift = $oShiftRow->id;
+
 				$param = array(
 					'RecordOwnerID' 	=> $RecordOwnerID,
 					'KodeCheckPoint' 	=> $KodeCheckPoint,

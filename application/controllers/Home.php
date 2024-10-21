@@ -288,7 +288,7 @@ class home extends CI_Controller {
 	// Report
 	public function readReview()
 	{
-		$this->load->view('V_Report/reviewpatroli');
+		$this->load->view('V_Report/reviewpatroli_v2');
 	}
 	public function loadmap($value)
 	{

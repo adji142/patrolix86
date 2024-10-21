@@ -21,7 +21,7 @@
       <div class="col-md-12 col-sm-12  ">
         <div class="x_panel">
           <div class="x_title">
-            <h2>Review Daily Activity</h2>
+            <h2>Review Patroli</h2>
             <div class="clearfix"></div>
           </div>
 
@@ -64,6 +64,13 @@
                   ?>
                 </select>
               </div>
+              
+              <div class="col-md-3 col-sm-12  form-group">
+                Shift
+                <select id="KodeShift" name="KodeShift" class="form-control">
+                  <option value="-1">Pilih Shift..</option>
+                </select>
+              </div>
 
               <div class="col-md-3 col-sm-12  form-group">
                 Security
@@ -72,9 +79,9 @@
                 </select>
               </div>
 
-              <div class="col-md-3 col-sm-12  form-group">
-                <br>
+              <div class="col-md-12 col-sm-12  form-group">
                 <button class="btn btn-success" id="btSearch">Proses</button>
+                <button class="btn btn-warning" id="btExportpdf">Export PDF</button>
               </div>
 
               <div class="col-md-12 col-sm-12  form-group">
@@ -89,46 +96,6 @@
           </div>
         </div>
       </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-hidden="true" id="modal_lihat_gambar">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-
-      <div class="modal-header">
-        <h4 class="modal-title" id="myModalLabel">Daily Activity</h4>
-        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="row">
-          <div class="col-md-4 col-sm-4 ">
-            <center>Foto 1
-              <div id="Image_1"></div>
-            </center> <br>
-          </div>
-
-          <div class="col-md-4 col-sm-4 ">
-            <center>Foto 2
-              <div id="Image_2"></div>
-            </center><br>
-          </div>
-
-          <div class="col-md-4 col-sm-4 ">
-            <center>Foto 3
-              <div id="Image_3"></div>
-            </center><br>
-          </div>
-          
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Keluar</button>
-        
-      </div>
-
     </div>
   </div>
 </div>
@@ -159,13 +126,14 @@
 
       $.ajax({
         type: "post",
-        url: "<?=base_url()?>C_DailyActivity/Read",
+        url: "<?=base_url()?>C_ReviewPatroli/Read",
         data: {
           'TglAwal'       :$('#TglAwal').val(),
           'TglAkhir'      :$('#TglAkhir').val(),
           'RecordOwnerID' :RecordOwnerID,
           'KodeKaryawan'  :$('#KodeKaryawan').val(),
-          'KodeLokasi'    :$('#LocationID').val(),
+          'LocationID'    :$('#LocationID').val(),
+          'KodeShift'     :$('#KodeShift').val()
         },
         dataType: "json",
         success: function (response) {
@@ -179,13 +147,14 @@
     $('#btSearch').click(function () {
       $.ajax({
         type: "post",
-        url: "<?=base_url()?>C_DailyActivity/Read",
+        url: "<?=base_url()?>C_ReviewPatroli/Read",
         data: {
           'TglAwal'       :$('#TglAwal').val(),
           'TglAkhir'      :$('#TglAkhir').val(),
           'RecordOwnerID' :RecordOwnerID,
           'KodeKaryawan'  :$('#KodeKaryawan').val(),
-          'KodeLokasi'    :$('#LocationID').val(),
+          'LocationID'    :$('#LocationID').val(),
+          'KodeShift'     :$('#KodeShift').val()
         },
         dataType: "json",
         success: function (response) {
@@ -193,6 +162,27 @@
         }
       });
     });
+
+    $('#btExportpdf').click(function () {
+      $.ajax({
+        type: "post",
+        url: "<?=base_url()?>C_ReviewPatroli/generatePDF",
+        data: {
+          'TglAwal'       :$('#TglAwal').val(),
+          'TglAkhir'      :$('#TglAkhir').val(),
+          'RecordOwnerID' :RecordOwnerID,
+          'KodeKaryawan'  :$('#KodeKaryawan').val(),
+          'LocationID'    :$('#LocationID').val(),
+        },
+        dataType: "json",
+        success: function (response) {
+          // bindGrid(response.data);
+          var linkurl = "<?php echo base_url() ?>Assets/doc/"+response.filename+".pdf";
+
+          window.open(linkurl, '_blank');
+        }
+      });
+    })
 
     $('#LocationID').change(function () {
       $.ajax({
@@ -218,6 +208,34 @@
           }
         }
       });
+
+      // 
+
+      $.ajax({
+        async:false,
+        type: "post",
+        url: "<?=base_url()?>C_Shift/Read",
+        data: {
+          'id'            : '',
+          'RecordOwnerID' :RecordOwnerID,
+          'LocationID'    :$('#LocationID').val()
+        },
+        dataType: "json",
+        success: function (response) {
+          // bindGrid(response.data);
+          $('#KodeShift').empty();
+          if (response.data.length > 0) {
+            $('#KodeShift').append('<option value="-1">Pilih Shift</option>');
+            $.each(response.data,function (k,v) {
+              $('#KodeShift').append('<option value="' + v.id + '">' + v.NamaShift + '</option>');
+            });
+          }
+          else{
+            $('#KodeShift').append('<option value="-1">Pilih Shift</option>');
+          }
+        }
+      });
+
     });
 
     function bindGrid(data) {
@@ -258,44 +276,88 @@
             },
             export: {
                 enabled: true,
-                fileName: "Daftar Daily Activity"
+                fileName: "Daftar Patroli"
             },
             selection: {
               mode: 'single',
             },
             columns: [
                 {
-                    dataField: "Tanggal",
+                    dataField: "TanggalPatroli",
                     caption: "Tanggal",
                     allowEditing:false,
+                    cssClass: "TglPatrol",
                 },
                 {
-                    dataField: "KodeKaryawan",
-                    caption: "NIK",
+                    dataField: "JamAktual",
+                    caption: "Jam Patroli",
+                    allowEditing:false
+                },
+                {
+                    dataField: "NamaSecurity",
+                    caption: "Security",
                     allowEditing:false,
                 },
                 {
-                    dataField: "NamaKaryawan",
-                    caption: "Nama",
+                    dataField: "NamaLokasi",
+                    caption: "Lokasi",
                     allowEditing:false,
                 },
                 {
-                    dataField: "DeskripsiAktifitas",
-                    caption: "Deskripsi",
+                    dataField: "NamaCheckPoint",
+                    caption: "Check Point",
                     allowEditing:false,
                 },
                 {
-                  dataField: "Action",
-                  caption: "Action",
-                  allowEditing:false,
-                  fixed:true,
-                  fixedPosition: "left",
-                  cellTemplate: function(cellElement, cellInfo) {
-                    LinkAccess = "<button class='btn btn-warning' onClick=loadImage('"+cellInfo.data.id+"')>Lihat gambar</button>";
-                    // console.log();
-                    cellElement.append(LinkAccess);
+                    dataField: "NamaShift",
+                    caption: "Shift",
+                    allowEditing:false,
+                },
+                {
+                    dataField: "id",
+                    caption: "#",
+                    allowEditing:false,
+                    visible:false
+                },
+                {
+                    dataField: "JamJadwal",
+                    caption: "Jam Jadwal Patroli",
+                    allowEditing:false,
+                    visible:false
+                },
+                {
+                    dataField: "Toleransi",
+                    caption: "Toleransi",
+                    allowEditing:false,
+                    visible:false
+                },
+                {
+                    dataField: "Catatan",
+                    caption: "Catatan",
+                    allowEditing:false
+                },
+                {
+                    dataField: "Koordinat",
+                    caption: "Koordinat",
+                    allowEditing:false,
+                    visible:false
+                },
+                {
+                    dataField: "Image",
+                    caption: "Image",
+                    allowEditing:false,
+                    visible:false
+                },
+                {
+                    dataField: "FileItem",
+                    caption: "Action",
+                    allowEditing:false,
+                    cellTemplate: function(cellElement, cellInfo) {
+                      LinkAccess = "<a style href = '<?=base_url()?>Assets/images/patroli/"+cellInfo.data.Image+"' class='btn btn-info' target='_blank'>Lihat Gambar</a>";
+                      LinkAccess += "<button class='btn btn-success' onClick=loadMap('"+cellInfo.data.Koordinat+"')>Lihat Lokasi</button>";
+                      cellElement.append(LinkAccess);
                   }
-              }
+                }
             ],
         });
 
@@ -386,33 +448,5 @@
   function loadMap(koordinat) {
     // alert(koordinat)
     window.open("<?php echo base_url()?>Assets/map.php?latlang="+koordinat, "_blank");
-  }
-
-  function loadImage(id) {
-    var RecordOwnerID = "<?php echo $this->session->userdata('RecordOwnerID') ?>";
-    // alert(absentID)
-    $.ajax({
-      type: "post",
-      url: "<?=base_url()?>C_DailyActivity/Find",
-      data: {
-        'id'            :id, 
-        'RecordOwnerID' :RecordOwnerID,
-      },
-      dataType: "json",
-      success: function (response) {
-        $.each(response.data,function (k,v) {
-          console.log(v);
-
-          var baseurl = "<?php echo base_url() ?>Assets/images/activity/";
-          $('#Image_1').html("<img src ='"+baseurl+v.Gambar1+"' width = '50%'> ");
-          $('#Image_2').html("<img src ='"+baseurl+v.Gambar2+"' width = '50%'> ");
-          $('#Image_3').html("<img src ='"+baseurl+v.Gambar3+"' width = '50%'> ");
-
-          $('#modal_lihat_gambar').modal('show');
-        });
-      }
-    });
-    // $('#modal_detail_absen').modal('show');
-    // window.open("<?php echo base_url()?>Assets/map.php?latlang="+koordinat, "_blank");
   }
 </script>

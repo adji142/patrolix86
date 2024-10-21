@@ -22,6 +22,7 @@
 			$RecordOwnerID = $this->input->post('RecordOwnerID');
 			$KodeKaryawan = $this->input->post('KodeKaryawan');
 			$LocationID = $this->input->post('LocationID');
+			$KodeShift = $this->input->post('KodeShift');
 			
 			// $SQL = "
 			// 	SELECT 
@@ -52,7 +53,7 @@
 			// $SQL.= " ORDER BY a.TanggalPatroli";
 
 
-			$SQL = "CALL fn_ReadReview('".$TglAwal."','".$TglAkhir."','".$RecordOwnerID."','".$KodeKaryawan."','".$LocationID."');";
+			$SQL = "CALL fn_ReadReview('".$TglAwal."','".$TglAkhir."','".$RecordOwnerID."','".$KodeKaryawan."','".$LocationID."',".$KodeShift.");";
 
 			$rs = $this->db->query($SQL);
 			if ($rs) {

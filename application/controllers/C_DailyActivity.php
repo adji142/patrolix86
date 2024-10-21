@@ -55,7 +55,7 @@
 
 			$where = array(
                 'RecordOwnerID' => $RecordOwnerID,
-                'LocationID'    => $KodeLokasi,
+                // 'LocationID'    => $KodeLokasi,
                 'id'            => $id
             );
 

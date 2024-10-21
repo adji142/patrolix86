@@ -85,6 +85,41 @@
     </div>
   </div>
 </div>
+
+<div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-hidden="true" id="modal_lihat_gambar">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h4 class="modal-title" id="myModalLabel">Buku Tamu</h4>
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-6 col-sm-6 ">
+            <center>Foto Masuk
+              <div id="image_result_IN"></div>
+            </center> <br>
+          </div>
+
+          <div class="col-md-6 col-sm-6 ">
+            <center>Foto Keluar
+              <div id="image_result_OUT"></div>
+            </center><br>
+          </div>
+          
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Keluar</button>
+        
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <!-- /page content -->
 <?php
   require_once(APPPATH."views/parts/Footer.php");
@@ -223,6 +258,18 @@
                     dataField: "Keterangan",
                     caption: "Keterangan",
                     allowEditing:false
+                },
+                {
+                    dataField: "Action",
+                    caption: "Action",
+                    allowEditing:false,
+                    fixed:true,
+                    fixedPosition: "left",
+                    cellTemplate: function(cellElement, cellInfo) {
+                      LinkAccess = "<button class='btn btn-warning' onClick=loadImage('"+cellInfo.data.id+"')>Lihat gambar</button>";
+                      // console.log();
+                      cellElement.append(LinkAccess);
+                    }
                 }
             ],
         });
@@ -254,6 +301,33 @@
           x1 = x1.replace(rgx, '$1' + ',' + '$2');
       }
       return x1 + x2;
-  }
+    }
   });
+
+  function loadImage(id) {
+    var RecordOwnerID = "<?php echo $this->session->userdata('RecordOwnerID') ?>";
+    // alert(absentID)
+    $.ajax({
+      type: "post",
+      url: "<?=base_url()?>C_GuestLog/Find",
+      data: {
+        'id'            :id, 
+        'RecordOwnerID' :RecordOwnerID,
+      },
+      dataType: "json",
+      success: function (response) {
+        $.each(response.data,function (k,v) {
+          console.log(v);
+
+          var baseurl = "<?php echo base_url() ?>Assets/images/guestlog/";
+          $('#image_result_IN').html("<img src ='"+baseurl+v.ImageIn+"' width = '50%'> ");
+          $('#image_result_OUT').html("<img src ='"+baseurl+v.ImageOut+"' width = '50%'> ");
+
+          $('#modal_lihat_gambar').modal('show');
+        });
+      }
+    });
+    // $('#modal_detail_absen').modal('show');
+    // window.open("<?php echo base_url()?>Assets/map.php?latlang="+koordinat, "_blank");
+  }
 </script>
