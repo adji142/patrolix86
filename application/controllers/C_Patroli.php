@@ -126,7 +126,7 @@
 
 				$queryShift = "SELECT * FROM tshift a WHERE RecordOwnerID = '".$RecordOwnerID."' 
 				and a.LocationID =".$LocationID."
-				and NOW() BETWEEN MulaiBekerja and SelesaiBekerja order by MulaiBekerja limit 1";
+				and NOW() BETWEEN CAST(CONCAT(CURRENT_DATE(), ' ', MulaiBekerja) AS DATETIME) and CAST(CONCAT(case when GantiHari = 1 then DATE_ADD(CURRENT_DATE(), INTERVAL 1 DAY) ELSE CURRENT_DATE() END ,  ' ', SelesaiBekerja) AS DATETIME) order by MulaiBekerja limit 1";
 
 				$oShift = $this->db->query($queryShift);
 				$oShiftRow = $oShift->row();
