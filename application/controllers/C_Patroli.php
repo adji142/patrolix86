@@ -126,7 +126,7 @@
 
 				$queryShift = "SELECT * FROM tshift a WHERE RecordOwnerID = '".$RecordOwnerID."' 
 				and a.LocationID =".$LocationID."
-				and NOW() BETWEEN MulaiBekerja and SelesaiBekerja";
+				and NOW() BETWEEN MulaiBekerja and SelesaiBekerja order by MulaiBekerja limit 1";
 
 				$oShift = $this->db->query($queryShift);
 				$oShiftRow = $oShift->row();
