@@ -26,7 +26,7 @@
 				$data['message'] = 'No Data Found';
 			}
 
-			echo json_encode($data)
+			echo json_encode($data);
 		}
 
 		public function ReadPricingTerm()
@@ -46,7 +46,7 @@
 				$data['message'] = 'No Data Found';
 			}
 
-			echo json_encode($data)
+			echo json_encode($data);
 		}
 	}
 ?>

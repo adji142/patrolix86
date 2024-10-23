@@ -124,13 +124,35 @@
 
 				// Get Shift
 
-				$queryShift = "SELECT * FROM tshift a WHERE RecordOwnerID = '".$RecordOwnerID."' 
-				and a.LocationID =".$LocationID."
-				and NOW() BETWEEN CAST(CONCAT(CURRENT_DATE(), ' ', MulaiBekerja) AS DATETIME) and CAST(CONCAT(case when GantiHari = 1 then DATE_ADD(CURRENT_DATE(), INTERVAL 1 DAY) ELSE CURRENT_DATE() END ,  ' ', SelesaiBekerja) AS DATETIME) order by MulaiBekerja limit 1";
-
-				$oShift = $this->db->query($queryShift);
-				$oShiftRow = $oShift->row();
-				$Shift = $oShiftRow->id;
+				$oShiftWhere = array(
+					'RecordOwnerID' => $RecordOwnerID,
+					'LocationID'    => $LocationID
+				);
+	
+				$shifts = $this->ModelsExecuteMaster->FindData($oShiftWhere,'tshift')->result();
+		
+				$current_datetime = new DateTime($TanggalPatroli);
+				$current_time_only = $current_datetime->format('H:i:s');
+		
+				$Shift = "";
+		
+				foreach ($shifts as $key) {
+					$shiftstart = $key->MulaiBekerja;
+					$shiftend = $key->SelesaiBekerja;
+		
+					// $absenstart > $absenend
+		
+					if ($key->GantiHari == 1) {
+						if ($current_time_only >= $shiftstart || $current_time_only <= $shiftend) {
+							$Shift = $key->id;
+						}
+					} else {
+						if ($current_time_only >= $shiftstart && $current_time_only <= $shiftend) {
+							$Shift = $key->id;
+							
+						}
+					}
+				}
 
 				$param = array(
 					'RecordOwnerID' 	=> $RecordOwnerID,
@@ -160,5 +182,46 @@
 			}
 			echo json_encode($data);
 		}
+
+		public function TestGetShift() {
+
+			$TanggalPatroli 	= $this->input->post('TanggalPatroli');
+			$RecordOwnerID 		= $this->input->post('RecordOwnerID');
+			$LocationID 		= $this->input->post('LocationID');
+
+			$oShiftWhere = array(
+				'RecordOwnerID' => $RecordOwnerID,
+				'LocationID'    => $LocationID
+			);
+
+			$shifts = $this->ModelsExecuteMaster->FindData($oShiftWhere,'tshift')->result();
+	
+			$current_datetime = new DateTime($TanggalPatroli);
+			$current_time_only = $current_datetime->format('H:i:s');
+	
+			$Shift = "";
+	
+			foreach ($shifts as $key) {
+				$shiftstart = $key->MulaiBekerja;
+				$shiftend = $key->SelesaiBekerja;
+	
+				// $absenstart > $absenend
+	
+				if ($key->GantiHari == 1) {
+					if ($current_time_only >= $shiftstart || $current_time_only <= $shiftend) {
+						$Shift = $key->NamaShift;
+					}
+				} else {
+					if ($current_time_only >= $shiftstart && $current_time_only <= $shiftend) {
+						$Shift = $key->NamaShift;
+						
+					}
+				}
+			}
+	
+			var_dump($Shift);
+		}
 	}
+
+	
 ?>
