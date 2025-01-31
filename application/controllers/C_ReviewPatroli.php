@@ -63,6 +63,23 @@
 			echo json_encode($data);
 		}
 
+		function png_to_jpg($source, $destination, $quality = 80) {
+		    $image = imagecreatefrompng($source);
+		    $bg = imagecreatetruecolor(imagesx($image), imagesy($image));
+
+		    // Set background to white
+		    $white = imagecolorallocate($bg, 255, 255, 255);
+		    imagefilledrectangle($bg, 0, 0, imagesx($image), imagesy($image), $white);
+
+		    imagecopy($bg, $image, 0, 0, 0, 0, imagesx($image), imagesy($image));
+		    imagejpeg($bg, $destination, $quality);
+		    
+		    imagedestroy($image);
+		    imagedestroy($bg);
+		    
+		    return $destination;
+		}
+
 		public function generatePDF()
 		{
 
@@ -181,7 +198,9 @@
 						// $this->pdf_generator->MultiCell($wBox / 2, 2, $key->NamaLokasi);
 
 						$imagePath = base_url().'Assets/images/patroli/'.$key->Image;
-						$this->pdf_generator->Image($imagePath, $xBox + 5, $yBox + 3, $wBox - 10, 40);
+
+						$jpeg_image = png_to_jpg($imagePath, base_url().'Assets/images/converted/'.$key->Image, 50);
+						$this->pdf_generator->Image($jpeg_image, $xBox + 5, $yBox + 3, $wBox - 10, 40);
 						// $this->pdf_generator->Ln(5);
 						// $this->pdf_generator->Cell($wBox /2, 2, $key->NamaLokasi);
 
