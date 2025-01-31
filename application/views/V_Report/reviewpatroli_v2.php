@@ -181,6 +181,9 @@
         },
         dataType: "json",
         success: function (response) {
+          $('#btExportpdf').text('Export PDF');
+          $('#btExportpdf').attr('disabled',false);
+          $('#btSearch').attr('disabled',false);
           // bindGrid(response.data);
           var linkurl = "<?php echo base_url() ?>Assets/doc/"+response.filename+".pdf";
 
