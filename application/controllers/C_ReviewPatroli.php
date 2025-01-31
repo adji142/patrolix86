@@ -80,6 +80,26 @@
 		    return $destination;
 		}
 
+		function compress_image($source, $destination, $quality) {
+		    $info = getimagesize($source);
+
+		    if ($info['mime'] == 'image/jpeg') {
+		        $image = imagecreatefromjpeg($source);
+		    } elseif ($info['mime'] == 'image/png') {
+		        $image = imagecreatefrompng($source);
+		        imagepalettetotruecolor($image); // Convert to true color to enable compression
+		        imagealphablending($image, false);
+		        imagesavealpha($image, true);
+		    } else {
+		        return false; // Unsupported format
+		    }
+
+		    imagejpeg($image, $destination, $quality);
+		    imagedestroy($image);
+
+		    return $destination;
+		}
+
 		public function generatePDF()
 		{
 
@@ -198,9 +218,10 @@
 						// $this->pdf_generator->MultiCell($wBox / 2, 2, $key->NamaLokasi);
 
 						$imagePath = base_url().'Assets/images/patroli/'.$key->Image;
-
-						$jpeg_image = $this->png_to_jpg($imagePath, base_url().'Assets/images/converted/'.$key->Image, 50);
-						$this->pdf_generator->Image($jpeg_image, $xBox + 5, $yBox + 3, $wBox - 10, 40);
+						$compressed_image = base_url().'Assets/images/converted/'.$key->Image;
+						// $jpeg_image = $this->png_to_jpg($imagePath, base_url().'Assets/images/converted/'.$key->Image, 50);
+						$this->compress_image($imagePath, $compressed_image, 50);
+						$this->pdf_generator->Image($compressed_image, $xBox + 5, $yBox + 3, $wBox - 10, 40);
 						// $this->pdf_generator->Ln(5);
 						// $this->pdf_generator->Cell($wBox /2, 2, $key->NamaLokasi);
 
