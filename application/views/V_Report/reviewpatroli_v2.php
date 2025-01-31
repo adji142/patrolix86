@@ -164,6 +164,10 @@
     });
 
     $('#btExportpdf').click(function () {
+      $('#btExportpdf').text('Tunggu Sebentar.....');
+      $('#btExportpdf').attr('disabled',true);
+      $('#btSearch').attr('disabled',true);
+      
       $.ajax({
         type: "post",
         url: "<?=base_url()?>C_ReviewPatroli/generatePDF",
