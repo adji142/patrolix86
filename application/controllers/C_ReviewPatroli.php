@@ -199,7 +199,7 @@
 
 						$imagePath = base_url().'Assets/images/patroli/'.$key->Image;
 
-						$jpeg_image = png_to_jpg($imagePath, base_url().'Assets/images/converted/'.$key->Image, 50);
+						$jpeg_image = $this->png_to_jpg($imagePath, base_url().'Assets/images/converted/'.$key->Image, 50);
 						$this->pdf_generator->Image($jpeg_image, $xBox + 5, $yBox + 3, $wBox - 10, 40);
 						// $this->pdf_generator->Ln(5);
 						// $this->pdf_generator->Cell($wBox /2, 2, $key->NamaLokasi);
