@@ -173,6 +173,7 @@
           'RecordOwnerID' :RecordOwnerID,
           'KodeKaryawan'  :$('#KodeKaryawan').val(),
           'LocationID'    :$('#LocationID').val(),
+          'KodeShift'     :$('#KodeShift').val()
         },
         dataType: "json",
         success: function (response) {
