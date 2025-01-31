@@ -100,6 +100,45 @@
 		    return $destination;
 		}
 
+		function compress_remote_image($url, $destination, $quality = 80) {
+		    // Download the image
+		    $imageData = file_get_contents($url);
+		    if ($imageData === false) {
+		        die("Failed to download image.");
+		    }
+
+		    // Save to a temporary file
+		    $tempFile = 'temp_image.jpg';
+		    file_put_contents($tempFile, $imageData);
+
+		    // Get image type
+		    $info = getimagesize($tempFile);
+		    if ($info === false) {
+		        die("Invalid image file.");
+		    }
+
+		    // Create an image resource
+		    if ($info['mime'] == 'image/jpeg') {
+		        $image = imagecreatefromjpeg($tempFile);
+		    } elseif ($info['mime'] == 'image/png') {
+		        $image = imagecreatefrompng($tempFile);
+		        imagepalettetotruecolor($image); // Convert to true color
+		        imagealphablending($image, false);
+		        imagesavealpha($image, true);
+		    } else {
+		        die("Unsupported image format.");
+		    }
+
+		    // Compress and save
+		    imagejpeg($image, $destination, $quality);
+		    imagedestroy($image);
+
+		    // Remove temp file
+		    unlink($tempFile);
+
+		    return $destination;
+		}
+
 		public function generatePDF()
 		{
 
@@ -217,8 +256,9 @@
 						// $this->pdf_generator->SetXY($xBox + 6,$yBox + 45);
 						// $this->pdf_generator->MultiCell($wBox / 2, 2, $key->NamaLokasi);
 
-						$imagePath = base_url().'Assets/images/patroli/'.$key->Image;
-						$compressed_image = base_url().'Assets/images/converted/'.$key->Image;
+						// $imagePath = base_url().'Assets/images/patroli/'.$key->Image;
+						$imagePath = FCPATH.'Assets/images/patroli/'.$key->Image;
+						$compressed_image = FCPATH.'Assets/images/converted/'.$key->Image;
 						// $jpeg_image = $this->png_to_jpg($imagePath, base_url().'Assets/images/converted/'.$key->Image, 50);
 						$this->compress_image($imagePath, $compressed_image, 50);
 						$this->pdf_generator->Image($compressed_image, $xBox + 5, $yBox + 3, $wBox - 10, 40);
