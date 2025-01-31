@@ -73,8 +73,8 @@
 			$RecordOwnerID = $this->input->post('RecordOwnerID');
 			$KodeKaryawan = $this->input->post('KodeKaryawan');
 			$LocationID = $this->input->post('LocationID');
-
 			$NamaLokasi = $this->input->post('NamaLokasi');
+			$KodeShift = $this->input->post('KodeShift');
 
 			// $TglAwal = '2023-12-01';
 			// $TglAkhir = '2024-01-01';
@@ -115,7 +115,7 @@
 				$this->pdf_generator->Line($startX, $lineY, $endX, $lineY);
 
 
-				$SQL = "CALL fn_ReadReview('".$TglAwal."','".$TglAkhir."','".$RecordOwnerID."','".$KodeKaryawan."','".$LocationID."');";
+				$SQL = "CALL fn_ReadReview('".$TglAwal."','".$TglAkhir."','".$RecordOwnerID."','".$KodeKaryawan."','".$LocationID."',".$KodeShift.");";
 
 				$rs = $this->db->query($SQL);
 
