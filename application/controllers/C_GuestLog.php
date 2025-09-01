@@ -90,6 +90,22 @@
 			$oParam = array();
 			$rs = array();
 
+			// Validasi Subscription
+			$SubscriptionID = $this->input->post('SubscriptionID');
+			$Subscription = $this->ModelsExecuteMaster->FindData(array('KodePartner' => $RecordOwnerID), 'tcompany');
+
+			if ($Subscription->num_rows() == 0) {
+				$data['message'] = "Invalid Subscription";
+				goto jump;
+			}
+			else{
+				$EndSubscription = $Subscription->row()->EndSubs;
+				if (strtotime($EndSubscription) < time()) {
+					$data['message'] = "Subscription Expired";
+					goto jump;
+				}
+			}
+
 			if ($formtype == "add") {
 				$getDate = str_replace(":", "", str_replace("-", "", $TglMasuk));
                 // 2023-09-06 16:11:38.658465

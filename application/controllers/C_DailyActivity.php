@@ -88,6 +88,23 @@
 			$KodeKaryawan = $this->input->post('KodeKaryawan');
 			$formtype = $this->input->post('formtype');
 
+
+			// Validasi Subscription
+			$SubscriptionID = $this->input->post('SubscriptionID');
+			$Subscription = $this->ModelsExecuteMaster->FindData(array('KodePartner' => $RecordOwnerID), 'tcompany');
+
+			if ($Subscription->num_rows() == 0) {
+				$data['message'] = "Invalid Subscription";
+				goto jump;
+			}
+			else{
+				$EndSubscription = $Subscription->row()->EndSubs;
+				if (strtotime($EndSubscription) < time()) {
+					$data['message'] = "Subscription Expired";
+					goto jump;
+				}
+			}
+
 			try {
 				$getDate = str_replace(":", "", str_replace("-", "", $Tanggal));
 
@@ -156,6 +173,7 @@
 				$data['message'] = $e->getMessage();
 			}
 
+			jump:
 			echo json_encode($data);
 
 		}

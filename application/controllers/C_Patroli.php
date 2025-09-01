@@ -98,6 +98,22 @@
 
 			$baseDir = FCPATH.'Assets/images/patroli/'.$ImageName;
 
+			// Validasi Subscription
+			$SubscriptionID = $this->input->post('SubscriptionID');
+			$Subscription = $this->ModelsExecuteMaster->FindData(array('KodePartner' => $RecordOwnerID), 'tcompany');
+
+			if ($Subscription->num_rows() == 0) {
+				$data['message'] = "Invalid Subscription";
+				goto jump;
+			}
+			else{
+				$EndSubscription = $Subscription->row()->EndSubs;
+				if (strtotime($EndSubscription) < time()) {
+					$data['message'] = "Subscription Expired";
+					goto jump;
+				}
+			}
+
 			try {
 				file_put_contents($baseDir,base64_decode($Image));
 				$oParam = array(
@@ -180,6 +196,8 @@
 				$data['success'] = false;
 				$data['message'] = "Gagal Simpan CheckPoint : ".$e->getMessage();
 			}
+
+			jump:
 			echo json_encode($data);
 		}
 

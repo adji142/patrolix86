@@ -429,6 +429,23 @@
 
             $baseDir = "";
 
+
+            // Validasi Subscription
+			$SubscriptionID = $this->input->post('SubscriptionID');
+			$Subscription = $this->ModelsExecuteMaster->FindData(array('KodePartner' => $RecordOwnerID), 'tcompany');
+
+			if ($Subscription->num_rows() == 0) {
+				$data['message'] = "Invalid Subscription";
+				goto jump;
+			}
+			else{
+				$EndSubscription = $Subscription->row()->EndSubs;
+				if (strtotime($EndSubscription) < time()) {
+					$data['message'] = "Subscription Expired";
+					goto jump;
+				}
+			}
+            
             try {
                 if($formMode == "in"){
                     // Get Shift
