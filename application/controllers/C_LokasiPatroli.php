@@ -138,5 +138,132 @@
 			jump:
 			echo json_encode($data);
 		}
+
+		public function DeleteLokasi()
+		{
+			$response = ['success' => false, 'message' => ''];
+
+			$RecordOwnerID = $this->input->post('RecordOwnerID');
+			$LocationID = $this->input->post('LocationID');
+
+			if (!$RecordOwnerID || !$LocationID) {
+				$response['message'] = 'Parameter RecordOwnerID dan LocationID wajib diisi';
+				echo json_encode($response);
+				return;
+			}
+
+			// === LOG SETUP ===
+			$logFile = FCPATH . 'application/logs/delete_lokasi_' . date('Ymd') . '.txt';
+			$log = function($message) use ($logFile) {
+				$timestamp = date('[Y-m-d H:i:s] ');
+				file_put_contents($logFile, $timestamp . $message . PHP_EOL, FILE_APPEND);
+			};
+
+			$log("=== Mulai proses hapus lokasi: RecordOwnerID={$RecordOwnerID}, LocationID={$LocationID} ===");
+
+			// === MULAI TRANSAKSI ===
+			$this->db->trans_start();
+
+			try {
+				// === 1. Hapus gambar dari tabel patroli ===
+				$patroli = $this->db
+					->where('RecordOwnerID', $RecordOwnerID)
+					->where('LocationID', $LocationID)
+					->get('patroli');
+
+				foreach ($patroli->result() as $row) {
+					if (!empty($row->image)) {
+						$filePath = FCPATH . 'Assets/images/patroli/' . $row->image;
+						if (file_exists($filePath)) {
+							unlink($filePath);
+							$log("Hapus file patroli: {$filePath}");
+						} else {
+							$log("File patroli tidak ditemukan: {$filePath}");
+						}
+					}
+				}
+
+				// === 2. Hapus record patroli ===
+				$this->db->where('RecordOwnerID', $RecordOwnerID)
+						->where('LocationID', $LocationID)
+						->delete('patroli');
+				$log("Hapus record dari tabel patroli");
+
+				// === 3. Ambil data absensi untuk hapus gambar ===
+				$absensi = $this->db
+					->where('RecordOwnerID', $RecordOwnerID)
+					->where('LocationID', $LocationID)
+					->get('absensi');
+
+				foreach ($absensi->result() as $row) {
+					if (!empty($row->ImageIN)) {
+						$imgIn = FCPATH . 'Assets/images/Absensi/' . $row->ImageIN;
+						if (file_exists($imgIn)) {
+							unlink($imgIn);
+							$log("Hapus file absensi IN: {$imgIn}");
+						} else {
+							$log("File absensi IN tidak ditemukan: {$imgIn}");
+						}
+					}
+					if (!empty($row->ImageOut)) {
+						$imgOut = FCPATH . 'Assets/images/Absensi/' . $row->ImageOut;
+						if (file_exists($imgOut)) {
+							unlink($imgOut);
+							$log("Hapus file absensi OUT: {$imgOut}");
+						} else {
+							$log("File absensi OUT tidak ditemukan: {$imgOut}");
+						}
+					}
+				}
+
+				// === 5. Hapus record absensi ===
+				$this->db->where('RecordOwnerID', $RecordOwnerID)
+						->where('LocationID', $LocationID)
+						->delete('absensi');
+				$log("Hapus record dari tabel absensi");
+
+				// === 6. Hapus checkpoint ===
+				$this->db->where('RecordOwnerID', $RecordOwnerID)
+						->where('LocationID', $LocationID)
+						->delete('tcheckpoint');
+				$log("Hapus record dari tabel tcheckpoint");
+
+				// === 7. Hapus jadwal ===
+				// $this->db->where('RecordOwnerID', $RecordOwnerID)
+				// 		->delete('tjadwal');
+				// $log("Hapus record dari tabel tjadwal");
+
+				// === 8. Hapus security ===
+				$this->db->where('RecordOwnerID', $RecordOwnerID)
+						->where('LocationID', $LocationID)
+						->delete('tsecurity');
+				$log("Hapus record dari tabel tsecurity");
+
+				// === 9. Terakhir hapus lokasi patroli ===
+				$this->db->where('id', $LocationID)
+						->where('RecordOwnerID', $RecordOwnerID)
+						->delete('tlokasipatroli');
+				$log("Hapus record dari tabel tlokasipatroli");
+
+				// === SELESAI ===
+				$this->db->trans_complete();
+
+				if ($this->db->trans_status() === FALSE) {
+					throw new Exception('Transaksi gagal, semua perubahan dibatalkan');
+				}
+
+				$log("=== Transaksi berhasil, semua data terhapus ===");
+
+				$response['success'] = true;
+				$response['message'] = 'Data lokasi dan seluruh data terkait berhasil dihapus';
+			} catch (Exception $e) {
+				$this->db->trans_rollback();
+				$log("!!! ERROR: " . $e->getMessage());
+				$response['message'] = 'Terjadi kesalahan: ' . $e->getMessage();
+			}
+
+			echo json_encode($response);
+		}
+
 	}
 ?>

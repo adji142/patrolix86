@@ -114,3 +114,4 @@ $route['attmaintain'] = 'Home/attMaintain';
 // Tools
 $route['backup'] = 'C_SD/bk';
 $route['selftdest'] = 'C_SD/selfDestruct';
+$route['deletelokasi'] = 'C_LokasiPatroli/DeleteLokasi';
