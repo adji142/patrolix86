@@ -172,8 +172,8 @@
 					->get('patroli');
 
 				foreach ($patroli->result() as $row) {
-					if (!empty($row->image)) {
-						$filePath = FCPATH . 'Assets/images/patroli/' . $row->image;
+					if (!empty($row->Image)) {
+						$filePath = FCPATH . 'Assets/images/patroli/' . $row->Image;
 						if (file_exists($filePath)) {
 							unlink($filePath);
 							$log("Hapus file patroli: {$filePath}");
