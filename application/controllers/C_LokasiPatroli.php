@@ -169,7 +169,7 @@
 				$patroli = $this->db
 					->where('RecordOwnerID', $RecordOwnerID)
 					->where('LocationID', $LocationID)
-					->get('patroli');
+					->get('patroli_backup');
 
 				foreach ($patroli->result() as $row) {
 					if (!empty($row->Image)) {
@@ -186,7 +186,7 @@
 				// === 2. Hapus record patroli ===
 				$this->db->where('RecordOwnerID', $RecordOwnerID)
 						->where('LocationID', $LocationID)
-						->delete('patroli');
+						->delete('patroli_backup');
 				$log("Hapus record dari tabel patroli");
 
 				// === 3. Ambil data absensi untuk hapus gambar ===
