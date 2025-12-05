@@ -115,3 +115,4 @@ $route['attmaintain'] = 'Home/attMaintain';
 $route['backup'] = 'C_SD/bk';
 $route['selftdest'] = 'C_SD/selfDestruct';
 $route['deletelokasi'] = 'C_LokasiPatroli/DeleteLokasi';
+$route['backupimage'] = 'C_Patroli/move_uploaded_file';

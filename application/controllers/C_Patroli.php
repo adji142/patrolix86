@@ -239,6 +239,67 @@
 	
 			var_dump($Shift);
 		}
+
+		public function move_uploaded_file()
+		{
+			$sourcePath = FCPATH . 'Assets\\images\\patroli\\';
+			$archiveRoot = FCPATH . 'Assets\\images\\patroli_archive\\';
+			
+
+			$Bulan = $this->input->post('Bulan');
+			$Tahun = $this->input->post('Tahun');
+
+			$start_date = "{$Tahun}-{$Bulan}-01";
+			$end_date   = date("Y-m-t", strtotime($start_date));
+
+			$oPatrolData = $this->db->where("TanggalPatroli >=", $start_date)
+							->where("TanggalPatroli <=", $end_date)
+							// ->where("Image = ","scaled_9186e2e4-4978-4d63-a59f-d114350b2bb18143695232328591163.jpg")
+							->get("patroli")
+							->result();
+
+			$targetFolder = $archiveRoot . $Tahun.$Bulan . '/';
+			// var_dump($targetFolder);
+			if (!is_dir($targetFolder)) {
+				mkdir($targetFolder);
+			}
+
+			var_dump(count($oPatrolData)." records found.");
+
+			foreach ($oPatrolData as $patrol) {
+				$Image = $patrol->Image;
+
+				if (rename($sourcePath.$Image, $targetFolder.$Image)) {
+					echo "Moved: {$Image}<br>";
+				} else {
+					echo "FAILED: {$Image}<br>";
+				}
+			}
+
+			$zipFile = $archiveRoot . $Tahun.$Bulan . '.zip';
+
+			$zip = new ZipArchive();
+			if ($zip->open($zipFile, ZipArchive::CREATE | ZipArchive::OVERWRITE)) {
+				$filesToZip = glob($targetFolder . '*.*');
+
+				foreach ($filesToZip as $f) {
+					$zip->addFile($f, basename($f));
+				}
+
+				$zip->close();
+				echo "ZIP berhasil dibuat<br>";
+			} else {
+				echo "Gagal membuat zip.";
+				return;
+			}
+
+			foreach (glob($targetFolder . '*') as $f) {
+				unlink($f);
+			}
+			rmdir($targetFolder);
+
+			echo "Folder berhasil dihapus";
+		}
 	}
 
 	
