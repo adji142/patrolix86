@@ -263,42 +263,42 @@
 			if (!is_dir($targetFolder)) {
 				mkdir($targetFolder);
 			}
+			echo "Target folder: " . $targetFolder . "<br>";
+			echo count($oPatrolData)." records found.<br>";
 
-			// var_dump(count($oPatrolData)." records found.");
+			foreach ($oPatrolData as $patrol) {
+				$Image = $patrol->Image;
 
-			// foreach ($oPatrolData as $patrol) {
-			// 	$Image = $patrol->Image;
+				if (rename($sourcePath.$Image, $targetFolder.$Image)) {
+					echo "Moved: {$Image}<br>";
+				} else {
+					echo "FAILED: {$Image}<br>";
+				}
+			}
 
-			// 	if (rename($sourcePath.$Image, $targetFolder.$Image)) {
-			// 		echo "Moved: {$Image}<br>";
-			// 	} else {
-			// 		echo "FAILED: {$Image}<br>";
-			// 	}
-			// }
+			$zipFile = $archiveRoot . $Tahun.$Bulan . '.zip';
 
-			// $zipFile = $archiveRoot . $Tahun.$Bulan . '.zip';
+			$zip = new ZipArchive();
+			if ($zip->open($zipFile, ZipArchive::CREATE | ZipArchive::OVERWRITE)) {
+				$filesToZip = glob($targetFolder . '*.*');
 
-			// $zip = new ZipArchive();
-			// if ($zip->open($zipFile, ZipArchive::CREATE | ZipArchive::OVERWRITE)) {
-			// 	$filesToZip = glob($targetFolder . '*.*');
+				foreach ($filesToZip as $f) {
+					$zip->addFile($f, basename($f));
+				}
 
-			// 	foreach ($filesToZip as $f) {
-			// 		$zip->addFile($f, basename($f));
-			// 	}
+				$zip->close();
+				echo "ZIP berhasil dibuat<br>";
+			} else {
+				echo "Gagal membuat zip.";
+				return;
+			}
 
-			// 	$zip->close();
-			// 	echo "ZIP berhasil dibuat<br>";
-			// } else {
-			// 	echo "Gagal membuat zip.";
-			// 	return;
-			// }
+			foreach (glob($targetFolder . '*') as $f) {
+				unlink($f);
+			}
+			rmdir($targetFolder);
 
-			// foreach (glob($targetFolder . '*') as $f) {
-			// 	unlink($f);
-			// }
-			// rmdir($targetFolder);
-
-			// echo "Folder berhasil dihapus";
+			echo "Folder berhasil dihapus";
 		}
 	}
 
