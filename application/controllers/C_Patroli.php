@@ -242,8 +242,8 @@
 
 		public function move_uploaded_file()
 		{
-			$sourcePath = FCPATH . 'Assets\\images\\patroli\\';
-			$archiveRoot = FCPATH . 'Assets\\images\\patroli_archive\\';
+			$sourcePath = FCPATH . 'Assets/images/patroli/';
+			$archiveRoot = FCPATH . 'Assets/images/patroli_archive/';
 			
 
 			$Bulan = $this->input->post('Bulan');
