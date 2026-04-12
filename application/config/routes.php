@@ -87,6 +87,8 @@ $route['APICRUDGuestLog'] = 'C_GuestLog/CRUD';
 $route['APIDailyActivity'] = 'C_DailyActivity/Read';
 $route['APIFindDailyActivity'] = 'C_DailyActivity/Find';
 $route['APICRUDDailyActivity'] = 'C_DailyActivity/CRUD';
+
+$route['APIReadSecurity'] = 'C_Absensi/FindSecurity';
 // API TOKEN
 
 $route['permissionread'] = 'Auth/C_Permission/permission';

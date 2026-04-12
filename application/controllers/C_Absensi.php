@@ -11,6 +11,32 @@
             date_default_timezone_set('Asia/Jakarta');
 		}
 
+        public function FindSecurity()
+		{
+			$data = array('success' => false ,'message'=>array(),'data'=>array());
+
+			$NIK = $this->input->post('NIK');
+			$KodeLokasi = $this->input->post('KodeLokasi');
+			$RecordOwnerID = $this->input->post('RecordOwnerID');
+
+			$where = array(
+                'NIK' => $NIK,
+                'LocationID'    => $KodeLokasi,
+                'RecordOwnerID' => $RecordOwnerID
+            );
+
+            $rs = $this->ModelsExecuteMaster->FindData($where, 'tsecurity');
+
+            if($rs->num_rows() > 0){
+                $data['success'] = true;
+                $data['data'] = $rs->result();
+            }else{
+            	$data['message'] = "0 Record Count";
+            }
+
+            echo json_encode($data);
+		}
+
         public function ReadNew()
         {
             $data = array('success' => false ,'message'=>array(),'data'=>array());
