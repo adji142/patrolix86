@@ -477,6 +477,7 @@ class Auth extends CI_Controller {
 			$data['NamaUser'] = $oUser->row()->nama;
 			$data['icon'] = $oPartner->row()->icon;
 			if ($oSecurity->num_rows() > 0) {
+				$data["FotoSecurity"] = $oSecurity->row()->Image;
 				// Shift
 
 				$xLoginDate = strtotime($LoginDate);
