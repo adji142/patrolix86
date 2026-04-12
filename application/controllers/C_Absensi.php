@@ -799,7 +799,7 @@
                 'NIK'               => $NIK
             );
 
-            $rs = $this->ModelsExecuteMaster->FindData($where, 'tsecurity');
+            $rs = $this->ModelsExecuteMaster->FindData($where, 'tsecurit y');
 
             if($rs){
                 $data['success'] = true;
