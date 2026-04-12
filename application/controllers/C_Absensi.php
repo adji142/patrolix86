@@ -25,7 +25,9 @@
                 'RecordOwnerID' => $RecordOwnerID
             );
 
-            $rs = $this->ModelsExecuteMaster->FindData($where, 'tsecurit y');
+            var_dump($where);
+
+            $rs = $this->ModelsExecuteMaster->FindData($where, 'tsecurity');
 
             if($rs->num_rows() > 0){
                 $data['success'] = true;
