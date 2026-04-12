@@ -476,6 +476,7 @@ class Auth extends CI_Controller {
 			$data['LocationID'] = $oUser->row()->AreaUser;
 			$data['NamaUser'] = $oUser->row()->nama;
 			$data['icon'] = $oPartner->row()->icon;
+			$data['AllowFaceRecognition'] = $oPartnerSubs->row()->AllowFaceRecognition;
 			if ($oSecurity->num_rows() > 0) {
 				$data["FotoSecurity"] = $oSecurity->row()->Image;
 				// Shift
