@@ -25,7 +25,7 @@
                 'RecordOwnerID' => $RecordOwnerID
             );
 
-            var_dump($where);
+            var_dump($this->input);
 
             $rs = $this->ModelsExecuteMaster->FindData($where, 'tsecurity');
 
