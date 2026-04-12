@@ -19,13 +19,21 @@
 			$KodeLokasi = $this->input->post('KodeLokasi');
 			$RecordOwnerID = $this->input->post('RecordOwnerID');
 
+			if (empty($NIK) && empty($KodeLokasi) && empty($RecordOwnerID)) {
+				$json = file_get_contents('php://input');
+				$request = json_decode($json);
+				if ($request) {
+					$NIK = isset($request->NIK) ? $request->NIK : null;
+					$KodeLokasi = isset($request->KodeLokasi) ? $request->KodeLokasi : null;
+					$RecordOwnerID = isset($request->RecordOwnerID) ? $request->RecordOwnerID : null;
+				}
+			}
+
 			$where = array(
                 'NIK' => $NIK,
                 'LocationID'    => $KodeLokasi,
                 'RecordOwnerID' => $RecordOwnerID
             );
-
-            var_dump($this->input);
 
             $rs = $this->ModelsExecuteMaster->FindData($where, 'tsecurity');
 
