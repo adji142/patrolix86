@@ -75,6 +75,7 @@ $route['APISOSRead'] = 'C_SOS/Read';
 $route['APISOSGetData'] = 'C_SOS/getSoSData';
 $route['APIAttRead'] = 'C_Absensi/ReadNew';
 $route['APIAttCRUD'] = 'C_Absensi/CRUD';
+$route['APIReadSecurity'] = 'C_Absensi/ReadDataSecurityMobile';
 $route['APIGetJadwal'] = 'C_Jadwal/Read';
 $route['APIGetPayment'] = 'Auth/getMetodePembayaran';
 $route['APIGetLookupPayment'] = 'Auth/lookupMetodePembayaran';
@@ -88,7 +89,7 @@ $route['APIDailyActivity'] = 'C_DailyActivity/Read';
 $route['APIFindDailyActivity'] = 'C_DailyActivity/Find';
 $route['APICRUDDailyActivity'] = 'C_DailyActivity/CRUD';
 
-$route['APIReadSecurity'] = 'C_Absensi/FindSecurity';
+
 // API TOKEN
 
 $route['permissionread'] = 'Auth/C_Permission/permission';

@@ -11,42 +11,6 @@
             date_default_timezone_set('Asia/Jakarta');
 		}
 
-        public function FindSecurity()
-		{
-			$data = array('success' => false ,'message'=>array(),'data'=>array());
-
-			$NIK = $this->input->post('NIK');
-			$KodeLokasi = $this->input->post('KodeLokasi');
-			$RecordOwnerID = $this->input->post('RecordOwnerID');
-
-			if (empty($NIK) && empty($KodeLokasi) && empty($RecordOwnerID)) {
-				$json = file_get_contents('php://input');
-				$request = json_decode($json);
-				if ($request) {
-					$NIK = isset($request->NIK) ? $request->NIK : null;
-					$KodeLokasi = isset($request->KodeLokasi) ? $request->KodeLokasi : null;
-					$RecordOwnerID = isset($request->RecordOwnerID) ? $request->RecordOwnerID : null;
-				}
-			}
-
-			$where = array(
-                'NIK' => $NIK,
-                'LocationID'    => $KodeLokasi,
-                'RecordOwnerID' => $RecordOwnerID
-            );
-
-            $rs = $this->ModelsExecuteMaster->FindData($where, 'tsecurity');
-
-            if($rs->num_rows() > 0){
-                $data['success'] = true;
-                $data['data'] = $rs->result();
-            }else{
-            	$data['message'] = "0 Record Count";
-            }
-
-            echo json_encode($data);
-		}
-
         public function ReadNew()
         {
             $data = array('success' => false ,'message'=>array(),'data'=>array());
@@ -821,6 +785,32 @@
 
 
             // echo json_encode($overlaps);
+        }
+
+        public function ReadDataSecurityMobile(){
+            $data = array('success' => false ,'message'=>array(),'data'=>array(),'Penyelesaian'=> 0);
+            $KodeLokasi = $this->input->post('KodeLokasi');
+			$RecordOwnerID = $this->input->post('RecordOwnerID');
+            $NIK = $this->input->post('NIK');
+
+            $where = array(
+                'RecordOwnerID'     => $RecordOwnerID,
+                'LocationID'        => $KodeLokasi,
+                'NIK'               => $NIK
+            );
+
+            $rs = $this->ModelsExecuteMaster->FindData($where, 'tsecurity');
+
+            if($rs){
+                $data['success'] = true;
+                $data['data'] = $rs->result();
+            }
+            else{
+                $data['success'] = false;
+                $data['message'] = 'No Data Found';
+            }
+
+            echo json_encode($data);
         }
 
 
