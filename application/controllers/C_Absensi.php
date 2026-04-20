@@ -118,7 +118,6 @@
 
             $current_datetime = new DateTime($Tanggal);
             $current_time_only = $current_datetime->format('H:i:s');
-            $midnight = new DateTime('23:59:59');
 
             $oShiftWhere = array(
                 'RecordOwnerID' => $RecordOwnerID,
@@ -133,29 +132,18 @@
 
             // end Validasi
             foreach ($shifts as $key) {
-                $absenstart = $key->MulaiAbsen;
-                $absenend = date("H:i:s", strtotime($key->MaxAbsen." +2 hours"));
-                // var_dump($absenend);
-
                 $shiftstart = $key->MulaiBekerja;
-                $shiftend = $key->SelesaiBekerja;
+                $shiftend   = $key->SelesaiBekerja;
 
-                // $absenstart > $absenend
-
-                // var_dump($current_time_only);
-                // var_dump($midnight);
-                if ($key->GantiHari == 1) {
-                    if ($current_time_only ) {
-                        # code...
-                    }
-                    if ($current_time_only >= $absenstart || $current_time_only <= $absenend) {
-                        
+                if ($shiftstart < $shiftend) {
+                    // Shift tidak lintas tengah malam (e.g. 08:00 - 20:00)
+                    if ($current_time_only >= $shiftstart && $current_time_only < $shiftend) {
                         $Shift = $key->id;
                     }
                 } else {
-                    if ($current_time_only >= $absenstart && $current_time_only <= $absenend) {
+                    // Shift lintas tengah malam (e.g. 20:00 - 08:00)
+                    if ($current_time_only >= $shiftstart || $current_time_only < $shiftend) {
                         $Shift = $key->id;
-                        // echo $current_time_only." > ".$absenstart." < ".$absenend."<br>";
                     }
                 }
             }
@@ -174,30 +162,18 @@
             // var_dump($oShiftWhere);
             $currentDate = new DateTime($Tanggal);
             foreach ($oShift as $key) {
-                // var_dump($key);
-                // echo json_encode($key);
                 $paramDate = explode(" ", $Tanggal);
-                // var_dump($paramDate);
                 $datefrom = new DateTime($paramDate[0].' '.$key->MulaiBekerja);
-                $dateTo = new DateTime($paramDate[0].' '.$key->SelesaiBekerja);
+                $dateTo   = new DateTime($paramDate[0].' '.$key->SelesaiBekerja);
 
-
-
-                if ($current_datetime > $midnight) {
-                    $datefrom->modify('-1 days');
-                }
-                else{
-                    $dateTo->modify('1 days');   
+                // Jika shift lintas tengah malam (SelesaiBekerja < MulaiBekerja)
+                if ($key->SelesaiBekerja < $key->MulaiBekerja) {
+                    $dateTo->modify('+1 day');
                 }
 
-                // if ($key->GantiHari == 1) {
-                //     $datefrom->modify('-1 days');
-                // }
                 $dateTo->modify('-30 minutes');
 
                 if ($currentDate >= $datefrom && $currentDate <= $dateTo) {
-                    // echo $key->NamaShift."<br>";
-                    $isGantiHari = $key->GantiHari;
                     $KodeShift = $key->id;
                     break;
                 }
@@ -247,6 +223,83 @@
             }
 
 
+
+            echo json_encode($data);
+        }
+
+        public function ReadActive()
+        {
+            $data = array('success' => false, 'message' => array(), 'data' => array());
+
+            $KodeLokasi    = $this->input->post('KodeLokasi');
+            $RecordOwnerID = $this->input->post('RecordOwnerID');
+            $KodeKaryawan  = $this->input->post('KodeKaryawan');
+            $Tanggal       = $this->input->post('Tanggal');
+
+            // 1. Parse waktu dari parameter Tanggal
+            $current_datetime  = new DateTime($Tanggal);
+            $current_time_only = $current_datetime->format('H:i:s');
+
+            // 2. Ambil semua shift untuk lokasi ini
+            $shifts = $this->ModelsExecuteMaster->FindData(
+                array('RecordOwnerID' => $RecordOwnerID, 'LocationID' => $KodeLokasi),
+                'tshift'
+            )->result();
+
+            // 3. Deteksi shift yang aktif berdasarkan waktu
+            $matchedShift = null;
+            foreach ($shifts as $key) {
+                $shiftstart = $key->MulaiBekerja;
+                $shiftend   = $key->SelesaiBekerja;
+
+                if ($shiftstart < $shiftend) {
+                    // Shift tidak lintas tengah malam (e.g. 08:00 - 20:00)
+                    if ($current_time_only >= $shiftstart && $current_time_only < $shiftend) {
+                        $matchedShift = $key;
+                    }
+                } else {
+                    // Shift lintas tengah malam (e.g. 20:00 - 08:00)
+                    if ($current_time_only >= $shiftstart || $current_time_only < $shiftend) {
+                        $matchedShift = $key;
+                    }
+                }
+            }
+
+            if ($matchedShift === null) {
+                $data['message'] = "Tidak ada shift aktif pada waktu ini";
+                echo json_encode($data);
+                return;
+            }
+
+            // 4. Hitung window shift (datefrom & dateTo)
+            $paramDate = explode(" ", $Tanggal);
+            $datefrom  = new DateTime($paramDate[0] . ' ' . $matchedShift->MulaiBekerja);
+            $dateTo    = new DateTime($paramDate[0] . ' ' . $matchedShift->SelesaiBekerja);
+
+            // Jika shift lintas tengah malam, dateTo +1 hari
+            if ($matchedShift->SelesaiBekerja < $matchedShift->MulaiBekerja) {
+                $dateTo->modify('+1 day');
+            }
+
+            // 5. Query absensi dengan dua kondisi:
+            //    a. Checkout kosong  → selalu tampilkan
+            //    b. Checkout terisi  → tampilkan selama masih dalam window shift
+            $sql  = "SELECT a.* FROM absensi a ";
+            $sql .= " WHERE a.RecordOwnerID = '" . $RecordOwnerID . "'";
+            $sql .= " AND a.LocationID = " . $KodeLokasi;
+            $sql .= " AND a.KodeKaryawan = '" . $KodeKaryawan . "'";
+            $sql .= " AND (";
+            $sql .= "   a.CheckOut = '0000-00-00 00:00:00.000000'";
+            $sql .= "   OR a.Checkin BETWEEN '" . $datefrom->format('Y-m-d H:i:s') . "' AND '" . $dateTo->format('Y-m-d H:i:s') . "'";
+            $sql .= " )";
+            $sql .= " ORDER BY CreatedOn DESC LIMIT 1";
+
+            $rs = $this->db->query($sql);
+
+            if ($rs->num_rows() > 0) {
+                $data['success'] = true;
+                $data['data']    = $rs->result();
+            }
 
             echo json_encode($data);
         }
@@ -463,36 +516,32 @@
                     $shifts = $this->ModelsExecuteMaster->FindData($oShiftWhere,'tshift')->result();
                     
                     // Validasi
-                    $oSQLValidation = "SELECT * FROM tshift where RecordOwnerID = '".$RecordOwnerID."' AND LocationID = ".$LocationID." AND '".$current_time_only."' BETWEEN MulaiAbsen and DATE_ADD(MulaiBekerja,INTERVAL 1 HOUR) ";
+                    // $oSQLValidation = "SELECT * FROM tshift where RecordOwnerID = '".$RecordOwnerID."' AND LocationID = ".$LocationID." AND '".$current_time_only."' BETWEEN MulaiAbsen and DATE_ADD(MulaiBekerja,INTERVAL 1 HOUR) ";
+                    
+                    // $oValidation = $this->db->query($oSQLValidation);
 
-                    $oValidation = $this->db->query($oSQLValidation);
-
-                    if ($oValidation->num_rows() == 0) {
-                        $data['message'] = "Absensi Shift Belum dimulai";
-                        goto jump;
-                    }
+                    // if ($oValidation->num_rows() == 0) {
+                    //     $data['message'] = "Absensi Shift Belum dimulai";
+                    //     goto jump;
+                    // }
 
                     // echo json_encode($oDataShift);
 
 
                     // end Validasi
                     foreach ($shifts as $key) {
-                        $absenstart = $key->MulaiAbsen;
-                        $absenend = $key->MaxAbsen;
-
                         $shiftstart = $key->MulaiBekerja;
-                        $shiftend = $key->SelesaiBekerja;
+                        $shiftend   = $key->SelesaiBekerja;
 
-                        // $absenstart > $absenend
-
-                        if ($key->GantiHari == 1) {
-                            if ($current_time_only >= $absenstart || $current_time_only <= $absenend) {
+                        if ($shiftstart < $shiftend) {
+                            // Shift tidak lintas tengah malam (e.g. 08:00 - 20:00)
+                            if ($current_time_only >= $shiftstart && $current_time_only < $shiftend) {
                                 $Shift = $key->id;
                             }
                         } else {
-                            if ($current_time_only >= $absenstart && $current_time_only <= $absenend) {
+                            // Shift lintas tengah malam (e.g. 20:00 - 08:00)
+                            if ($current_time_only >= $shiftstart || $current_time_only < $shiftend) {
                                 $Shift = $key->id;
-                                
                             }
                         }
                     }

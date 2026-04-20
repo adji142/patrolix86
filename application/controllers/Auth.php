@@ -467,7 +467,6 @@ class Auth extends CI_Controller {
 			// var_dump($oSecurity->row());
 
 			$oLokasi = $this->ModelsExecuteMaster->FindData(array('LocationID'=>$oUser->row()->AreaUser,'RecordOwnerID'=> $RecordOwnerID), 'tshift');
-
 			$data['success'] = true;
 			$data['username'] = $oUser->row()->username;
 			$data['unique_id'] = $oUser->row()->id;
@@ -476,7 +475,7 @@ class Auth extends CI_Controller {
 			$data['LocationID'] = $oUser->row()->AreaUser;
 			$data['NamaUser'] = $oUser->row()->nama;
 			$data['icon'] = $oPartner->row()->icon;
-			$data['AllowFaceRecognition'] = $oPartnerSubs->row()->AllowFaceRecognition;
+			$data['AllowFaceRecognition'] = $oPartner->row()->AllowFaceRecognition;
 			if ($oSecurity->num_rows() > 0) {
 				$data["FotoSecurity"] = $oSecurity->row()->Image;
 				// Shift

@@ -10,6 +10,45 @@
 			$this->load->model('LoginMod');
 		}
 
+		public function GetLokasi()
+		{
+			$data = array('success' => false, 'message' => '', 'data' => array());
+
+			$id            = $this->input->get('id');
+			$RecordOwnerID = $this->input->get('RecordOwnerID');
+
+			if (!$RecordOwnerID) {
+				$data['message'] = 'RecordOwnerID wajib diisi';
+				echo json_encode($data);
+				return;
+			}
+
+			$SQL = "
+				SELECT
+					id, NamaArea, AlamatArea, Keterangan,
+					StartPatroli, IntervalPatroli, IntervalType, EndPatroli, Toleransi,
+					Latitude, Longitude, Radius
+				FROM tlokasipatroli
+				WHERE RecordOwnerID = '" . $this->db->escape_str($RecordOwnerID) . "'
+			";
+
+			if ($id != '') {
+				$SQL .= " AND id = '" . $this->db->escape_str($id) . "'";
+			}
+
+			$rs = $this->db->query($SQL);
+
+			if ($rs) {
+				$data['success'] = true;
+				$data['data']    = $rs->result();
+			} else {
+				$data['message'] = 'Query gagal';
+			}
+
+			header('Content-Type: application/json');
+			echo json_encode($data);
+		}
+
 		public function Read()
 		{
 			$data = array('success' => false ,'message'=>array(),'data'=>array());
@@ -50,6 +89,9 @@
 			$IntervalType = $this->input->post('IntervalType');
 			$EndPatroli = $this->input->post('EndPatroli');
 			$Toleransi = $this->input->post('Toleransi');
+			$Latitude  = $this->input->post('Latitude');
+			$Longitude = $this->input->post('Longitude');
+			$Radius    = $this->input->post('Radius');
 
 			$formtype = $this->input->post('formtype');
 
@@ -62,7 +104,10 @@
 				'IntervalPatroli' => $IntervalPatroli,
 				'IntervalType' => $IntervalType,
 				'EndPatroli' => $EndPatroli,
-				'Toleransi'	=> $Toleransi
+				'Toleransi'	=> $Toleransi,
+				'Latitude'  => $Latitude,
+				'Longitude' => $Longitude,
+				'Radius'    => $Radius
 			);
 
 			if ($formtype == "delete") {
