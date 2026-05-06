@@ -476,6 +476,10 @@
             $UpdatedOn = $this->input->post('UpdatedOn');
             $formMode = $this->input->post('formMode');
 
+            $AppVersion = $this->input->post('AppVersion');
+            $TresholdIn = $this->input->post('TresholdIn');
+            $TresholdOut = $this->input->post('TresholdOut');
+
             $inputData = array();
 
             $rs = false;
@@ -570,6 +574,8 @@
                         'Checkin'           => $Checkin,
                         'CheckOut'          => '00:00:00',
                         'CreatedOn'         => $CreatedOn,
+                        'AppVersion'        => $AppVersion,
+                        'TresholdIn'        => $TresholdIn,
                     );
     
                     $rs = $this->ModelsExecuteMaster->ExecInsert($inputData,'absensi');
@@ -586,6 +592,7 @@
                         'ImageOUT'          => $ImageNameOUT,
                         'CheckOut'          => $CheckOut,
                         'UpdatedOn'         => $UpdatedOn,
+                        'TresholdOut'       => $TresholdOut
                     );
     
                     $rs = $this->ModelsExecuteMaster->ExecUpdate($inputData,array('id'=>$id),'absensi');

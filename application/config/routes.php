@@ -90,7 +90,8 @@ $route['APICRUDGuestLog'] = 'C_GuestLog/CRUD';
 $route['APIDailyActivity'] = 'C_DailyActivity/Read';
 $route['APIFindDailyActivity'] = 'C_DailyActivity/Find';
 $route['APICRUDDailyActivity'] = 'C_DailyActivity/CRUD';
-
+$route['APIGetUser'] = 'Auth/ReadUser';
+$route['APISetLoginStatus'] = 'Auth/SetLoginStatus';
 
 // API TOKEN
 
