@@ -53,9 +53,39 @@ const router = createRouter({
           component: () => import('../views/Dashboard/ReviewPatroli.vue'),
         },
         {
+          path: 'review-daily-activity',
+          name: 'ReviewDailyActivity',
+          component: () => import('../views/Dashboard/ReviewDailyActivity.vue'),
+        },
+        {
+          path: 'review-bukutamu',
+          name: 'ReviewBukuTamu',
+          component: () => import('../views/Dashboard/ReviewBukuTamu.vue'),
+        },
+        {
           path: 'review-absensi',
           name: 'ReviewAbsensi',
           component: () => import('../views/Dashboard/ReviewAbsensi.vue'),
+        },
+        {
+          path: 'review-absensi/karyawan',
+          name: 'ReviewAbsensiKaryawan',
+          component: () => import('../views/Dashboard/ReviewAbsensiKaryawan.vue'),
+        },
+        {
+          path: 'review-pengajuan-izin',
+          name: 'ReviewPengajuanIzin',
+          component: () => import('../views/Dashboard/ReviewPengajuanIzin.vue'),
+        },
+        {
+          path: 'review-pengajuan-cuti',
+          name: 'ReviewPengajuanCuti',
+          component: () => import('../views/Dashboard/ReviewPengajuanCuti.vue'),
+        },
+        {
+          path: 'review-tukar-jadwal',
+          name: 'ReviewTukarJadwal',
+          component: () => import('../views/Dashboard/ReviewTukarJadwal.vue'),
         },
       ],
     },

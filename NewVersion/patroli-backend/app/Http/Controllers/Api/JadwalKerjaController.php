@@ -13,7 +13,10 @@ class JadwalKerjaController extends Controller
     {
         $recordOwnerID = $request->user()->RecordOwnerID;
 
-        $query = JadwalKerja::with('shift:id,NamaShift,MulaiBekerja,SelesaiBekerja')
+        $query = JadwalKerja::with([
+            'shift:id,NamaShift,MulaiBekerja,SelesaiBekerja',
+            'security:NIK,NamaSecurity'
+        ])
             ->where('RecordOwnerID', $recordOwnerID);
 
         if ($request->filled('nik')) {
@@ -59,6 +62,13 @@ class JadwalKerjaController extends Controller
         $tanggal = $request->Tanggal;
         $date    = \Carbon\Carbon::parse($tanggal);
 
+        if ($date->lt(\Carbon\Carbon::today())) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak dapat mengubah jadwal yang sudah terlewati.',
+            ], 422);
+        }
+
         $jadwal = JadwalKerja::updateOrCreate(
             [
                 'KodeKaryawan'  => $request->KodeKaryawan,
@@ -69,7 +79,7 @@ class JadwalKerjaController extends Controller
                 'Tgl'                       => $date->day,
                 'Bulan'                     => $date->month,
                 'Tahun'                     => $date->year,
-                'shiftid'                   => $isOff ? null : $request->shiftid,
+                'shiftid'                   => $isOff ? -1 : $request->shiftid,
                 'StatusKehadiran'           => $isOff ? 'OFF' : null,
                 'KeteranganStatusKehadiran' => $isOff ? null : ($request->KeteranganStatusKehadiran ?? null),
             ]
@@ -93,6 +103,13 @@ class JadwalKerjaController extends Controller
                 'success' => false,
                 'message' => 'Data tidak ditemukan.',
             ], 404);
+        }
+
+        if (\Carbon\Carbon::parse($jadwal->Tanggal)->lt(\Carbon\Carbon::today())) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak dapat menghapus jadwal yang sudah terlewati.',
+            ], 422);
         }
 
         $jadwal->delete();

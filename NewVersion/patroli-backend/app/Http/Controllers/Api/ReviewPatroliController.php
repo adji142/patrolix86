@@ -165,10 +165,17 @@ class ReviewPatroliController extends Controller
             ], 404);
         }
 
-        $imageBaseUrl = config('app.legacy_asset_url', 'http://localhost/patrolix86');
-        $patroli->ImageUrl = $patroli->Image
-            ? $imageBaseUrl . '/Assets/images/patroli/' . $patroli->Image
-            : null;
+        if ($patroli->Image) {
+            // mob_ prefix = new image from Flutter app saved in Laravel public/patroli/
+            if (str_starts_with($patroli->Image, 'mob_')) {
+                $patroli->ImageUrl = url('patroli/' . $patroli->Image);
+            } else {
+                $legacy = config('app.legacy_asset_url', 'http://localhost/patrolix86');
+                $patroli->ImageUrl = $legacy . '/Assets/images/patroli/' . $patroli->Image;
+            }
+        } else {
+            $patroli->ImageUrl = null;
+        }
 
         return response()->json([
             'success' => true,

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\CIDecryption;
+use App\Models\JadwalKerja;
 use App\Models\Logdata;
 use App\Models\Tcompany;
+use App\Models\Tlokasipatroli;
 use App\Models\Tsecurity;
 use App\Models\Tshift;
 use App\Models\User;
@@ -79,52 +81,16 @@ class AuthController extends Controller
             $user->LaravelPassword = \Illuminate\Support\Facades\Hash::make($password);
             $user->save();
         }
-
-        // 5. Data security (untuk FotoSecurity & kalkulasi shift)
-        $security = Tsecurity::where('NIK', $username)
-                              ->where('RecordOwnerID', $RecordOwnerID)
-                              ->first();
-
-        // 6. Jadwal shift berdasarkan lokasi user
-        $shifts = Tshift::where('LocationID', $user->AreaUser)
-                        ->where('RecordOwnerID', $RecordOwnerID)
-                        ->get();
-
-        // 7. Hitung shift aktif berdasarkan LoginDate (termasuk logika GantiHari)
-        $currentShift = null;
-        $isGantiHari  = 0;
-
-        if ($security) {
-            $loginTs = strtotime($loginDate);
-            $defTime = strtotime('00:00:01');
-            $jamNow  = strtotime(date('H:i:s', $loginTs));
-
-            foreach ($shifts as $s) {
-                if ((int) $s->GantiHari === 1) {
-                    $selesai = strtotime($s->SelesaiBekerja);
-
-                    if ($defTime < $jamNow && $jamNow < $selesai) {
-                        // Jam dini hari sebelum shift selesai → masih shift hari sebelumnya
-                        $currentShift = $s->id;
-                        $isGantiHari  = $s->GantiHari;
-                    } else {
-                        $currentShift = $s->id;
-                        $isGantiHari  = $s->GantiHari;
-                    }
-                }
-            }
-        }
-
-        // 8. Generate Sanctum token
+        // 5. Generate Sanctum token
         $token = $user->createToken('mobile')->plainTextToken;
 
-        // 9. Tulis log
+        // 6. Tulis log
         $this->writeLog($RecordOwnerID, 'Login', json_encode([
             'success'  => true,
             'username' => $username,
         ]));
 
-        $response = [
+        return response()->json([
             'success'              => true,
             'message'              => '',
             'username'             => $user->username,
@@ -135,17 +101,8 @@ class AuthController extends Controller
             'NamaUser'             => $user->nama,
             'icon'                 => $partner->icon,
             'AllowFaceRecognition' => $partner->AllowFaceRecognition,
-            'Shift'                => $currentShift,
-            'isGantiHari'          => $isGantiHari,
-            'JadwalShift'          => $shifts,
             'token'                => $token,
-        ];
-
-        if ($security) {
-            $response['FotoSecurity'] = $security->Image;
-        }
-
-        return response()->json($response);
+        ]);
     }
 
     // -------------------------------------------------------------------------
@@ -223,6 +180,20 @@ class AuthController extends Controller
         $menus = array_values($tree);
         usort($menus, fn($a, $b) => $a['order'] <=> $b['order']);
 
+        // Lokasi patroli user (single, dari AreaUser)
+        $lokasiPatroli = Tlokasipatroli::where('id', $user->AreaUser)
+                                        ->where('RecordOwnerID', $user->RecordOwnerID)
+                                        ->first();
+
+        // Semua lokasi yang dapat diakses user (dari tabel user_lokasi)
+        $lokasiAkses = \App\Models\UserLokasi::with('lokasi')
+                        ->where('user_id', $user->id)
+                        ->where('RecordOwnerID', $user->RecordOwnerID)
+                        ->get()
+                        ->map(fn($ul) => $ul->lokasi)
+                        ->filter()
+                        ->values();
+
         return response()->json([
             'success'              => true,
             'unique_id'            => $user->id,
@@ -239,11 +210,51 @@ class AuthController extends Controller
             'AllowFaceRecognition' => $partner?->AllowFaceRecognition,
             'AllowMobile'          => $partner?->AllowMobile,
             'menus'                => $menus,
+            'lokasiPatroli'        => $lokasiPatroli,
+            'lokasi_akses'         => $lokasiAkses,
         ]);
     }
 
     // -------------------------------------------------------------------------
     // POST /api/auth/logout  (requires: Authorization: Bearer <token>)
+    // -------------------------------------------------------------------------
+    // GET /api/auth/security  (requires: Authorization: Bearer <token>)
+    // -------------------------------------------------------------------------
+    public function security(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $security = Tsecurity::where('NIK', $user->username)
+                              ->where('RecordOwnerID', $user->RecordOwnerID)
+                              ->first();
+
+        return response()->json([
+            'success'      => true,
+            'security'     => $security,
+            'FotoSecurity' => $security?->Image,
+        ]);
+    }
+
+    // -------------------------------------------------------------------------
+    // GET /api/auth/schedule  (requires: Authorization: Bearer <token>)
+    // -------------------------------------------------------------------------
+    public function schedule(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $shifts = Tshift::where('LocationID', $user->AreaUser)
+                        ->where('RecordOwnerID', $user->RecordOwnerID)
+                        ->get();
+
+        [$currentShift, $isGantiHari, $activeShiftDetails] = $this->getActiveShiftDetails($user, date('Y-m-d H:i:s'));
+
+        return response()->json([
+            'success'            => true,
+            'Shift'              => $currentShift,
+            'isGantiHari'        => $isGantiHari,
+            'ActiveShiftDetails' => $activeShiftDetails,
+            'JadwalShift'        => $shifts,
+        ]);
+    }
+
     // -------------------------------------------------------------------------
     public function logout(Request $request): JsonResponse
     {
@@ -297,6 +308,86 @@ class AuthController extends Controller
     // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
+    private function getActiveShiftDetails($user, $loginDate = null): array
+    {
+        $loginTs = $loginDate ? strtotime($loginDate) : time();
+        $dateObj = \Carbon\Carbon::createFromTimestamp($loginTs);
+        
+        $lokasi = Tlokasipatroli::find($user->AreaUser);
+        $allowJadwalKerja = $lokasi->AllowJadwalKerja ?? 0;
+        
+        $activeShiftId = null;
+        $isGantiHari = 0;
+        $activeShiftModel = null;
+        
+        if ($allowJadwalKerja == 1) {
+            // Cek jadwal hari kemarin untuk shift overlap (GantiHari)
+            $yesterday = $dateObj->copy()->subDay()->format('Y-m-d');
+            $jadwalYesterday = \App\Models\JadwalKerja::with('shift')
+                ->where('KodeKaryawan', $user->username)
+                ->where('RecordOwnerID', $user->RecordOwnerID)
+                ->where('Tanggal', $yesterday)->first();
+                
+            if ($jadwalYesterday && $jadwalYesterday->shift && $jadwalYesterday->shift->GantiHari == 1) {
+                $selesai = strtotime($jadwalYesterday->shift->SelesaiBekerja);
+                $jamNow = strtotime($dateObj->format('H:i:s'));
+                if ($jamNow <= $selesai) {
+                    $activeShiftModel = $jadwalYesterday->shift;
+                }
+            }
+            
+            // Jika bukan shift kemarin yang overlap, cek jadwal hari ini
+            if (!$activeShiftModel) {
+                $today = $dateObj->format('Y-m-d');
+                $jadwalToday = \App\Models\JadwalKerja::with('shift')
+                    ->where('KodeKaryawan', $user->username)
+                    ->where('RecordOwnerID', $user->RecordOwnerID)
+                    ->where('Tanggal', $today)->first();
+                if ($jadwalToday && $jadwalToday->shiftid != -1 && $jadwalToday->shift) {
+                    $activeShiftModel = $jadwalToday->shift;
+                }
+            }
+            
+            if ($activeShiftModel) {
+                $activeShiftId = $activeShiftModel->id;
+                $isGantiHari = $activeShiftModel->GantiHari;
+            }
+        } else {
+            // Realtime fallback logic (dari kode sebelumnya)
+            $shifts = Tshift::where('LocationID', $user->AreaUser)
+                            ->where('RecordOwnerID', $user->RecordOwnerID)
+                            ->get();
+            $defTime = strtotime('00:00:01');
+            $jamNow  = strtotime($dateObj->format('H:i:s'));
+            
+            foreach ($shifts as $s) {
+                if ((int) $s->GantiHari === 1) {
+                    $selesai = strtotime($s->SelesaiBekerja);
+                    if ($defTime < $jamNow && $jamNow < $selesai) {
+                        $activeShiftId = $s->id;
+                        $isGantiHari  = $s->GantiHari;
+                        $activeShiftModel = $s;
+                    } else {
+                        $activeShiftId = $s->id;
+                        $isGantiHari  = $s->GantiHari;
+                        $activeShiftModel = $s;
+                    }
+                }
+            }
+        }
+        
+        $shiftDetails = null;
+        if ($activeShiftModel) {
+            $shiftDetails = [
+                'NamaShift' => $activeShiftModel->NamaShift,
+                'MulaiBekerja' => $activeShiftModel->MulaiBekerja,
+                'SelesaiBekerja' => $activeShiftModel->SelesaiBekerja,
+            ];
+        }
+        
+        return [$activeShiftId, $isGantiHari, $shiftDetails];
+    }
+
     private function failResponse(string $message, string $recordOwnerID): JsonResponse
     {
         $this->writeLog($recordOwnerID, 'Login', json_encode([

@@ -28,4 +28,12 @@ class Tsecurity extends Model
     {
         return $this->belongsTo(Tlokasipatroli::class, 'LocationID');
     }
+
+    public function getImageAttribute($value)
+    {
+        if (is_null($value) || $value === '') {
+            return 'person.png';
+        }
+        return $value;
+    }
 }

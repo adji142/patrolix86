@@ -21,6 +21,10 @@ class Absensi extends Model
         'Shift',
         'Checkin',
         'CheckOut',
+        'TresholdIn',
+        'TresholdOut',
+        'AppVersion',
+        'Keterangan',
         'CreatedOn',
         'UpdatedOn',
     ];

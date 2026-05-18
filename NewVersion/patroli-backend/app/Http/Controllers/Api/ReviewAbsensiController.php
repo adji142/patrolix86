@@ -169,6 +169,74 @@ class ReviewAbsensiController extends Controller
         ]);
     }
 
+    public function karyawan(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'nik'         => 'required|string|max:20',
+            'tgl_awal'    => 'required|date',
+            'tgl_akhir'   => 'required|date|after_or_equal:tgl_awal',
+            'location_id' => 'nullable|integer',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation Error',
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        $recordOwnerID = $request->user()->RecordOwnerID;
+        $nik      = $request->nik;
+        $tglAwal  = $request->tgl_awal;
+        $tglAkhir = $request->tgl_akhir;
+
+        $karyawan = DB::table('tsecurity as s')
+            ->leftJoin('tlokasipatroli as l', function ($j) {
+                $j->on('s.LocationID', '=', 'l.id')
+                  ->on('s.RecordOwnerID', '=', 'l.RecordOwnerID');
+            })
+            ->select('s.NIK', 's.NamaSecurity', 's.LocationID', 'l.NamaArea as NamaLokasi')
+            ->where('s.NIK', $nik)
+            ->where('s.RecordOwnerID', $recordOwnerID)
+            ->first();
+
+        $jadwal = DB::table('jadwalkerja as jk')
+            ->leftJoin('tshift as ts', 'jk.shiftid', '=', 'ts.id')
+            ->select(
+                'jk.Tanggal',
+                'ts.NamaShift',
+                'ts.MulaiBekerja',
+                'ts.SelesaiBekerja',
+                'jk.StatusKehadiran',
+                'jk.KeteranganStatusKehadiran'
+            )
+            ->where('jk.KodeKaryawan', $nik)
+            ->where('jk.RecordOwnerID', $recordOwnerID)
+            ->whereBetween('jk.Tanggal', [$tglAwal, $tglAkhir])
+            ->get()
+            ->keyBy('Tanggal');
+
+        $absensiQuery = DB::table('absensi as a')
+            ->select('a.id', 'a.Tanggal', 'a.Checkin', 'a.CheckOut', 'a.KoordinatIN', 'a.ImageIN', 'a.Keterangan')
+            ->where('a.KodeKaryawan', $nik)
+            ->where('a.RecordOwnerID', $recordOwnerID)
+            ->whereBetween('a.Tanggal', [$tglAwal, $tglAkhir]);
+
+        if ($request->filled('location_id')) {
+            $absensiQuery->where('a.LocationID', $request->location_id);
+        }
+
+        $absensi = $absensiQuery->get()->keyBy('Tanggal');
+
+        return response()->json([
+            'success'  => true,
+            'karyawan' => $karyawan,
+            'jadwal'   => $jadwal,
+            'absensi'  => $absensi,
+        ]);
+    }
+
     public function showRecord(Request $request, $id)
     {
         $recordOwnerID = $request->user()->RecordOwnerID;
@@ -236,6 +304,45 @@ class ReviewAbsensiController extends Controller
         return response()->json([
             'success' => true,
             'data'    => $absensi,
+        ]);
+    }
+
+    public function updateKeterangan(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'Keterangan' => 'nullable|string|max:500',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation Error',
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        $recordOwnerID = $request->user()->RecordOwnerID;
+
+        $absensi = DB::table('absensi')
+            ->where('id', $id)
+            ->where('RecordOwnerID', $recordOwnerID)
+            ->first();
+
+        if (!$absensi) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak ditemukan.',
+            ], 404);
+        }
+
+        DB::table('absensi')
+            ->where('id', $id)
+            ->where('RecordOwnerID', $recordOwnerID)
+            ->update(['Keterangan' => $request->Keterangan]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Keterangan berhasil disimpan.',
         ]);
     }
 

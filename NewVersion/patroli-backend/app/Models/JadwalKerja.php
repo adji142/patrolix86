@@ -17,6 +17,8 @@ class JadwalKerja extends Model
         'shiftid',
         'StatusKehadiran',
         'KeteranganStatusKehadiran',
+        'BaseEntry',
+        'BaseType',
         'RecordOwnerID',
     ];
 

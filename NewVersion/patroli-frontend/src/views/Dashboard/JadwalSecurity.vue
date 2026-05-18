@@ -58,7 +58,7 @@
               <div style="font-size: 0.9rem; font-weight: 600; margin-bottom: 0.25rem;">{{ cell }}</div>
 
               <!-- OFF day -->
-              <template v-if="jadwalMap[cell] && jadwalMap[cell].StatusKehadiran === 'OFF'">
+              <template v-if="jadwalMap[cell] && (jadwalMap[cell].StatusKehadiran === 'OFF' || jadwalMap[cell].shiftid === -1)">
                 <div style="font-size: 0.78rem; font-weight: 700; color: #e53e3e; letter-spacing: 0.04em;">OFF</div>
               </template>
 
@@ -150,7 +150,7 @@
           v-if="jadwalMap[selectedDate]"
           style="background: #fffbeb; border: 1px solid #f6e05e; border-radius: 6px; padding: 0.6rem 0.85rem; margin-bottom: 1rem; font-size: 0.85rem; color: #744210;"
         >
-          <template v-if="jadwalMap[selectedDate].StatusKehadiran === 'OFF'">
+          <template v-if="jadwalMap[selectedDate].StatusKehadiran === 'OFF' || jadwalMap[selectedDate].shiftid === -1">
             Saat ini: <strong style="color:#c53030;">OFF</strong>
           </template>
           <template v-else>
@@ -289,9 +289,27 @@ export default {
     },
 
     openShiftModal(day) {
+      if (!day) return;
+
+      const dateStr = `${this.selectedYear}-${String(this.selectedMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const targetDate = new Date(dateStr);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (targetDate < today) {
+        Swal.fire({
+          icon: 'info',
+          title: 'Informasi',
+          text: 'Jadwal yang sudah terlewati tidak dapat diubah.',
+          timer: 2000,
+          showConfirmButton: false
+        });
+        return;
+      }
+
       const existing = this.jadwalMap[day];
       this.selectedDate = day;
-      this.isOff = existing?.StatusKehadiran === 'OFF';
+      this.isOff = existing?.StatusKehadiran === 'OFF' || existing?.shiftid === -1;
       this.modalShiftId = existing?.shiftid || '';
       this.modalKeterangan = existing?.KeteranganStatusKehadiran || '';
       this.showShiftModal = true;
@@ -307,7 +325,7 @@ export default {
         await axios.post('/jadwal-kerja', {
           KodeKaryawan: this.nik,
           Tanggal: tanggal,
-          shiftid: this.isOff ? null : this.modalShiftId,
+          shiftid: this.isOff ? -1 : this.modalShiftId,
           StatusKehadiran: this.isOff ? 'OFF' : null,
           KeteranganStatusKehadiran: this.isOff ? null : (this.modalKeterangan || null),
         });
@@ -384,9 +402,20 @@ export default {
       if (!day) {
         return { ...base, background: '#f7fafc', cursor: 'default', opacity: 0.4 };
       }
+
+      const dateStr = `${this.selectedYear}-${String(this.selectedMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const targetDate = new Date(dateStr);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const isPast = targetDate < today;
+
+      if (isPast) {
+          base.opacity = 0.7;
+          base.background = '#f1f5f9';
+      }
       const jadwal = this.jadwalMap[day];
       if (jadwal) {
-        if (jadwal.StatusKehadiran === 'OFF') {
+        if (jadwal.StatusKehadiran === 'OFF' || jadwal.shiftid === -1) {
           return { ...base, background: '#fff5f5', border: '1px solid #fed7d7' };
         }
         return { ...base, background: '#ebf8ff', border: '1px solid #bee3f8' };

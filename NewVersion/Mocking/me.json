@@ -1,0 +1,34 @@
+{
+    "success": true,
+    "unique_id": 2,
+    "username": "40001",
+    "NamaUser": "Prasetyo Aji Wibowo",
+    "email": null,
+    "phone": null,
+    "RecordOwnerID": "CL0001",
+    "LocationID": "1",
+    "HakAkses": null,
+    "role": {
+        "id": 3,
+        "rolename": "Security"
+    },
+    "NamaPartner": "AIS SYSTEM",
+    "icon": "CL0009.png",
+    "AllowFaceRecognition": 1,
+    "AllowMobile": null,
+    "menus": [],
+    "security": {
+        "NIK": "40001",
+        "NamaSecurity": "Prasetyo Aji Wibowo",
+        "JoinDate": "2023-07-13",
+        "LocationID": 1,
+        "Status": 1,
+        "RecordOwnerID": "CL0001",
+        "tempEncrypt": "9c9f529ebc3f935a28964c3234127274904d4fe1b7d06e651554b5e2002eec05e4ece9b5851a73c1303cd0fb84621a8fdd5ccb2b9a67572393f481606a09f161Oe1YL6+cejOeI7oPBfeX4bOPl1Zb8AgTN7iI4JoOy7s=",
+        "Shift": 6,
+        "Image": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAAAAAAAD"
+    },
+    "FotoSecurity": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAAAAAAAD",
+    "Shift": 7,
+    "isGantiHari": 1
+}

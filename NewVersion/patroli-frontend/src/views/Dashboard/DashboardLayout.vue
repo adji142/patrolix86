@@ -20,6 +20,17 @@
 
       <!-- Navigation -->
       <nav class="sb-nav">
+        <!-- Static: Dashboard -->
+        <RouterLink
+          to="/app"
+          class="sb-item"
+          active-class="sb-item-active"
+          exact
+        >
+          <HomeIcon class="sb-item-icon" style="width:16px;height:16px;flex-shrink:0;" />
+          <span class="sb-item-label">Dashboard</span>
+        </RouterLink>
+
         <template v-for="menu in menus" :key="menu.id">
           <!-- Parent with children -->
           <template v-if="menu.children && menu.children.length > 0">
@@ -112,6 +123,7 @@ import {
   ChevronDownIcon,
   Bars3Icon,
   ArrowRightOnRectangleIcon,
+  HomeIcon,
 } from '@heroicons/vue/24/outline'
 import { Dot } from 'lucide-vue-next'
 import { useAuthStore } from '../../stores/auth.js'
@@ -119,7 +131,7 @@ import { resolveMenuIcon } from '../../utils/icons.js'
 
 export default {
   name: 'DashboardLayout',
-  components: { ShieldCheckIcon, ChevronDownIcon, Bars3Icon, ArrowRightOnRectangleIcon, Dot },
+  components: { ShieldCheckIcon, ChevronDownIcon, Bars3Icon, ArrowRightOnRectangleIcon, Dot, HomeIcon },
 
   data() {
     return {

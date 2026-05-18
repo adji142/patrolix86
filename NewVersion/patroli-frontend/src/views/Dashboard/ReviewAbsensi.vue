@@ -70,16 +70,17 @@
                 <th style="text-align: center;">OFF</th>
                 <th style="text-align: center;">IZIN</th>
                 <th style="text-align: center;">CUTI</th>
+                <th style="text-align: center;">Aksi</th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="!hasSearched && summaryItems.length === 0">
-                <td colspan="8" style="text-align: center; color: #9ca3af; padding: 2rem;">
+                <td colspan="9" style="text-align: center; color: #9ca3af; padding: 2rem;">
                   Pilih filter dan klik <strong>Tampilkan</strong> untuk melihat data.
                 </td>
               </tr>
               <tr v-else-if="paginatedSummary.length === 0">
-                <td colspan="8" style="text-align: center; color: #9ca3af; padding: 2rem;">Tidak ada data ditemukan.</td>
+                <td colspan="9" style="text-align: center; color: #9ca3af; padding: 2rem;">Tidak ada data ditemukan.</td>
               </tr>
               <tr v-for="(item, idx) in paginatedSummary" :key="idx">
                 <td style="color: #9ca3af; font-size: 0.8rem;">{{ (currentPage - 1) * itemsPerPage + idx + 1 }}</td>
@@ -110,6 +111,13 @@
                   <span :style="item.CUTI > 0 ? 'display:inline-block;background:#dbeafe;color:#1d4ed8;border-radius:9999px;padding:0.1rem 0.65rem;font-size:0.8rem;font-weight:700;' : 'color:#9ca3af;font-size:0.875rem;'">
                     {{ item.CUTI }}
                   </span>
+                </td>
+                <td style="text-align: center;">
+                  <button
+                    @click="goToDetail(item)"
+                    class="btn btn-secondary"
+                    style="padding: 0.25rem 0.75rem; font-size: 0.8rem; white-space: nowrap;"
+                  >&#128197; Detail</button>
                 </td>
               </tr>
             </tbody>
@@ -446,6 +454,18 @@ export default {
   },
 
   methods: {
+    goToDetail(item) {
+      this.$router.push({
+        name: 'ReviewAbsensiKaryawan',
+        query: {
+          nik:         item.NIK,
+          tgl_awal:    this.filter.tgl_awal,
+          tgl_akhir:   this.filter.tgl_akhir,
+          location_id: this.filter.location_id || '',
+        },
+      });
+    },
+
     async fetchLokasi() {
       try {
         const res = await axios.get('/lokasi-patroli');
